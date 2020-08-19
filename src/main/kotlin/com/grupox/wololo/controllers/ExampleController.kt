@@ -13,6 +13,6 @@ class ExampleController {
     fun home(model: Model): String {
         model["title"] = "Home page"
         model["message"] = "Hello spring boot!"
-        return "sample"
+        return "sample" // Como ExampleController es un @Controller y no un @RestController este string es el template.
     }
 }
