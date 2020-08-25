@@ -1,0 +1,85 @@
+@startuml
+interface Especializacion { }
+enum Estado { }
+
+RepoUsuarios --> "*" Usuario
+RepoPartidas --> "*" Partida
+Partida --> Mapa
+Partida --> Estado 
+Partida --> "*" Municipio
+Partida --> "*" Usuario
+Partida --> Usuario
+Partida --> Provincia
+Municipio --> Usuario
+Municipio --> Especializacion
+Especializacion <|.. Produccion
+Especializacion <|.. Defensa
+Mapa --> "*" Provincia
+Provincia --> "*" DatosMunicipio
+Municipio --> DatosMunicipio
+Partida --> Turno
+Turno --> Usuario
+
+Partida : fechaCreacion : Date
+Partida : provincia : Provincia
+Partida : municipiosAUsar : Set<Municipio>
+Partida : participantes : List<Usuario>
+Partida : estado : Estado
+Partida : turno : Turno
+Partida : moverGauchos(usuario, municipio, otroMunicipio)
+Partida : atacar(usuario, municipio)
+Partida : modificarEstado(nuevoEstado)
+
+Turno : iniciar()
+Turno : resetear()
+Turno : usuario : Usuario
+Turno : tiempo : Time
+Turno : enviarMail(usuario)
+
+RepoUsuarios : usuarios : Set<Usuario>
+RepoUsuarios : buscarUsuarioPorNombre(nombre)
+
+RepoPartidas : partidas : List<Partida>
+RepoPartidas : mostrarTodas()
+RepoPartidas : mostrarOrdenadas()
+RepoPartidas : filtrarPorFecha(desde, hasta)
+RepoPartidas : filtrarPorEstado(estado)
+
+Estado : NUEVA, EN_CURSO, 
+Estado : TERMINADA, CANCELADA
+
+Usuario : String id
+Usuario : String contraseña
+Usuario : mail : String
+Usuario : esAdmin : Bool
+
+Municipio : perteneceA : Usuario
+Municipio : especializacion : Especializacion
+Municipio : datosGenerales : DatosMunicipio
+Municipio : cantidadDeGauchos : Int
+Municipio : bloqueado : Bool
+Municipio : darGauchos(cantidad)
+Municipio : recibirGauchos(cantidad)
+Municipio : gauchosPorEspecializacion()
+
+Especializacion : gauchos()
+Produccion : gauchos()
+Defensa : gauchos()
+
+Mapa : provincias : Set<Provincia>
+Mapa : obtenerProvincias()
+Mapa : obtenerDatos(provincia)
+
+Provincia : nombre : String
+Provincia : coordenadas : ???
+Provincia : municipios : List<DatosMunicipio>
+Provincia : obtenerDatosMunicipios()
+Provincia : maximaAltura()
+Provincia : minimaAltura()
+Provincia : distanciaMaximaEntre(municipio, otroMunicipio)
+Provincia : distanciaMinimaEntre(municipio, otroMunicipio)
+
+DatosMunicipio : nombre : String
+DatosMunicipio : altura : Double
+DatosMunicipio : coordenadas : ???
+@enduml
