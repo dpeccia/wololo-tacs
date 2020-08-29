@@ -13,11 +13,12 @@ import java.util.*
 @RequestMapping("/users")
 @RestController
 class UsersController {
+
     @GetMapping()
     fun getUsers(): ArrayList<User> = RepoUsers.getUsers()
 
     @GetMapping("/{id}")
-    fun getUser(@PathVariable("id") id: Int) = RepoUsers.getUser(id) ?: throw UserNotFoundException()
+    fun getUser(@PathVariable("id") id: Int) = RepoUsers.getUser(id) ?: throw UserNotFoundException("hola")
 
     @PostMapping
     fun createUser(@RequestBody user: User){ //que agarre el request body del request
@@ -27,5 +28,5 @@ class UsersController {
 
     @ExceptionHandler(UserNotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleUserNotFoundError() = UserNotFound("user was not found")
+    fun handleUserNotFoundError(exception: UserNotFoundException) = UserNotFound(exception.message)
 }

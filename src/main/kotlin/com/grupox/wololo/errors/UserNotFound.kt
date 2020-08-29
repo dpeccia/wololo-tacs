@@ -1,5 +1,5 @@
 package com.grupox.wololo.errors
 
-data class UserNotFound(var message: String)
+data class UserNotFound(var message: String?)
 
-class UserNotFoundException(): Exception()
+class UserNotFoundException(message: String): Exception(message)
