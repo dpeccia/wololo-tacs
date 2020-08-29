@@ -16,7 +16,6 @@ class UsersController {
     @GetMapping()
     fun getUsers(): ArrayList<User> = RepoUsers.getUsers()
 
-    // TODO make a new exception "UserNotFound"
     @GetMapping("/{id}")
     fun getUser(@PathVariable("id") id: Int) = RepoUsers.getUser(id) ?: throw UserNotFoundException()
 
