@@ -1,22 +1,32 @@
 package com.grupox.wololo.controllers
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.grupox.wololo.errors.UserNotFound
+import com.grupox.wololo.errors.UserNotFoundException
 import com.grupox.wololo.model.RepoUsers
 import com.grupox.wololo.model.User
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
+import java.lang.IllegalArgumentException
 import java.util.*
 
-@RequestMapping("v1/users")
+@RequestMapping("/users")
 @RestController
 class UsersController {
-    @GetMapping(path = arrayOf("id"))
-    fun getUser(@PathVariable("id") id: UUID): User{
-        return RepoUsers.getUser(id)
-                .orElse(null)
-    }
+    @GetMapping()
+    fun getUsers(): ArrayList<User> = RepoUsers.getUsers()
+
+    // TODO make a new exception "UserNotFound"
+    @GetMapping("/{id}")
+    fun getUser(@PathVariable("id") id: Int) = RepoUsers.getUser(id) ?: throw UserNotFoundException()
 
     @PostMapping
     fun createUser(@RequestBody user: User){ //que agarre el request body del request
-//        TODO cambiar que no reciba todo el usuario por un json
+        // TODO cambiar que no reciba todo el usuario por un json
         RepoUsers.createUser(user)
     }
+
+    @ExceptionHandler(UserNotFoundException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun handleUserNotFoundError() = UserNotFound("user was not found")
 }
