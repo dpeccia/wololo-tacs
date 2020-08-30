@@ -1,6 +1,5 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.errors.ExceptionData
 import com.grupox.wololo.errors.NotFoundException
 import com.grupox.wololo.model.Game
 import com.grupox.wololo.model.RepoGames
@@ -30,5 +29,5 @@ class GamesController {
 
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundException(exception: NotFoundException) = ExceptionData(exception.message)
+    fun handleNotFoundException(exception: NotFoundException) = exception.getDTO()
 }

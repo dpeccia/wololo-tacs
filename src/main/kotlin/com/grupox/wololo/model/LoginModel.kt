@@ -1,3 +1,3 @@
 package com.grupox.wololo.model
 
-data class LoginModel(val user: String, val password: String)
+data class LoginModel(val mail: String, val password: String)
