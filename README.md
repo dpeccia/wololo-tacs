@@ -4,7 +4,7 @@ Tp de la materia cuatrimestral Tecnicas Avanzadas en la Construccion de Software
 ## Como correr con Docker
 
 ```
-$ gradle build
-$ sudo docker build --build-arg JAR_FILE=build/libs/*.jar -t wololo .
-$ sudo docker run -p 8080:8080 wololo
+$ docker build -t wololo . && docker run -p 8080:8080 wololo
+Opcional pasarle como ultimo parametro el -d para detach
+$ docker build -t wololo . && docker run -p 8080:8080 -d wololo
 ```
