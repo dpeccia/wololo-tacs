@@ -10,7 +10,7 @@ object RepoGames {
 
     fun getGames(): List<Game> = gamesInDB
 
-    fun getGameById(id: Int): Game? = gamesInDB.find { it.getId() == id }
+    fun getGameById(id: Int): Game? = gamesInDB.find { it.id == id }
 
     fun insertGame(game: Game) {
         gamesInDB.add(game)
