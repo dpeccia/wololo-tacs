@@ -1,6 +1,5 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.errors.ExceptionData
 import com.grupox.wololo.errors.NotFoundException
 import com.grupox.wololo.model.JWT
 import com.grupox.wololo.model.LoginModel
@@ -33,5 +32,5 @@ class UsersController {
 
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundError(exception: NotFoundException) = ExceptionData(exception.message)
+    fun handleNotFoundError(exception: NotFoundException) = exception.getDTO()
 }
