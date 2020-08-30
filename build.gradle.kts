@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
 
 plugins {
     id("org.springframework.boot") version "2.3.3.RELEASE"
@@ -11,9 +12,15 @@ group = "com.grupox"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
-repositories {
-    mavenCentral()
+allprojects {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven (url = "https://dl.bintray.com/arrow-kt/arrow-kt/")
+        maven (url = "https://oss.jfrog.org/artifactory/oss-snapshot-local/") // for SNAPSHOT builds
+    }
 }
+
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-mustache")
@@ -21,6 +28,10 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("io.arrow-kt:arrow-core:0.10.5")
+    implementation("io.arrow-kt:arrow-fx:0.10.5")
+    implementation("io.arrow-kt:arrow-optics:0.10.5")
+    implementation("io.arrow-kt:arrow-syntax:0.10.5")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
