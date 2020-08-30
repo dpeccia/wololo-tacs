@@ -12,6 +12,9 @@ object RepoUsers {
 
     fun getUserById(id: Int): User? = usersInDB.find { it.id == id }
 
+    fun getUserByLogin(loginData: LoginModel): User? = usersInDB.find {it.isUserByLoginData(loginData)}
+
+    // TODO: ENCRYPT USER PASSWORD BEFORE SAVING
     fun insertUser(usuario: User) {
         usersInDB.add(usuario)
     }
