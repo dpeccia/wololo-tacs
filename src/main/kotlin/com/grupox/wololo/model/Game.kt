@@ -1,5 +1,8 @@
 package com.grupox.wololo.model
 
-class Game(status: Status) {
+import java.util.*
 
+class Game(private val id: Int, private val status: Status) {
+
+    fun getId(): Int = id
 }

@@ -19,12 +19,12 @@ class UsersController {
     fun getUsers(): ArrayList<User> = RepoUsers.getUsers()
 
     @GetMapping("/{id}")
-    fun getUser(@PathVariable("id") id: Int) = RepoUsers.getUser(id) ?: throw NotFoundException("hola")
+    fun getUser(@PathVariable("id") id: Int) = RepoUsers.getUserById(id) ?: throw NotFoundException("User was not found.")
 
     @PostMapping()
     fun createUser(@RequestBody user: User){ //que agarre el request body del request
         // TODO cambiar que no reciba todo el usuario por un json
-        RepoUsers.createUser(user)
+        RepoUsers.insertUser(user)
     }
 
     @PostMapping("/tokens")

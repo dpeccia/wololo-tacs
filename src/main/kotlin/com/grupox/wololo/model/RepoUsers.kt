@@ -10,11 +10,9 @@ object RepoUsers {
 
     fun getUsers(): ArrayList<User> = usersInDB
 
-    fun getUser(id: Int): User? = usersInDB.find { it.id == id }
+    fun getUserById(id: Int): User? = usersInDB.find { it.id == id }
 
-    fun createUser(usuario: User) {
+    fun insertUser(usuario: User) {
         usersInDB.add(usuario)
     }
-
-
 }

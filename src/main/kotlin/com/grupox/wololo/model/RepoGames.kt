@@ -3,19 +3,16 @@ package com.grupox.wololo.model
 import java.util.*
 
 object RepoGames {
-    fun getGames() : List<Game>{
-        TODO("Not yet implemented")
-    }
-    fun getGame(id:UUID): Game{
-        TODO("Not yet implemented")
-    }
+    private val gamesInDB: ArrayList<Game> = arrayListOf(
+        Game(1, Status.NEW),
+        Game(2, Status.FINISHED)
+    )
+
+    fun getGames(): List<Game> = gamesInDB
+
+    fun getGameById(id: Int): Game? = gamesInDB.find { it.getId() == id }
 
     fun insertGame(game: Game) {
-        TODO("Not yet implemented")
+        gamesInDB.add(game)
     }
-
-    fun updateGame(id: UUID) {
-        TODO("Not yet implemented")
-    }
-
 }
