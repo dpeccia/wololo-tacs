@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class UsersController {
     @GetMapping()
-    fun getUsers(): List<DTO> = RepoUsers.getUsers().map{it.getDTO()}
+    fun getUsers(): List<DTO> = RepoUsers.getUsers().map { it.getDTO() }
 
     @GetMapping("/{id}")
-    fun getUser(@PathVariable("id") id: Int): DTO = RepoUsers.getUserById(id)?.getDTO() ?: throw NotFoundException("User was not found")
+    fun getUserById(@PathVariable("id") id: Int): DTO = RepoUsers.getUserById(id)?.getDTO() ?: throw NotFoundException("User was not found")
 
     @PostMapping()
     fun createUser(@RequestBody user: User) { // que agarre el request body del request

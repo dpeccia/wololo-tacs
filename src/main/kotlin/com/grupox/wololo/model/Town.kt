@@ -1,10 +1,9 @@
 package com.grupox.wololo.model
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.grupox.wololo.model.dtos.DTO
-import com.grupox.wololo.model.dtos.TownDTO
 import com.grupox.wololo.model.dtos.Entity
+import com.grupox.wololo.model.dtos.TownDTO
 
-class Town(var id: Int, var name: String) : Entity {
+class Town(val id: Int, private var name: String) : Entity {
     override fun getDTO(): DTO = TownDTO(id, name)
 }
