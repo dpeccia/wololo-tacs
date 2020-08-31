@@ -4,7 +4,6 @@ import com.grupox.wololo.errors.NotFoundException
 import com.grupox.wololo.model.Game
 import com.grupox.wololo.model.RepoGames
 import com.grupox.wololo.model.Town
-import com.grupox.wololo.model.dtos.DTO
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class GamesController {
     @GetMapping
-    fun getGames(): List<DTO> = RepoGames.getGames().map { it.getDTO() }
+    fun getGames(): List<Game> = RepoGames.getGames()
 
     @PostMapping
     fun createGame(@RequestBody game: Game) {
@@ -20,7 +19,7 @@ class GamesController {
     }
 
     @GetMapping("/{id}")
-    fun getGameById(@PathVariable("id") id: Int): DTO = RepoGames.getGameById(id)?.getDTO() ?: throw NotFoundException("Game was not found")
+    fun getGameById(@PathVariable("id") id: Int): Game = RepoGames.getGameById(id) ?: throw NotFoundException("Game was not found")
 
     @PutMapping("/{id}")
     fun updateGame(@PathVariable("id") id: Int) {
@@ -30,12 +29,12 @@ class GamesController {
 
     @PutMapping("/{id}/town/{idTown}")
     fun updateTown(@PathVariable("id") id: Int, @PathVariable("idTown") idTown: Int) {
-        val town: Town = RepoGames.getGameById(id)?.getTownById(idTown) ?: throw NotFoundException("Town was not found.")
+        val town: Town = RepoGames.getGameById(id)?.getTownById(idTown) ?: throw NotFoundException("Town was not found")
         TODO("UPDATE TOWN VALUE")
     }
 
 
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundException(exception: NotFoundException) = exception.getDTO()
+    fun handleNotFoundException(exception: NotFoundException) = exception.getJSON()
 }

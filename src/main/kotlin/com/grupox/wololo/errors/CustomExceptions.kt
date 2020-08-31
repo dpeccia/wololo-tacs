@@ -1,9 +1,7 @@
 package com.grupox.wololo.errors
 
-import com.grupox.wololo.model.dtos.DTO
-import com.grupox.wololo.model.dtos.Entity
-import com.grupox.wololo.model.dtos.ExceptionDTO
+data class ExceptionJSON(val message: String?)
 
-class NotFoundException(message: String) : Exception(message), Entity {
-    override fun getDTO(): DTO = ExceptionDTO(message)
+class NotFoundException(message: String) : Exception(message) {
+    fun getJSON(): ExceptionJSON = ExceptionJSON(message)
 }

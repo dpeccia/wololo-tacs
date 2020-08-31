@@ -1,11 +1,7 @@
 package com.grupox.wololo.model
 
-import com.grupox.wololo.model.dtos.DTO
-import com.grupox.wololo.model.dtos.Entity
-import com.grupox.wololo.model.dtos.GameDTO
-
-class Game(val id: Int, private var status: Status, private var province: Province) : Entity {
-    override fun getDTO(): DTO = GameDTO(id, status, province.getDTO())
-
+class Game(val id: Int, val province: Province, status: Status = Status.NEW) {
+    var status: Status = status
+        private set
     fun getTownById(idTown: Int): Town ? = province.getTownById(idTown)
 }

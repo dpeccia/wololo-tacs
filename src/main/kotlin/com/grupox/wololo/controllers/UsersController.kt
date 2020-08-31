@@ -5,8 +5,6 @@ import com.grupox.wololo.model.JWT
 import com.grupox.wololo.model.LoginModel
 import com.grupox.wololo.model.RepoUsers
 import com.grupox.wololo.model.User
-import com.grupox.wololo.model.dtos.DTO
-import java.util.*
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -14,10 +12,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class UsersController {
     @GetMapping()
-    fun getUsers(): List<DTO> = RepoUsers.getUsers().map { it.getDTO() }
+    fun getUsers(): List<User> = RepoUsers.getUsers()
 
     @GetMapping("/{id}")
-    fun getUserById(@PathVariable("id") id: Int): DTO = RepoUsers.getUserById(id)?.getDTO() ?: throw NotFoundException("User was not found")
+    fun getUserById(@PathVariable("id") id: Int): User = RepoUsers.getUserById(id) ?: throw NotFoundException("User was not found")
 
     @PostMapping()
     fun createUser(@RequestBody user: User) { // que agarre el request body del request
@@ -38,5 +36,5 @@ class UsersController {
 
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundError(exception: NotFoundException) = exception.getDTO()
+    fun handleNotFoundError(exception: NotFoundException) = exception
 }
