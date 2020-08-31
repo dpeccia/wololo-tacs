@@ -36,5 +36,5 @@ class UsersController {
 
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundError(exception: NotFoundException) = exception
+    fun handleNotFoundError(exception: NotFoundException) = exception.getJSON()
 }
