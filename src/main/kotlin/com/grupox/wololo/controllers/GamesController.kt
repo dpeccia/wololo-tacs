@@ -3,6 +3,7 @@ package com.grupox.wololo.controllers
 import arrow.core.getOrElse
 import com.grupox.wololo.errors.NotFoundException
 import com.grupox.wololo.model.Game
+import com.grupox.wololo.model.Province
 import com.grupox.wololo.model.RepoGames
 import com.grupox.wololo.model.Town
 import com.grupox.wololo.model.services.GeoRef
@@ -17,13 +18,8 @@ class GamesController {
     fun getGames(): List<Game> = RepoGames.getGames()
 
     @PostMapping
-    fun createGame(/*@RequestBody game: Game*/) {
-        val pData = GeoRef.httpGetProvinceData("Neuquen").getOrElse { throw NotFoundException("No se encontro la provincia") }
-        println(pData)
-
-        val tsData = GeoRef.httpGetTownsData(pData.id)
-        println(tsData)
-        //RepoGames.insertGame(game)
+    fun createGame(@RequestBody game: Game) {
+        RepoGames.insertGame(game)
     }
 
     @GetMapping("/{id}")
@@ -41,6 +37,11 @@ class GamesController {
         TODO("UPDATE TOWN VALUE")
     }
 
+    @GetMapping("/provincias/{name}")
+    fun getProvincia(@PathVariable("name") name: String): Province {   // Solo para debugging, este no va a ser un endpoint
+        return GeoRef.generateProvince(name)
+                .getOrElse { throw NotFoundException("Couldn't find a province with the given name") }
+    }
 
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
