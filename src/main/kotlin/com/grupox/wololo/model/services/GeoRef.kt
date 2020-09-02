@@ -16,10 +16,13 @@ import okhttp3.Response
 
 sealed class QueryData {
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class ProvinceQuery(@JsonProperty("cantidad") val numberOfMatches: Int, @JsonProperty("provincias") val matches: List<LocationData>) : QueryData()
+    data class ProvinceQuery(
+            @JsonProperty("cantidad") val numberOfMatches: Int,
+            @JsonProperty("provincias") val matches: List<LocationData>) : QueryData()
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class TownsQuery(@JsonProperty("cantidad") val numberOfMatches: Int, @JsonProperty("municipios") val matches: List<LocationData>) : QueryData()
+    data class TownsQuery(@JsonProperty("cantidad") val numberOfMatches: Int,
+                          @JsonProperty("municipios") val matches: List<LocationData>) : QueryData()
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
