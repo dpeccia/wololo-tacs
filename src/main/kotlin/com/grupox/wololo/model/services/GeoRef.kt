@@ -14,15 +14,16 @@ import io.github.rybalkinsd.kohttp.ext.httpGet
 import io.github.rybalkinsd.kohttp.jackson.ext.toType
 import okhttp3.Response
 
-sealed class QueryData {
-    @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
+sealed class GeoRefResponse() {
     data class ProvinceQuery(
-            @JsonProperty("cantidad") val numberOfMatches: Int,
-            @JsonProperty("provincias") val matches: List<LocationData>) : QueryData()
+        @JsonProperty("provincias") val matches: List<LocationData>
+    ) : GeoRefResponse()
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class TownsQuery(@JsonProperty("cantidad") val numberOfMatches: Int,
-                          @JsonProperty("municipios") val matches: List<LocationData>) : QueryData()
+    data class TownsQuery(
+        @JsonProperty("municipios") val matches: List<LocationData>
+    ) : GeoRefResponse()
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,6 +34,7 @@ data class LocationData (
 )
 
 object GeoRef {
+    private const val exactValue: Boolean = true
     private const val maxMatches: Int = 200 // Numero maximo de resultados que devuelve una query a georef
     private const val provinceDataUrl = "https://apis.datos.gob.ar/georef/api/provincias"
     private const val townsDataUrl = "https://apis.datos.gob.ar/georef/api/municipios"
@@ -42,25 +44,29 @@ object GeoRef {
             Province(
                     it.id,
                     it.name,
-                    ArrayList(httpGetTownsData(it.id).map { townData -> Town(townData.id, townData.name) }),
+                    ArrayList(httpGetTownsData(it.id).map { townData -> Town(townData.id, townData.name, townData.coordinates) }),
                     it.coordinates
             )
         }
     }
 
-    private fun httpGetProvinceData(name: String): Option<LocationData> = // Retorna el primer match (el mas parecido al input)
-        httpGetQueryData<QueryData
-            .ProvinceQuery>(provinceDataUrl, mapOf("nombre" to name)).map { it.matches.first() }
+    private fun httpGetProvinceData(name: String): Option<LocationData> {
+        val queryData: Option<GeoRefResponse.ProvinceQuery> =
+                httpGetQueryData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
+
+        return queryData.mapNotNull { it.matches.firstOrNull() }
+    }
 
     private fun httpGetTownsData(provinceId: Int): List<LocationData> =
-        httpGetQueryData<QueryData
-            .TownsQuery>(townsDataUrl, mapOf("provincia" to provinceId.toString(), "max" to maxMatches.toString()))
+        httpGetQueryData<GeoRefResponse.TownsQuery>(townsDataUrl, mapOf("provincia" to provinceId.toString(), "max" to maxMatches.toString()))
             .toList().flatMap { it.matches }
 
-    private inline fun <reified QueryDataT : QueryData>httpGetQueryData(url: String, queryParams: Map<String, String>): Option<QueryDataT> {
-        val queryResponse: Response = appendQueryParams(url, queryParams).httpGet()
+    private inline fun <reified QueryDataT : GeoRefResponse>httpGetQueryData(url: String, queryParams: Map<String, String>): Option<QueryDataT> {
+        val finalUrl = appendQueryParams(url, queryParams)
+        println(finalUrl)
+        val queryResponse: Response = finalUrl.httpGet()
         val mapper = ObjectMapper().registerKotlinModule()
-        return Some(queryResponse).filter { it.isSuccessful }.mapNotNull { it.toType<QueryDataT>(mapper) }
+        return Some(queryResponse).mapNotNull { it.toType<QueryDataT>(mapper) }
     }
 
     private fun appendQueryParams(url: String, queryParams: Map<String, String>): String =
