@@ -7,7 +7,6 @@ import com.grupox.wololo.model.Province
 import com.grupox.wololo.model.RepoGames
 import com.grupox.wololo.model.Town
 import com.grupox.wololo.model.services.GeoRef
-import com.grupox.wololo.model.services.LocationData
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 

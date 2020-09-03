@@ -17,7 +17,7 @@ import io.github.rybalkinsd.kohttp.jackson.ext.toType
 import okhttp3.Response
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-sealed class GeoRefResponse() {
+private sealed class GeoRefResponse() {
     data class ProvinceQuery(
         @JsonProperty("provincias") val matches: List<LocationData>
     ) : GeoRefResponse()
@@ -29,7 +29,7 @@ sealed class GeoRefResponse() {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class LocationData (
+private data class LocationData (
         @JsonProperty("centroide") val coordinates: Coordinates,
         @JsonProperty("id") val id: Int,
         @JsonProperty("nombre") val name: String
