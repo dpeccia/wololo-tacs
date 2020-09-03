@@ -1,9 +1,12 @@
 package com.grupox.wololo.model.services
 
 import arrow.core.*
+import arrow.core.extensions.either.applicativeError.catch
 import arrow.core.extensions.list.foldable.foldLeft
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Coordinates
 import com.grupox.wololo.model.Province
@@ -31,6 +34,7 @@ private data class LocationData(
 )
 
 object GeoRef {
+    private const val apiName = "GeoRef"
     private const val provinceDataUrl = "https://apis.datos.gob.ar/georef/api/provincias"
     private const val townsDataUrl = "https://apis.datos.gob.ar/georef/api/municipios"
     private const val exactValue: Boolean = true // Las busquedas por nombres buscan el match exacto
@@ -67,9 +71,9 @@ object GeoRef {
 
     private inline fun <reified QueryDataT : GeoRefResponse>httpGetQueryData(url: String, queryParams: Map<String, String>): Either<CustomException, QueryDataT> {
         val finalUrl = appendQueryParams(url, queryParams)
-        return Right(finalUrl.httpGet()).flatMap {
-            it.toType<QueryDataT>().rightIfNotNull { CustomException.NotFoundException("Couldn't obtain valid data from the request: GET $finalUrl") }
-        }
+        return Right(finalUrl.httpGet())
+                .filterOrOther({ it.isSuccessful }, { CustomException.UnsuccessfulExternalRequest(apiName, it.code()) })
+                .flatMap { it.toType<QueryDataT>().rightIfNotNull { CustomException.NotFoundException("Couldn't obtain valid data from the request: GET $finalUrl") } }
     }
 
     private fun appendQueryParams(url: String, queryParams: Map<String, String>): String =
