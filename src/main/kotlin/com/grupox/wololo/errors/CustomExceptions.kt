@@ -2,6 +2,9 @@ package com.grupox.wololo.errors
 
 data class ExceptionJSON(val message: String?)
 
-class NotFoundException(message: String) : Exception(message) {
-    fun getJSON(): ExceptionJSON = ExceptionJSON(message)
+sealed class CustomException(message: String?) : Exception(message){
+    class NotFoundException(message: String) : CustomException(message)
+
+    fun getJSON(): ExceptionJSON = ExceptionJSON(message) // Default
 }
+

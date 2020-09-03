@@ -1,20 +1,15 @@
 package com.grupox.wololo.model.services
 
 import arrow.core.*
-import arrow.core.Option
 import arrow.core.extensions.list.foldable.foldLeft
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Coordinates
 import com.grupox.wololo.model.Province
 import com.grupox.wololo.model.Town
 import io.github.rybalkinsd.kohttp.ext.httpGet
-import io.github.rybalkinsd.kohttp.jackson.ext.toJsonOrNull
 import io.github.rybalkinsd.kohttp.jackson.ext.toType
-import okhttp3.Response
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private sealed class GeoRefResponse() {
@@ -29,7 +24,7 @@ private sealed class GeoRefResponse() {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-private data class LocationData (
+private data class LocationData(
         @JsonProperty("centroide") val coordinates: Coordinates,
         @JsonProperty("id") val id: Int,
         @JsonProperty("nombre") val name: String
@@ -41,36 +36,44 @@ object GeoRef {
     private const val exactValue: Boolean = true // Las busquedas por nombres buscan el match exacto
     private const val maxMatches: Int = 200 // Numero maximo de resultados que devuelve una query a georef
 
-    fun generateProvince(provinceName: String): Option<Province> {
-        return httpGetProvinceData(provinceName).map {
-            Province(
-                it.id,
-                it.name,
-                ArrayList(httpGetTownsData(it.id).map { townData -> Town(townData.id, townData.name, townData.coordinates) }),
-                it.coordinates
-            )
+    fun generateProvince(provinceName: String): Either<CustomException, Province> {
+        return httpGetProvinceData(provinceName).flatMap { provinceData ->
+            httpGetTownsData(provinceData.id).map { townsData ->
+                Province (
+                    id = provinceData.id,
+                    name = provinceData.name,
+                    coordinates = provinceData.coordinates,
+                    towns = ArrayList(townsData.map { Town(it.id, it.name, it.coordinates) })
+                )
+            }
         }
     }
 
-    private fun httpGetProvinceData(name: String): Option<LocationData> {
-        val responseData: Option<GeoRefResponse.ProvinceQuery> =
+    private fun httpGetProvinceData(name: String): Either<CustomException, LocationData> {
+        val responseData: Either<CustomException, GeoRefResponse.ProvinceQuery> =
             httpGetQueryData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
 
-        return responseData.mapNotNull { it.matches.firstOrNull() }
+        return responseData.flatMap {
+            it.matches.firstOrNull().rightIfNotNull { CustomException.NotFoundException("There are no matches for provinces with name: $name") }
+        }
     }
 
-    private fun httpGetTownsData(provinceId: Int): List<LocationData> {
-        val responseData: Option<GeoRefResponse.TownsQuery> =
+    private fun httpGetTownsData(provinceId: Int): Either<CustomException, List<LocationData>> {
+        val responseData: Either<CustomException, GeoRefResponse.TownsQuery> =
             httpGetQueryData(townsDataUrl, mapOf("provincia" to provinceId.toString(), "max" to maxMatches.toString()))
 
-        return responseData.toList().flatMap { it.matches }
+        return responseData.map { it.matches }
     }
 
-    private inline fun <reified QueryDataT : GeoRefResponse>httpGetQueryData(url: String, queryParams: Map<String, String>): Option<QueryDataT> {
-        val queryResponse: Response = appendQueryParams(url, queryParams).httpGet()
-        return Some(queryResponse).mapNotNull { it.toType<QueryDataT>() }
+    private inline fun <reified QueryDataT : GeoRefResponse>httpGetQueryData(url: String, queryParams: Map<String, String>): Either<CustomException, QueryDataT> {
+        val finalUrl = appendQueryParams(url, queryParams)
+        return Right(finalUrl.httpGet()).flatMap {
+            it.toType<QueryDataT>().rightIfNotNull { CustomException.NotFoundException("Couldn't obtain valid data from the request: GET $finalUrl") }
+        }
     }
 
     private fun appendQueryParams(url: String, queryParams: Map<String, String>): String =
-        queryParams.toList().foldLeft("$url?") { unf, (key, value) -> "$unf$key=$value&" }.removeSuffix("&")
+        queryParams.toList()
+                .foldLeft("$url?") { unf, (key, value) -> "$unf$key=$value&" }
+                .removeSuffix("&")
 }
