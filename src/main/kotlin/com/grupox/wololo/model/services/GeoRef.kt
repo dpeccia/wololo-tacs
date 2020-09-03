@@ -73,7 +73,7 @@ object GeoRef {
         val finalUrl = appendQueryParams(url, queryParams)
         return Right(finalUrl.httpGet())
                 .filterOrOther({ it.isSuccessful }, { CustomException.UnsuccessfulExternalRequest(apiName, it.code()) })
-                .flatMap { it.toType<QueryDataT>().rightIfNotNull { CustomException.NotFoundException("Couldn't obtain valid data from the request: GET $finalUrl") } }
+                .flatMap { it.toType<QueryDataT>().rightIfNotNull { CustomException.NotFoundException("Request: GET $finalUrl returned with null") } }
     }
 
     private fun appendQueryParams(url: String, queryParams: Map<String, String>): String =
