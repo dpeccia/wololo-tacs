@@ -42,7 +42,7 @@ class GamesController {
                 .getOrHandle { throw it }
     }
 
-    @ExceptionHandler(CustomException::class)
+    @ExceptionHandler(CustomException.NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFoundException(exception: CustomException) = exception.getJSON()
 }

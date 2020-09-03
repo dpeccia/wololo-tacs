@@ -1,6 +1,6 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.errors.NotFoundException
+import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.JWT
 import com.grupox.wololo.model.LoginModel
 import com.grupox.wololo.model.RepoUsers
@@ -15,7 +15,7 @@ class UsersController {
     fun getUsers(): List<User> = RepoUsers.getUsers()
 
     @GetMapping("/{id}")
-    fun getUserById(@PathVariable("id") id: Int): User = RepoUsers.getUserById(id) ?: throw NotFoundException("User was not found")
+    fun getUserById(@PathVariable("id") id: Int): User = RepoUsers.getUserById(id) ?: throw CustomException.NotFoundException("User was not found")
 
     @PostMapping()
     fun createUser(@RequestBody user: User) { // que agarre el request body del request
@@ -25,7 +25,7 @@ class UsersController {
 
     @PostMapping("/tokens")
     fun createToken(@RequestBody user: LoginModel): JWT {
-        var user = RepoUsers.getUserByLogin(user) ?: throw NotFoundException("Bad Login")
+        var user = RepoUsers.getUserByLogin(user) ?: throw CustomException.NotFoundException("Bad Login")
 
         // TODO CREATE JWT
         return JWT("${user.mail}.${user.nombre}", "1h")
@@ -34,7 +34,7 @@ class UsersController {
     @DeleteMapping("/tokens")
     fun deleteToken(@RequestBody token: JWT): Nothing = TODO("IMPLEMENT TOKEN DELETION")
 
-    @ExceptionHandler(NotFoundException::class)
+    @ExceptionHandler(CustomException.NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundError(exception: NotFoundException) = exception.getJSON()
+    fun handleNotFoundError(exception: CustomException) = exception.getJSON()
 }
