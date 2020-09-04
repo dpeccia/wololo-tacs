@@ -1,18 +1,12 @@
 package com.grupox.wololo.model.services
 
 import arrow.core.*
-import arrow.core.extensions.either.applicativeError.catch
-import arrow.core.extensions.list.foldable.foldLeft
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Coordinates
 import com.grupox.wololo.model.Province
 import com.grupox.wololo.model.Town
-import io.github.rybalkinsd.kohttp.ext.httpGet
-import io.github.rybalkinsd.kohttp.jackson.ext.toType
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private sealed class GeoRefResponse() {
@@ -54,7 +48,7 @@ object GeoRef : HttpService("GeoRef"){
 
     private fun httpGetProvinceData(name: String): Either<CustomException, LocationData> {
         val responseData: Either<CustomException, GeoRefResponse.ProvinceQuery> =
-            httpGetQueryData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
+            getData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
 
         return responseData.flatMap {
             it.matches.firstOrNull().rightIfNotNull { CustomException.NotFoundException("There are no matches for provinces with name: $name") }
@@ -63,7 +57,7 @@ object GeoRef : HttpService("GeoRef"){
 
     private fun httpGetTownsData(provinceId: Int): Either<CustomException, List<LocationData>> {
         val responseData: Either<CustomException, GeoRefResponse.TownsQuery> =
-            httpGetQueryData(townsDataUrl, mapOf("provincia" to provinceId.toString(), "max" to maxMatches.toString()))
+            getData(townsDataUrl, mapOf("provincia" to provinceId.toString(), "max" to maxMatches.toString()))
 
         return responseData.map { it.matches }
     }
