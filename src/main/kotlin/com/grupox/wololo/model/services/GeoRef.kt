@@ -50,9 +50,9 @@ object GeoRef : HttpService("GeoRef"){
         val responseData: Either<CustomException, GeoRefResponse.ProvinceQuery> =
             requestData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
 
-        return responseData.flatMap {
-            it.matches.firstOrNull().rightIfNotNull { CustomException.NotFoundException("There are no matches for provinces with name: $name") }
-        }
+        return responseData
+                .filterOrOther({ it.matches.isNotEmpty() },{ CustomException.BadDataFromExternalRequestException("There are no matches for provinces with name: $name") })
+                .map { it.matches.first() }
     }
 
     private fun requestTownsData(provinceId: Int): Either<CustomException, List<LocationData>> {
