@@ -34,8 +34,8 @@ object GeoRef : HttpService("GeoRef"){
     private const val maxMatches: Int = 200 // Numero maximo de resultados que devuelve una query a georef
 
     fun generateProvince(provinceName: String): Either<CustomException, Province> {
-        return httpGetProvinceData(provinceName).flatMap { provinceData ->
-            httpGetTownsData(provinceData.id).map { townsData ->
+        return requestProvinceData(provinceName).flatMap { provinceData ->
+            requestTownsData(provinceData.id).map { townsData ->
                 Province (
                     id = provinceData.id,
                     name = provinceData.name,
@@ -46,7 +46,7 @@ object GeoRef : HttpService("GeoRef"){
         }
     }
 
-    private fun httpGetProvinceData(name: String): Either<CustomException, LocationData> {
+    private fun requestProvinceData(name: String): Either<CustomException, LocationData> {
         val responseData: Either<CustomException, GeoRefResponse.ProvinceQuery> =
             requestData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
 
@@ -55,7 +55,7 @@ object GeoRef : HttpService("GeoRef"){
         }
     }
 
-    private fun httpGetTownsData(provinceId: Int): Either<CustomException, List<LocationData>> {
+    private fun requestTownsData(provinceId: Int): Either<CustomException, List<LocationData>> {
         val responseData: Either<CustomException, GeoRefResponse.TownsQuery> =
             requestData(townsDataUrl, mapOf("provincia" to provinceId.toString(), "max" to maxMatches.toString()))
 
