@@ -48,7 +48,7 @@ object GeoRef : HttpService("GeoRef"){
 
     private fun httpGetProvinceData(name: String): Either<CustomException, LocationData> {
         val responseData: Either<CustomException, GeoRefResponse.ProvinceQuery> =
-            getData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
+            requestData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
 
         return responseData.flatMap {
             it.matches.firstOrNull().rightIfNotNull { CustomException.NotFoundException("There are no matches for provinces with name: $name") }
@@ -57,7 +57,7 @@ object GeoRef : HttpService("GeoRef"){
 
     private fun httpGetTownsData(provinceId: Int): Either<CustomException, List<LocationData>> {
         val responseData: Either<CustomException, GeoRefResponse.TownsQuery> =
-            getData(townsDataUrl, mapOf("provincia" to provinceId.toString(), "max" to maxMatches.toString()))
+            requestData(townsDataUrl, mapOf("provincia" to provinceId.toString(), "max" to maxMatches.toString()))
 
         return responseData.map { it.matches }
     }
