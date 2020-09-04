@@ -33,8 +33,7 @@ private data class LocationData(
         @JsonProperty("nombre") val name: String
 )
 
-object GeoRef {
-    private const val apiName = "GeoRef"
+object GeoRef : HttpService("GeoRef"){
     private const val provinceDataUrl = "https://apis.datos.gob.ar/georef/api/provincias"
     private const val townsDataUrl = "https://apis.datos.gob.ar/georef/api/municipios"
     private const val exactValue: Boolean = true // Las busquedas por nombres buscan el match exacto
@@ -68,16 +67,4 @@ object GeoRef {
 
         return responseData.map { it.matches }
     }
-
-    private inline fun <reified QueryDataT : GeoRefResponse>httpGetQueryData(url: String, queryParams: Map<String, String>): Either<CustomException, QueryDataT> {
-        val finalUrl = appendQueryParams(url, queryParams)
-        return Right(finalUrl.httpGet())
-                .filterOrOther({ it.isSuccessful }, { CustomException.UnsuccessfulExternalRequest(apiName, it.code()) })
-                .flatMap { it.toType<QueryDataT>().rightIfNotNull { CustomException.NotFoundException("Request: GET $finalUrl returned with null") } }
-    }
-
-    private fun appendQueryParams(url: String, queryParams: Map<String, String>): String =
-        queryParams.toList()
-                .foldLeft("$url?") { unf, (key, value) -> "$unf$key=$value&" }
-                .removeSuffix("&")
 }
