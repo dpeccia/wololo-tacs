@@ -32,6 +32,42 @@ class GamesController {
         TODO("UPDATE GAME VALUE")
     }
 
+    @PutMapping("/{id}/player/{playerId}/towns")
+    fun updateGauchosQuantity(
+            @PathVariable("id") id: Int,
+            @PathVariable("playerId") playerId: Int,
+            @RequestParam("from") fromTownId: Int,
+            @RequestParam("to") toTownId: Int,
+            @RequestParam("quantity") gauchosQuantity: Int) {
+        TODO("MOVE GAUCHOS BETWEEN TOWNS")
+    }
+
+    @PostMapping("/{id}/attacks")
+    fun createAttack(
+            @PathVariable("id") id: Int,
+            @RequestParam("attacker") attackerId: Int,
+            @RequestParam("defender") defenderId: Int
+    ) {
+        TODO("ATTACK LOGIC")
+    }
+
+    @PutMapping("/{id}/player/{playerId}/towns/specializations/{specialization}")
+    fun updateTownSpecialization(
+            @PathVariable("id") id: Int,
+            @PathVariable("playerId") playerId: Int,
+            @PathVariable("specialization") specialization: Int // TODO change int to specialization type
+    ) {
+        TODO("UPDATE SPECIALIZATION LOGIC")
+    }
+
+    @GetMapping("/{id}/towns/{idTown}")
+    fun getTownData(
+            @PathVariable("id") id: Int,
+            @PathVariable("idTown") idTown: Int
+    ) {
+        TODO("GET TOWN STATISTICS OF PRODUCTION AND DEFENSE")
+    }
+
     @PutMapping("/{id}/town/{idTown}")
     fun updateTown(@PathVariable("id") id: Int, @PathVariable("idTown") idTown: Int) {
         val town: Town = RepoGames.getGameById(id)?.getTownById(idTown) ?: throw CustomException.NotFoundException("Town was not found")
