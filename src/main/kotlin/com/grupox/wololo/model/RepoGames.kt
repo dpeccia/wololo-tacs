@@ -3,19 +3,17 @@ package com.grupox.wololo.model
 import java.util.*
 
 object RepoGames {
-    fun getGames() : List<Game>{
-        TODO("Not yet implemented")
-    }
-    fun getGame(id:UUID): Game{
-        TODO("Not yet implemented")
-    }
+
+    private val gamesInDB: ArrayList<Game> = arrayListOf(
+            Game(1, province = Province(1, "Santiago del Estero",arrayListOf(Town(1, "Termas de Río Hondo"), Town(2, "La Banda")))),
+            Game(2, province = Province(3, "Córdoba",arrayListOf(Town(3, "Cipolletti"))), status = Status.FINISHED)
+    )
+
+    fun getGames(): List<Game> = gamesInDB
+
+    fun getGameById(id: Int): Game? = gamesInDB.find { it.id == id }
 
     fun insertGame(game: Game) {
-        TODO("Not yet implemented")
+        gamesInDB.add(game)
     }
-
-    fun updateGame(id: UUID) {
-        TODO("Not yet implemented")
-    }
-
 }

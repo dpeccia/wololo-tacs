@@ -1,4 +1,4 @@
-package com.grupox.wololo.controllersTODO()
+package com.grupox.wololo.controllers
 
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping

@@ -1,10 +1,12 @@
 package com.grupox.wololo.model
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import java.util.*
+class User(val id: Int, nombre: String, mail: String, private var password: String, val esAdmin: Boolean) {
+    var nombre: String = nombre
+        private set
 
-class User (var id: UUID, @JsonProperty var nombre: String,
-            @JsonProperty var mail: String,
-            @JsonProperty var password: String,
-            @JsonProperty val esAdmin: Boolean){
+    var mail: String = mail
+        private set
+
+    // TODO: MAKE THIS COMPARATION WITH ENCRYPTED PASSWORDS
+    fun isUserByLoginData(loginData: LoginModel): Boolean = this.mail == loginData.mail && this.password == loginData.password
 }

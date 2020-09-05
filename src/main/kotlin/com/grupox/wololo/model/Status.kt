@@ -1,8 +1,8 @@
 package com.grupox.wololo.model
 
 enum class Status {
-    New,
-    OnGoing,
-    Finished,
-    Cancelled
+    NEW,
+    ONGOING,
+    FINISHED,
+    CANCELED
 }
