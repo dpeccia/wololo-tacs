@@ -34,7 +34,7 @@ class GamesController {
     }
 
     @GetMapping("/provincias/{name}")
-    fun getProvincia(@PathVariable("name") name: String, @RequestParam("town_amount") townAmount: Int = 5): Province {   // Solo para debugging, este no va a ser un endpoint
+    fun getProvincia(@PathVariable("name") name: String, @RequestParam("town_amount", required = false, defaultValue = "5") townAmount: Int): Province {   // Solo para debugging, este no va a ser un endpoint
         return ProvinceFactory.generateProvince(name, townAmount)
                 .getOrHandle { throw it }
     }
