@@ -15,7 +15,7 @@ private data class ElevationData(val elevation: Float)
 object TopoData : HttpService("TopoData") {
     private const val baseUrl: String = "http://api.opentopodata.org/v1/test-dataset"
 
-    private fun requestElevation(coordinates: Coordinates): Either<CustomException, Float> {
+    fun requestElevation(coordinates: Coordinates): Either<CustomException, Float> {
         val queryResponse: Either<CustomException, TopoDataResponse> =
             requestData(baseUrl, mapOf("locations" to "${coordinates.latitude},${coordinates.longitude}"))
 

@@ -2,10 +2,7 @@ package com.grupox.wololo.controllers
 
 import arrow.core.getOrHandle
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.Game
-import com.grupox.wololo.model.Province
-import com.grupox.wololo.model.RepoGames
-import com.grupox.wololo.model.Town
+import com.grupox.wololo.model.*
 import com.grupox.wololo.model.services.GeoRef
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -37,8 +34,8 @@ class GamesController {
     }
 
     @GetMapping("/provincias/{name}")
-    fun getProvincia(@PathVariable("name") name: String): Province {   // Solo para debugging, este no va a ser un endpoint
-        return GeoRef.generateProvince(name)
+    fun getProvincia(@PathVariable("name") name: String, @RequestParam("town_amount") townAmount: Int = 5): Province {   // Solo para debugging, este no va a ser un endpoint
+        return ProvinceFactory.generateProvince(name, townAmount)
                 .getOrHandle { throw it }
     }
 
