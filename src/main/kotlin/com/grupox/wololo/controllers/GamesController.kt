@@ -6,6 +6,8 @@ import com.grupox.wololo.model.Game
 import com.grupox.wololo.model.Province
 import com.grupox.wololo.model.RepoGames
 import com.grupox.wololo.model.Town
+import com.grupox.wololo.model.Stats
+import com.grupox.wololo.model.User
 import com.grupox.wololo.model.services.GeoRef
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -43,15 +45,15 @@ class GamesController {
     }
 
     @GetMapping("/stats")
-    fun getStats(@RequestParam Map<String, String> allParams): Stats {
+    fun getStats(@RequestParam allParams: Map<String, String>): Stats {
         // TODO ADMIN ONLY
         TODO("GET GAMES STATS")
     }
 
     @GetMapping("/scoreboard")
-    fun getScoreboard(): Scoreboard {
+    fun getScoreboard(): List<User> {
         // TODO ADMIN ONLY
-        TODO("GET GAMES SCOREBOARD")
+        TODO("GET SCOREBOARD")
     }
 
     @ExceptionHandler(CustomException::class)
