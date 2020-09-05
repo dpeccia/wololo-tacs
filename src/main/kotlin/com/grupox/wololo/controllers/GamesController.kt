@@ -42,6 +42,18 @@ class GamesController {
                 .getOrHandle { throw it }
     }
 
+    @GetMapping("/stats")
+    fun getStats(@RequestParam Map<String, String> allParams): Stats {
+        // TODO ADMIN ONLY
+        TODO("GET GAMES STATS")
+    }
+
+    @GetMapping("/scoreboard")
+    fun getScoreboard(): Scoreboard {
+        // TODO ADMIN ONLY
+        TODO("GET GAMES SCOREBOARD")
+    }
+
     @ExceptionHandler(CustomException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleDomainException(exception: CustomException) = exception.getJSON()

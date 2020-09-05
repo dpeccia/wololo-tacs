@@ -17,6 +17,12 @@ class UsersController {
     @GetMapping("/{id}")
     fun getUserById(@PathVariable("id") id: Int): User = RepoUsers.getUserById(id) ?: throw CustomException.NotFoundException("User was not found")
 
+    @GetMapping("/{id}/stats")
+    fun getUserStats(@PathVariable("id") id: Int): Stats {
+        // TODO ADMIN ONLY
+        TODO("GET USER STATS")
+    }
+
     @PostMapping()
     fun createUser(@RequestBody user: User) { // que agarre el request body del request
         // TODO cambiar que no reciba todo el usuario por un json
