@@ -11,12 +11,14 @@ import com.grupox.wololo.model.User
 import com.grupox.wololo.model.services.GeoRef
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RequestMapping("/games")
 @RestController
 class GamesController {
     @GetMapping
-    fun getGames(): List<Game> = RepoGames.getGames()
+    fun getGames(@RequestParam("sort") sort: String, @RequestParam("filter") filter: String): List<Game> = RepoGames.getGames()
+    // TODO obtener mis partidas y filtrar u ordenar por fecha y estado
 
     @PostMapping
     fun createGame(@RequestBody game: Game) {
@@ -29,7 +31,8 @@ class GamesController {
     @PutMapping("/{id}")
     fun updateGame(@PathVariable("id") id: Int) {
         val game: Game = RepoGames.getGameById(id) ?: throw CustomException.NotFoundException("Game was not found")
-        TODO("UPDATE GAME VALUE")
+        TODO("modificar estado de una partida")
+        // TODO("definir Body")
     }
 
     @PostMapping("/{id}/actions/movement")
@@ -39,7 +42,8 @@ class GamesController {
             @RequestParam("from") fromTownId: Int,
             @RequestParam("to") toTownId: Int,
             @RequestParam("quantity") gauchosQuantity: Int) {
-        TODO("MOVE GAUCHOS BETWEEN TOWNS")
+        TODO("mover gauchos de un municipio a otro")
+        // TODO("definir Body")
     }
 
     @PostMapping("/{id}/actions/attack")
@@ -48,7 +52,8 @@ class GamesController {
             @RequestParam("attacker") attackerId: Int,
             @RequestParam("defender") defenderId: Int
     ) {
-        TODO("ATTACK LOGIC")
+        TODO("logica de ataque")
+        // TODO("definir Body")
     }
 
     @PutMapping("/{id}/towns/{idTown}")
@@ -57,7 +62,8 @@ class GamesController {
             @PathVariable("playerId") playerId: Int,
             @PathVariable("specialization") specialization: Int // TODO change int to specialization type
     ) {
-        TODO("UPDATE SPECIALIZATION LOGIC")
+        TODO("modificar la especialización del municipio entre producción o defensa")
+        // TODO("definir Body")
     }
 
     @GetMapping("/{id}/towns/{idTown}")
@@ -65,12 +71,12 @@ class GamesController {
             @PathVariable("id") id: Int,
             @PathVariable("idTown") idTown: Int
     ) {
-        TODO("GET TOWN STATISTICS OF PRODUCTION AND DEFENSE")
+        TODO("visualizar las estadísticas de producción y defensa de cada municipio, y la imagen")
     }
 
     @GetMapping("/provinces")
     fun getProvinces() : List<Province> {
-        TODO()
+        TODO("obtener provincias para que el usuario pueda seleccionar en que provincia quiere jugar")
     }
 
     @ExceptionHandler(CustomException::class)

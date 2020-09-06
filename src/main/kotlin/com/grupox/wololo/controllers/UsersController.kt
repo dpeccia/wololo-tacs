@@ -27,14 +27,12 @@ class UsersController {
     }
 
     @DeleteMapping("/tokens")
-    fun logout(@RequestBody token: JWT): Nothing = TODO("IMPLEMENT TOKEN DELETION")
+    fun logout(@RequestBody token: JWT): Nothing = TODO("implementar borrado de token")
 
     @GetMapping
-    fun getUsers(): List<User> = RepoUsers.getUsers() // TODO only get users without stats
+    fun getUsers(@RequestParam("username") username: String): List<User> = RepoUsers.getUsers()
+    // TODO obtener usuarios o un usuario en particular (sin stats)
 
-    /*@GetMapping("/{id}")
-    fun getUserById(@PathVariable("id") id: Int): User = RepoUsers.getUserById(id) ?: throw CustomException.NotFoundException("User was not found")
-*/
     @ExceptionHandler(CustomException.NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFoundError(exception: CustomException) = exception.getJSON()
