@@ -32,8 +32,8 @@ class GamesController {
         TODO("UPDATE GAME VALUE")
     }
 
-    @PutMapping("/{id}/player/{playerId}/towns")
-    fun updateGauchosQuantity(
+    @PostMapping("/{id}/actions/movement")
+    fun moveGauchosBetweenTowns(
             @PathVariable("id") id: Int,
             @PathVariable("playerId") playerId: Int,
             @RequestParam("from") fromTownId: Int,
@@ -42,8 +42,8 @@ class GamesController {
         TODO("MOVE GAUCHOS BETWEEN TOWNS")
     }
 
-    @PostMapping("/{id}/attacks")
-    fun createAttack(
+    @PostMapping("/{id}/actions/attack")
+    fun attackTown(
             @PathVariable("id") id: Int,
             @RequestParam("attacker") attackerId: Int,
             @RequestParam("defender") defenderId: Int
@@ -51,7 +51,7 @@ class GamesController {
         TODO("ATTACK LOGIC")
     }
 
-    @PutMapping("/{id}/player/{playerId}/towns/specializations/{specialization}")
+    @PutMapping("/{id}/towns/{idTown}")
     fun updateTownSpecialization(
             @PathVariable("id") id: Int,
             @PathVariable("playerId") playerId: Int,
@@ -68,28 +68,9 @@ class GamesController {
         TODO("GET TOWN STATISTICS OF PRODUCTION AND DEFENSE")
     }
 
-    @PutMapping("/{id}/town/{idTown}")
-    fun updateTown(@PathVariable("id") id: Int, @PathVariable("idTown") idTown: Int) {
-        val town: Town = RepoGames.getGameById(id)?.getTownById(idTown) ?: throw CustomException.NotFoundException("Town was not found")
-        TODO("UPDATE TOWN VALUE")
-    }
-
-    @GetMapping("/provincias/{name}")
-    fun getProvincia(@PathVariable("name") name: String): Province {   // Solo para debugging, este no va a ser un endpoint
-        return GeoRef.generateProvince(name)
-                .getOrHandle { throw it }
-    }
-
-    @GetMapping("/stats")
-    fun getStats(@RequestParam allParams: Map<String, String>): Stats {
-        // TODO ADMIN ONLY
-        TODO("GET GAMES STATS")
-    }
-
-    @GetMapping("/scoreboard")
-    fun getScoreboard(): List<User> {
-        // TODO ADMIN ONLY
-        TODO("GET SCOREBOARD")
+    @GetMapping("/provinces")
+    fun getProvinces() : List<Province> {
+        TODO()
     }
 
     @ExceptionHandler(CustomException::class)
