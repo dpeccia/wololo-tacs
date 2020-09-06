@@ -34,6 +34,8 @@ dependencies {
     implementation("io.arrow-kt:arrow-syntax:0.10.5")
     implementation("io.github.rybalkinsd:kohttp:0.12.0")
     implementation("io.github.rybalkinsd:kohttp-jackson:+")
+    implementation("io.springfox:springfox-swagger2:2.7.0")
+    implementation("io.springfox:springfox-swagger-ui:2.7.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }

@@ -9,6 +9,7 @@ import com.grupox.wololo.model.Town
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.services.GeoRef
+import io.swagger.annotations.ApiOperation
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -17,18 +18,23 @@ import java.util.*
 @RestController
 class GamesController {
     @GetMapping
-    fun getGames(@RequestParam("sort") sort: String, @RequestParam("filter") filter: String): List<Game> = RepoGames.getGames()
+    @ApiOperation(value = "Gets the games of the current user")
+    fun getGames(@RequestParam("sort", required = false) sort: String?,
+                 @RequestParam("filter", required = false) filter: String?): List<Game> = RepoGames.getGames()
     // TODO obtener mis partidas y filtrar u ordenar por fecha y estado
 
     @PostMapping
+    @ApiOperation(value = "Creates a new game")
     fun createGame(@RequestBody game: Game) {
         RepoGames.insertGame(game)
     }
 
     @GetMapping("/{id}")
+    @ApiOperation(value = "Gets a game")
     fun getGameById(@PathVariable("id") id: Int): Game = RepoGames.getGameById(id) ?: throw CustomException.NotFoundException("Game was not found")
 
     @PutMapping("/{id}")
+    @ApiOperation(value = "Modifies a game status (on going, finished, canceled)")
     fun updateGame(@PathVariable("id") id: Int) {
         val game: Game = RepoGames.getGameById(id) ?: throw CustomException.NotFoundException("Game was not found")
         TODO("modificar estado de una partida")
@@ -36,6 +42,7 @@ class GamesController {
     }
 
     @PostMapping("/{id}/actions/movement")
+    @ApiOperation(value = "Moves the gauchos between towns")
     fun moveGauchosBetweenTowns(
             @PathVariable("id") id: Int,
             @PathVariable("playerId") playerId: Int,
@@ -47,6 +54,7 @@ class GamesController {
     }
 
     @PostMapping("/{id}/actions/attack")
+    @ApiOperation(value = "Attacks a town")
     fun attackTown(
             @PathVariable("id") id: Int,
             @RequestParam("attacker") attackerId: Int,
@@ -57,6 +65,7 @@ class GamesController {
     }
 
     @PutMapping("/{id}/towns/{idTown}")
+    @ApiOperation(value = "Updates the town specialization")
     fun updateTownSpecialization(
             @PathVariable("id") id: Int,
             @PathVariable("playerId") playerId: Int,
@@ -67,6 +76,7 @@ class GamesController {
     }
 
     @GetMapping("/{id}/towns/{idTown}")
+    @ApiOperation(value = "Gets the town stats and an image")
     fun getTownData(
             @PathVariable("id") id: Int,
             @PathVariable("idTown") idTown: Int
@@ -75,6 +85,7 @@ class GamesController {
     }
 
     @GetMapping("/provinces")
+    @ApiOperation(value = "Gets all provinces")
     fun getProvinces() : List<Province> {
         TODO("obtener provincias para que el usuario pueda seleccionar en que provincia quiere jugar")
     }
