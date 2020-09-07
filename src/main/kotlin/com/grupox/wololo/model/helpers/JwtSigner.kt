@@ -1,11 +1,10 @@
 package com.grupox.wololo.model.helpers
 
 import arrow.core.*
+import arrow.core.extensions.either.applicativeError.handleError
+import arrow.core.extensions.either.applicativeError.raiseError
 import com.grupox.wololo.errors.CustomException
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.Jws
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
 import org.springframework.stereotype.Service
 import java.security.KeyPair
@@ -22,16 +21,17 @@ object JwtSigner {
                 .signWith(keyPair.private, SignatureAlgorithm.RS256)
                 .setSubject(userId)
                 .setIssuer("identity")
-                .setExpiration(Date.from(Instant.now().plus(Duration.ofMinutes(60))))
+                .setExpiration(Date.from(Instant.now().plus(Duration.ofMinutes(1))))
                 .setIssuedAt(Date.from(Instant.now()))
                 .compact()
     }
 
-    fun validateJwt(jwt: String): Either<CustomException, Jws<Claims>> {
-        return try {
-            Right(Jwts.parserBuilder().setSigningKey(keyPair.public).build().parseClaimsJws(jwt))
-        } catch (ex : Exception) {
-            Left(CustomException.ExpiredTokenException())
-        }
-    }
+    fun validateJwt(jwt: Option<String>): Either<CustomException, Jws<Claims>> =
+            try {
+                Right(Jwts.parserBuilder()
+                        .setSigningKey(keyPair.public)
+                        .build()
+                        .parseClaimsJws(jwt.getOrElse { throw CustomException.TokenException("Token not found. Login Again") }))
+            } catch (ex: ExpiredJwtException) { Left(CustomException.TokenException("Token expired. Login Again"))
+            } catch (ex: CustomException) { Left(ex) }
 }

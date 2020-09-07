@@ -2,6 +2,7 @@ package com.grupox.wololo.controllers
 
 import arrow.core.getOrElse
 import arrow.core.getOrHandle
+import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.JwtSigner
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import springfox.documentation.annotations.ApiIgnore
 
 @RequestMapping("/users")
 @RestController
@@ -43,8 +45,8 @@ class UsersController {
 
     @DeleteMapping("/tokens")
     @ApiOperation(value = "Log Out")
-    fun logout(@CookieValue("X-Auth") _authCookie : String?): ResponseEntity<Void> {
-        JwtSigner.validateJwt(_authCookie.toString()).getOrHandle { throw it }
+    fun logout(@ApiIgnore @CookieValue("X-Auth") _authCookie : String?): ResponseEntity<Void> {
+        JwtSigner.validateJwt(_authCookie.toOption()).getOrHandle { throw it }
         val authCookie = ResponseCookie.fromClientResponse("X-Auth", _authCookie.toString())
                 .maxAge(0)
                 .httpOnly(true)
@@ -58,8 +60,8 @@ class UsersController {
     @GetMapping
     @ApiOperation(value = "Gets the users without stats")
     fun getUsers(@RequestParam("username", required = false) _username: String?,
-                 @CookieValue("X-Auth") authCookie : String?): List<UserWithoutStats> {
-        JwtSigner.validateJwt(authCookie.toString()).getOrHandle { throw it }
+                 @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserWithoutStats> {
+        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
         val username = _username ?: return RepoUsers.getUsers().map { it.toUserWithoutStats() }
         val user = ArrayList<UserWithoutStats>()
         user.add(RepoUsers.getUserByName(username)
@@ -72,7 +74,7 @@ class UsersController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFoundError(exception: CustomException) = exception.getJSON()
 
-    @ExceptionHandler(CustomException.ExpiredTokenException::class)
+    @ExceptionHandler(CustomException.TokenException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     fun handleExpiredTokenError(exception: CustomException) = exception.getJSON()
 }
