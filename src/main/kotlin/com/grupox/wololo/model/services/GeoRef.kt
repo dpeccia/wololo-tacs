@@ -45,7 +45,7 @@ object GeoRef {
                     id = provinceData.id,
                     name = provinceData.name,
                     coordinates = provinceData.coordinates,
-                    towns = ArrayList(townsData.map { Town(it.id, it.name, it.coordinates, Production(), townStats()) })
+                    towns = ArrayList(townsData.map { Town(it.id, it.name, it.coordinates, Production(), TownStats()) })
                 )
             }
         }
