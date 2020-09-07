@@ -1,21 +1,13 @@
 package com.grupox.wololo.controllers
 
 import arrow.core.getOrHandle
-import com.google.common.base.Predicates
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Game
-import com.grupox.wololo.model.JwtSigner
+import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.User
 import io.swagger.annotations.ApiOperation
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-import springfox.documentation.builders.PathSelectors
-import springfox.documentation.builders.RequestHandlerSelectors
-import springfox.documentation.spi.DocumentationType
-import springfox.documentation.spring.web.plugins.Docket
-import springfox.documentation.swagger2.annotations.EnableSwagger2
 import java.util.*
 
 @RequestMapping("/admin")

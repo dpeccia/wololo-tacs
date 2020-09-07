@@ -3,11 +3,10 @@ package com.grupox.wololo.controllers
 import arrow.core.getOrHandle
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.services.GeoRef
+import com.grupox.wololo.model.helpers.JwtSigner
 import io.swagger.annotations.ApiOperation
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-import java.util.*
 
 @RequestMapping("/games")
 @RestController
