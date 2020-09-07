@@ -1,5 +1,5 @@
 package com.grupox.wololo.model
 
-class townStats {
+class TownStats {
     //TODO: ver que poner por acá
 }
