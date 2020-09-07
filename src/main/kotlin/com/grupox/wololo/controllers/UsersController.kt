@@ -6,6 +6,7 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.UserCredentials
+import com.grupox.wololo.model.helpers.UserWithoutStats
 import io.swagger.annotations.ApiOperation
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseCookie
@@ -20,7 +21,7 @@ class UsersController {
     fun createUser(@RequestBody newUser: UserCredentials) {
         if(RepoUsers.getUserByName(newUser.mail).nonEmpty())
             throw CustomException.NotFoundException("User already exists")
-        val user = User(newUser.mail, newUser.password, false, Stats(0,0))
+        val user = User(3, newUser.mail, newUser.password, false, Stats(0,0)) // TODO el id se tiene que autoincrementar
         RepoUsers.insertUser(user)
     }
 
@@ -57,11 +58,12 @@ class UsersController {
     @GetMapping
     @ApiOperation(value = "Gets the users without stats")
     fun getUsers(@RequestParam("username", required = false) _username: String?,
-                 @CookieValue("X-Auth") authCookie : String?): List<User> {
+                 @CookieValue("X-Auth") authCookie : String?): List<UserWithoutStats> {
         JwtSigner.validateJwt(authCookie.toString()).getOrHandle { throw it }
-        val username = _username ?: return RepoUsers.getUsers()
-        val user = ArrayList<User>()
-        user.add(RepoUsers.getUserByName(username).getOrElse { throw CustomException.NotFoundException("No user with such name") })
+        val username = _username ?: return RepoUsers.getUsers().map { it.toUserWithoutStats() }
+        val user = ArrayList<UserWithoutStats>()
+        user.add(RepoUsers.getUserByName(username)
+                .getOrElse { throw CustomException.NotFoundException("No user with such name") }.toUserWithoutStats())
         return user
     }
     // TODO obtener usuarios o un usuario en particular (sin stats)

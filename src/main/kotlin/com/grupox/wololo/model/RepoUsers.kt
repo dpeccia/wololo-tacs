@@ -9,16 +9,18 @@ import java.util.*
 
 object RepoUsers {
     private val usersInDB: ArrayList<User> = arrayListOf(
-            User("admin", "admin", true, Stats(0, 0)),
-            User("unmail@gmail.com", "1234", false, Stats(1, 1))
+            User(1,"admin", "admin", true, Stats(0, 0)),
+            User(2,"unmail@gmail.com", "1234", false, Stats(1, 1))
     )
 
-    fun getUsers(): ArrayList<User> = usersInDB
+    fun getUsers(): List<User> = usersInDB.filter { !it.esAdmin }
 
     // TODO FILTER AND SORT
     fun find(filters: List<String>, orderBys: List<String>): ArrayList<User> = usersInDB
 
-    fun getUserByName(mail: String): Option<User> = usersInDB.find { it.mail == mail }.toOption()
+    fun getUserByName(mail: String): Option<User> = this.getUsers().find { it.mail == mail }.toOption()
+
+    fun getUserById(id: Int): Option<User> = this.getUsers().find { it.id == id }.toOption()
 
     fun getUserByLogin(loginData: UserCredentials): User? = usersInDB.find {it.isUserByLoginData(loginData)}
 
