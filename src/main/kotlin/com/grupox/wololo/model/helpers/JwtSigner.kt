@@ -1,4 +1,4 @@
-package com.grupox.wololo.model
+package com.grupox.wololo.model.helpers
 
 import arrow.core.*
 import com.grupox.wololo.errors.CustomException
