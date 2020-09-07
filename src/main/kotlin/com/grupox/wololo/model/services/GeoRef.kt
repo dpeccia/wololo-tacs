@@ -8,9 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.Coordinates
-import com.grupox.wololo.model.Province
-import com.grupox.wololo.model.Town
+import com.grupox.wololo.model.*
 import io.github.rybalkinsd.kohttp.ext.httpGet
 import io.github.rybalkinsd.kohttp.jackson.ext.toType
 
@@ -47,7 +45,7 @@ object GeoRef {
                     id = provinceData.id,
                     name = provinceData.name,
                     coordinates = provinceData.coordinates,
-                    towns = ArrayList(townsData.map { Town(it.id, it.name, it.coordinates) })
+                    towns = ArrayList(townsData.map { Town(it.id, it.name, it.coordinates, Production(), townStats()) })
                 )
             }
         }
