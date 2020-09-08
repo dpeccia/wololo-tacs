@@ -20,9 +20,9 @@ private sealed class GeoRefResponse() {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class LocationData(
-        @JsonProperty("centroide") val coordinates: Coordinates,
         @JsonProperty("id") val id: Int,
-        @JsonProperty("nombre") val name: String
+        @JsonProperty("nombre") val name: String,
+        @JsonProperty("centroide") val coordinates: Coordinates
 )
 
 object GeoRef : HttpService("GeoRef"){
@@ -30,14 +30,14 @@ object GeoRef : HttpService("GeoRef"){
     private const val townsDataUrl = "https://apis.datos.gob.ar/georef/api/municipios"
     private const val exactValue: Boolean = true // Las busquedas por nombres buscan el match exacto
 
-    fun requestProvinceData(name: String): Either<CustomException, LocationData> {
-        val responseData: Either<CustomException, GeoRefResponse.ProvinceQuery> =
-            requestData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
-
-        return responseData
-                .filterOrOther({ it.matches.isNotEmpty() },{ CustomException.BadDataFromExternalRequestException("There are no matches for provinces with name: $name") })
-                .map { it.matches.first() }
-    }
+//    fun requestProvinceData(name: String): Either<CustomException, LocationData> {
+//        val responseData: Either<CustomException, GeoRefResponse.ProvinceQuery> =
+//            requestData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
+//
+//        return responseData
+//                .filterOrOther({ it.matches.isNotEmpty() },{ CustomException.BadDataFromExternalRequestException("There are no matches for provinces with name: $name") })
+//                .map { it.matches.first() }
+//    }
 
     fun requestTownsData(provinceId: Int, amount: Int): Either<CustomException, List<LocationData>> {
         val responseData: Either<CustomException, GeoRefResponse.TownsQuery> =
@@ -45,4 +45,7 @@ object GeoRef : HttpService("GeoRef"){
 
         return responseData.map { it.matches }
     }
+
+    fun requestAvailableProvinces(): Either<CustomException, List<LocationData>> =
+        requestData<GeoRefResponse.ProvinceQuery>(provinceDataUrl, mapOf()).map { it.matches }
 }

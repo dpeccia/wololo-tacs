@@ -5,6 +5,8 @@ import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.JwtSigner
+import com.grupox.wololo.model.services.GeoRef
+import com.grupox.wololo.model.services.LocationData
 import io.swagger.annotations.ApiOperation
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -97,9 +99,9 @@ class GamesController {
 
     @GetMapping("/provinces")
     @ApiOperation(value = "Gets all provinces")
-    fun getProvinces(@ApiIgnore @CookieValue("X-Auth") authCookie : String?) : List<Province> {
+    fun getProvinces(@ApiIgnore @CookieValue("X-Auth") authCookie : String?) : List<LocationData> {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        TODO("obtener provincias para que el usuario pueda seleccionar en que provincia quiere jugar")
+        return GeoRef.requestAvailableProvinces().getOrHandle { throw it }
     }
 
     @ExceptionHandler(CustomException::class)
