@@ -8,6 +8,7 @@ sealed class CustomException(message: String) : Exception(message){
         : CustomException("Request to $apiName API servers returned status code: $statusCode")
     class BadDataFromExternalRequestException(message: String)
         : CustomException(message)
+    class TokenException(message: String) : CustomException(message)
 
     fun getJSON(): ExceptionJSON = ExceptionJSON(message) // Default
 }

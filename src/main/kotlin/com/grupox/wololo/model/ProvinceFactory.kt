@@ -15,23 +15,23 @@ import com.grupox.wololo.model.services.GeoRef
 import com.grupox.wololo.model.services.LocationData
 import com.grupox.wololo.model.services.TopoData
 
-object ProvinceFactory {
-    fun generateProvince(provinceName: String, townAmount: Int): Either<CustomException, Province> {
-        return Either.fx<CustomException, Province> {
-            val provinceData = GeoRef.requestProvinceData(provinceName).bind()
-            val townsData = GeoRef.requestTownsData(provinceData.id, townAmount).bind()
-            val towns = townsData.map { generateTown((it)) }.sequence(Either.applicative()).fix().bind()
-            Province (
-                    id = provinceData.id,
-                    name = provinceData.name,
-                    coordinates = provinceData.coordinates,
-                    towns = ArrayList(towns.fix())
-            )
-        }.fix()
-    }
-
-    private fun generateTown(townData: LocationData): Either<CustomException, Town> =
-        TopoData.requestElevation(townData.coordinates).map { elevation ->
-            Town (id = townData.id, name = townData.name, coordinates = townData.coordinates, elevation = elevation)
-        }
-}
+//object ProvinceFactory {
+//    fun generateProvince(provinceName: String, townAmount: Int): Either<CustomException, Province> {
+//        return Either.fx<CustomException, Province> {
+//            val provinceData = GeoRef.requestProvinceData(provinceName).bind()
+//            val townsData = GeoRef.requestTownsData(provinceData.id, townAmount).bind()
+//            val towns = townsData.map { generateTown((it)) }.sequence(Either.applicative()).fix().bind()
+//            Province (
+//                    id = provinceData.id,
+//                    name = provinceData.name,
+//                    coordinates = provinceData.coordinates,
+//                    towns = ArrayList(towns.fix())
+//            )
+//        }.fix()
+//    }
+//
+//    private fun generateTown(townData: LocationData): Either<CustomException, Town> =
+//        TopoData.requestElevation(townData.coordinates).map { elevation ->
+//            Town (id = townData.id, name = townData.name, coordinates = townData.coordinates, elevation = elevation)
+//        }
+//}

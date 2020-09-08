@@ -12,3 +12,8 @@ $ docker build -t wololo . && docker run -p 8080:8080 -d wololo
 ## Correr docker-compose
 ```
 $ docker-compose up -d
+```
+
+## API
+
+[http://localhost:8080/swagger-ui.html#/](http://localhost:8080/swagger-ui.html#/)

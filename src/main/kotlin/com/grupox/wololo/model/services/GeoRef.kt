@@ -1,13 +1,10 @@
 package com.grupox.wololo.model.services
 
 import arrow.core.*
-import arrow.core.extensions.either.monadError.monadError
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Coordinates
-import com.grupox.wololo.model.Province
-import com.grupox.wololo.model.Town
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private sealed class GeoRefResponse() {

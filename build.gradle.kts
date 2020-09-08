@@ -34,6 +34,11 @@ dependencies {
     implementation("io.arrow-kt:arrow-syntax:0.10.5")
     implementation("io.github.rybalkinsd:kohttp:0.12.0")
     implementation("io.github.rybalkinsd:kohttp-jackson:+")
+    implementation("io.springfox:springfox-swagger2:2.7.0")
+    implementation("io.springfox:springfox-swagger-ui:2.7.0")
+    implementation("io.jsonwebtoken:jjwt-api:0.11.1")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.1")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
