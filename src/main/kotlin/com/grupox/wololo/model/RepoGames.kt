@@ -13,6 +13,10 @@ object RepoGames {
 
     fun getGameById(id: Int): Game? = gamesInDB.find { it.id == id }
 
+    fun changeGameStatus(id: Int, status: String){
+      gamesInDB.find { it.id == id }?.changeStatus(Status.valueOf(status))
+    }
+
     fun insertGame(game: Game) {
         gamesInDB.add(game)
     }

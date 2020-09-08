@@ -4,6 +4,7 @@ import arrow.core.getOrHandle
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
+import com.grupox.wololo.model.helpers.GameData
 import com.grupox.wololo.model.helpers.JwtSigner
 import io.swagger.annotations.ApiOperation
 import org.springframework.http.HttpStatus
@@ -40,11 +41,12 @@ class GamesController {
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Modifies a game status (on going, finished, canceled)")
-    fun updateGame(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+    fun updateGame(@PathVariable("id") id: Int, @RequestBody gameData: GameData, @ApiIgnore @CookieValue("X-Auth") authCookie : String?)  {
+       JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
         val game: Game = RepoGames.getGameById(id) ?: throw CustomException.NotFoundException("Game was not found")
-        TODO("modificar estado de una partida")
-        // TODO("definir Body")
+        RepoGames.changeGameStatus(id,gameData.status)
+
+        //TODO("id queda en la request o en el body?")
     }
 
     @PostMapping("/{id}/actions/movement")
