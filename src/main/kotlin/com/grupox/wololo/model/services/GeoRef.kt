@@ -1,6 +1,7 @@
 package com.grupox.wololo.model.services
 
 import arrow.core.*
+import arrow.core.extensions.either.monadError.monadError
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.grupox.wololo.errors.CustomException

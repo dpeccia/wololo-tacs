@@ -17,7 +17,6 @@ object Pixabay : HttpService(apiName = "Pixabay"){
     private fun requestImage(locationName: String): Either<CustomException, String> {
         val queryParams = configParams.toMutableMap()  // TODO: No me gusta esto :S
         queryParams.putIfAbsent("p", locationName)
-        val requestResponse: Either<CustomException, Float> = requestData(baseUrl, queryParams)
         TODO()
     }
 
