@@ -28,7 +28,7 @@ data class LocationData(
 object GeoRef : HttpService("GeoRef"){
     private const val provinceDataUrl = "https://apis.datos.gob.ar/georef/api/provincias"
     private const val townsDataUrl = "https://apis.datos.gob.ar/georef/api/municipios"
-    private const val exactValue: Boolean = true // Las busquedas por nombres buscan el match exacto
+//    private const val exactValue: Boolean = true // Las busquedas por nombres buscan el match exacto
 
 //    fun requestProvinceData(name: String): Either<CustomException, LocationData> {
 //        val responseData: Either<CustomException, GeoRefResponse.ProvinceQuery> =
@@ -39,12 +39,14 @@ object GeoRef : HttpService("GeoRef"){
 //                .map { it.matches.first() }
 //    }
 
-    fun requestTownsData(provinceId: Int, amount: Int): Either<CustomException, List<LocationData>> {
-        val responseData: Either<CustomException, GeoRefResponse.TownsQuery> =
-            requestData(townsDataUrl, mapOf("provincia" to provinceId.toString(), "max" to amount.toString()))
+    fun requestTownsData(provinceName: String, amount: Int): Either<CustomException, List<LocationData>> =
+        requestTownsData(mapOf("provincia" to provinceName, "max" to amount.toString())).map { it.take(amount) }
 
-        return responseData.map { it.matches }
-    }
+    fun requestTownsData(provinceId: Int, amount: Int): Either<CustomException, List<LocationData>> =
+        requestTownsData(mapOf("provincia" to provinceId.toString(), "max" to amount.toString())).map { it.take(amount) }
+
+    fun requestTownsData(queryParams: Map<String, String>): Either<CustomException, List<LocationData>> =
+        requestData<GeoRefResponse.TownsQuery>(townsDataUrl, queryParams).map { it.matches }
 
     fun requestAvailableProvinces(): Either<CustomException, List<LocationData>> =
         requestData<GeoRefResponse.ProvinceQuery>(provinceDataUrl, mapOf()).map { it.matches }
