@@ -4,26 +4,20 @@ import arrow.core.*
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.Coordinates
+import com.grupox.wololo.model.ProvinceGeoRef
+import com.grupox.wololo.model.TownGeoRef
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private sealed class GeoRefResponse() {
     data class ProvinceQuery(
-        @JsonProperty("provincias") val matches: List<LocationData>
+        @JsonProperty("provincias") val matches: List<ProvinceGeoRef>
     ) : GeoRefResponse()
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class TownsQuery(
-        @JsonProperty("municipios") val matches: List<LocationData>
+        @JsonProperty("municipios") val matches: List<TownGeoRef>
     ) : GeoRefResponse()
 }
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class LocationData(
-        @JsonProperty("id") val id: Int,
-        @JsonProperty("nombre") val name: String,
-        @JsonProperty("centroide") val coordinates: Coordinates
-)
 
 object GeoRef : HttpService("GeoRef"){
     private const val provinceDataUrl = "https://apis.datos.gob.ar/georef/api/provincias"
@@ -39,15 +33,12 @@ object GeoRef : HttpService("GeoRef"){
 //                .map { it.matches.first() }
 //    }
 
-    fun requestTownsData(provinceName: String, amount: Int): Either<CustomException, List<LocationData>> =
+    fun requestTownsData(provinceName: String, amount: Int): Either<CustomException, List<TownGeoRef>> =
         requestTownsData(mapOf("provincia" to provinceName, "max" to amount.toString())).map { it.take(amount) }
 
-    fun requestTownsData(provinceId: Int, amount: Int): Either<CustomException, List<LocationData>> =
-        requestTownsData(mapOf("provincia" to provinceId.toString(), "max" to amount.toString())).map { it.take(amount) }
-
-    fun requestTownsData(queryParams: Map<String, String>): Either<CustomException, List<LocationData>> =
+    fun requestTownsData(queryParams: Map<String, String>): Either<CustomException, List<TownGeoRef>> =
         requestData<GeoRefResponse.TownsQuery>(townsDataUrl, queryParams).map { it.matches }
 
-    fun requestAvailableProvinces(): Either<CustomException, List<LocationData>> =
+    fun requestAvailableProvinces(): Either<CustomException, List<ProvinceGeoRef>> =
         requestData<GeoRefResponse.ProvinceQuery>(provinceDataUrl, mapOf()).map { it.matches }
 }

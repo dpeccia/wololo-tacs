@@ -6,7 +6,6 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.services.GeoRef
-import com.grupox.wololo.model.services.LocationData
 import io.swagger.annotations.ApiOperation
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -27,9 +26,9 @@ class GamesController {
 
     @PostMapping
     @ApiOperation(value = "Creates a new game")
-    fun createGame(@RequestBody game: Game, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
+    fun createGame(@RequestBody game: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        RepoGames.insertGame(game)
+        TODO("Crear un game a partir del GameForm")
     }
 
     @GetMapping("/{id}")
@@ -99,7 +98,7 @@ class GamesController {
 
     @GetMapping("/provinces")
     @ApiOperation(value = "Gets all provinces")
-    fun getProvinces(@ApiIgnore @CookieValue("X-Auth") authCookie : String?) : List<LocationData> {
+    fun getProvinces(@ApiIgnore @CookieValue("X-Auth") authCookie : String?) : List<ProvinceGeoRef> {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
         return GeoRef.requestAvailableProvinces().getOrHandle { throw it }
     }
