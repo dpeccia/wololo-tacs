@@ -4,10 +4,10 @@ import arrow.core.getOrHandle
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.helpers.GameData
 import com.grupox.wololo.model.helpers.GameForm
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.ProvinceGeoRef
+import com.grupox.wololo.model.helpers.TownForm
 import com.grupox.wololo.model.services.GeoRef
 import io.swagger.annotations.ApiOperation
 import org.springframework.http.HttpStatus
@@ -44,12 +44,19 @@ class GamesController {
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Modifies a game status (on going, finished, canceled)")
-    fun updateGame(@PathVariable("id") id: Int, @RequestBody gameData: GameData, @ApiIgnore @CookieValue("X-Auth") authCookie : String?)  {
-       JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        val game: Game = RepoGames.getGameById(id) ?: throw CustomException.NotFoundException("Game was not found")
-        RepoGames.changeGameStatus(id,gameData.status)
+    fun updateGame(@PathVariable("id") id: Int, @RequestBody gameData: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?)  {
 
-        //TODO("id queda en la request o en el body?")
+        val userID : Int = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject.toInt()
+        val game: Game = RepoGames.getGameById(id) ?: throw CustomException.NotFoundException("Game was not found")
+        val participantsIds: List<Int> = gameData.participantsIds
+
+        RepoUsers.updateUserGamesLost(userID)
+
+        if ((participantsIds.size) <= 2) {
+            RepoGames.changeGameStatus(id, "CANCELED")
+            RepoUsers.updateUserGamesWon(participantsIds.find { it != userID })
+        }
+
     }
 
     @PostMapping("/{id}/actions/movement")
@@ -82,12 +89,21 @@ class GamesController {
     @ApiOperation(value = "Updates the town specialization")
     fun updateTownSpecialization(
             @PathVariable("id") id: Int,
-            @PathVariable("playerId") playerId: Int,
-            @PathVariable("specialization") specialization: Int, // TODO change int to specialization type
+            @PathVariable("idTown") idTown: Int,
+            @RequestBody townData: TownForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        TODO("modificar la especialización del municipio entre producción o defensa")
-        // TODO("definir Body")
+
+        if (townData.specialization == "PRODUCTION"){
+            //por ahí mejor una función dentro de repogames que se encarge de hacer esto porque creo que rompo encapsulamiento, despues de adr lo cambio
+            RepoGames.getGameById(id)?.getTownById(idTown)?.changeSpecialization(Production())
+        } else{
+            if (townData.specialization == "DEFENSE"){
+                RepoGames.getGameById(id)?.getTownById(idTown)?.changeSpecialization(Defense())
+            }
+        }
+
+
     }
 
     @GetMapping("/{id}/towns/{idTown}")

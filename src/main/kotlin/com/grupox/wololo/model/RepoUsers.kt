@@ -22,6 +22,14 @@ object RepoUsers {
 
     fun getUserById(id: Int): Option<User> = this.getUsers().find { it.id == id }.toOption()
 
+    fun updateUserGamesLost(id: Int){
+        this.getUsers().find { it.id == id }?.updateGamesLostStats()
+    }
+
+    fun updateUserGamesWon(id: Int?){
+        this.getUsers().find { it.id == id }?.updateGamesWonStats()
+    }
+
     fun getUserByLogin(loginData: UserCredentials): User? = usersInDB.find {it.isUserByLoginData(loginData)}
 
     // TODO: ENCRYPT USER PASSWORD BEFORE SAVING

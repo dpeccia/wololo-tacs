@@ -7,12 +7,12 @@ import com.grupox.wololo.model.Coordinates
 
 data class UserCredentials @JsonCreator constructor(val mail: String, val password: String)
 data class UserWithoutStats @JsonCreator constructor(val id: Int, val mail: String)
-data class GameData @JsonCreator constructor(val id: Int, val status: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class ProvinceGeoRef(@JsonProperty("nombre") val name: String)
 
 data class GameForm(val provinceName: String, val townAmount: Int, val participantsIds: List<Int>)
+data class TownForm @JsonCreator constructor(val specialization: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TownGeoRef(
