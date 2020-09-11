@@ -30,7 +30,7 @@ class UsersController {
     @PostMapping("/tokens")
     @ApiOperation(value = "Log In")
     fun login(@RequestBody _user: UserCredentials): ResponseEntity<Void> {
-        val user = RepoUsers.getUserByLogin(_user) ?: throw CustomException.NotFoundException("Bad Login")
+        val user = RepoUsers.getUserByLogin(_user) ?: throw CustomException.BadLoginException("Bad Login")
 
         val jwt = JwtSigner.createJwt(user.mail)
         val authCookie = ResponseCookie.fromClientResponse("X-Auth", jwt)
@@ -73,6 +73,10 @@ class UsersController {
     @ExceptionHandler(CustomException.NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFoundError(exception: CustomException) = exception.getJSON()
+
+    @ExceptionHandler(CustomException.BadLoginException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun handleBadLoginError(exception: CustomException) = exception.getJSON()
 
     @ExceptionHandler(CustomException.TokenException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
