@@ -16,10 +16,10 @@ import java.util.Date
 object JwtSigner {
     private val keyPair: KeyPair = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
-    fun createJwt(userId: String): String {
+    fun createJwt(userMail: String): String {
         return Jwts.builder()
                 .signWith(keyPair.private, SignatureAlgorithm.RS256)
-                .setSubject(userId)
+                .setSubject(userMail)
                 .setIssuer("identity")
                 .setExpiration(Date.from(Instant.now().plus(Duration.ofMinutes(1))))
                 .setIssuedAt(Date.from(Instant.now()))

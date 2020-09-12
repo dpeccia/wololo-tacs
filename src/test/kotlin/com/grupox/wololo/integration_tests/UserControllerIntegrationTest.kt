@@ -3,6 +3,7 @@ package com.grupox.wololo.integration_tests
 import arrow.core.Some
 import arrow.core.getOrHandle
 import com.grupox.wololo.model.helpers.JwtSigner
+import com.grupox.wololo.model.helpers.TownForm
 import com.grupox.wololo.model.helpers.UserCredentials
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
