@@ -6,6 +6,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.ProvinceGeoRef
 import com.grupox.wololo.model.helpers.TownGeoRef
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
+import org.springframework.stereotype.Service
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private sealed class GeoRefResponse() {
@@ -19,26 +24,29 @@ private sealed class GeoRefResponse() {
     ) : GeoRefResponse()
 }
 
-object GeoRef : HttpService("GeoRef"){
-    private const val provinceDataUrl = "https://apis.datos.gob.ar/georef/api/provincias"
-    private const val townsDataUrl = "https://apis.datos.gob.ar/georef/api/municipios"
-//    private const val exactValue: Boolean = true // Las busquedas por nombres buscan el match exacto
+interface IGeoRef {
+    fun requestAvailableProvinces(): Either<CustomException, List<ProvinceGeoRef>>
+    fun requestTownsData(provinceName: String): Either<CustomException, List<TownGeoRef>>
+}
 
-//    fun requestProvinceData(name: String): Either<CustomException, LocationData> {
-//        val responseData: Either<CustomException, GeoRefResponse.ProvinceQuery> =
-//            requestData(provinceDataUrl, mapOf("nombre" to name, "exacto" to exactValue.toString()))
-//
-//        return responseData
-//                .filterOrOther({ it.matches.isNotEmpty() },{ CustomException.BadDataFromExternalRequestException("There are no matches for provinces with name: $name") })
-//                .map { it.matches.first() }
-//    }
+@Service
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+class GeoRef(@Autowired private val self: GeoRef?) : HttpService("GeoRef"), IGeoRef{
+    private val provinceDataUrl = "https://apis.datos.gob.ar/georef/api/provincias"
+    private val townsDataUrl = "https://apis.datos.gob.ar/georef/api/municipios"
+    private val maxMatches = "200"
+
+    @Cacheable(cacheNames = ["withTimeToLive"])
+    override fun requestTownsData(provinceName: String): Either<CustomException, List<TownGeoRef>> {
+        return requestData<GeoRefResponse.TownsQuery>(townsDataUrl, mapOf("provincia" to provinceName, "max" to maxMatches)).map { it.matches }
+    }
 
     fun requestTownsData(provinceName: String, amount: Int): Either<CustomException, List<TownGeoRef>> =
-        requestTownsData(mapOf("provincia" to provinceName, "max" to amount.toString())).map { it.take(amount) }
+        self!!.requestTownsData(provinceName).map { it.take(amount) }
 
-    fun requestTownsData(queryParams: Map<String, String>): Either<CustomException, List<TownGeoRef>> =
-        requestData<GeoRefResponse.TownsQuery>(townsDataUrl, queryParams).map { it.matches }
+    @Cacheable(cacheNames = ["withTimeToLive"])
+    override fun requestAvailableProvinces(): Either<CustomException, List<ProvinceGeoRef>> {
+        return requestData<GeoRefResponse.ProvinceQuery>(provinceDataUrl, mapOf()).map { it.matches }
+    }
 
-    fun requestAvailableProvinces(): Either<CustomException, List<ProvinceGeoRef>> =
-        requestData<GeoRefResponse.ProvinceQuery>(provinceDataUrl, mapOf()).map { it.matches }
 }
