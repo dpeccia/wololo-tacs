@@ -1,5 +1,9 @@
 package com.grupox.wololo.controllers
 
+import arrow.core.Option
+import arrow.core.extensions.option.foldable.firstOption
+import arrow.core.extensions.option.foldable.get
+import arrow.core.getOrElse
 import arrow.core.getOrHandle
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
@@ -41,23 +45,26 @@ class GamesController(@Autowired private val geoRef: GeoRef) {
     fun getGameById(@PathVariable("id") id: Int,
                     @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        return RepoGames.getGameById(id) ?: throw CustomException.NotFoundException("Game was not found")
+        return RepoGames.getGameById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Modifies a game status (on going, finished, canceled)")
     fun updateGame(@PathVariable("id") id: Int, @RequestBody gameData: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?)  {
 
-        val userID : Int = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject.toInt()
-        val game: Game = RepoGames.getGameById(id) ?: throw CustomException.NotFoundException("Game was not found")
+        val userMail : String = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject
+        val userID : Int = RepoUsers.getUserByName(userMail).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.id
+        val game: Game = RepoGames.getGameById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
         val participantsIds: List<Int> = gameData.participantsIds
-
-        RepoUsers.updateUserGamesLost(userID)
 
         if ((participantsIds.size) <= 2) {
             RepoGames.changeGameStatus(id, "CANCELED")
-            RepoUsers.updateUserGamesWon(participantsIds.find { it != userID })
+            RepoUsers.updateUserGamesWon(participantsIds.find { it != userID }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")})
         }
+
+        RepoUsers.updateUserGamesLost(userID)
+
+
 
     }
 

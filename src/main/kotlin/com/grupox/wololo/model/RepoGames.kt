@@ -1,5 +1,9 @@
 package com.grupox.wololo.model
 
+import arrow.core.Option
+import arrow.core.getOrElse
+import arrow.core.toOption
+import com.grupox.wololo.errors.CustomException
 import java.util.*
 
 object RepoGames {
@@ -27,14 +31,14 @@ object RepoGames {
 
     fun getGames(): List<Game> = gamesInDB
 
-    fun getGameById(id: Int): Game? = gamesInDB.find { it.id == id }
+    fun getGameById(id: Int): Option<Game> = gamesInDB.find { it.id == id }.toOption()
 
     fun changeGameStatus(id: Int, status: String){
-      gamesInDB.find { it.id == id }?.changeStatus(Status.valueOf(status))
+        this.getGameById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeStatus(Status.valueOf(status))
     }
 
     fun changeGameTownSpecialization(gameId: Int, townId: Int, specialization: Specialization){
-        this.getGameById(gameId)?.changeTownSpecialization(townId, specialization)
+        this.getGameById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(townId, specialization)
     }
 
     fun insertGame(game: Game) {
