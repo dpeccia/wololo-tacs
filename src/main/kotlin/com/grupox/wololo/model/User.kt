@@ -11,4 +11,12 @@ class User(val id: Int, mail: String, private var password: String, val esAdmin:
     fun isUserByLoginData(loginData: UserCredentials): Boolean = this.mail == loginData.mail && this.password == loginData.password
 
     fun toUserWithoutStats(): UserWithoutStats = UserWithoutStats(this.id, this.mail)
+
+    fun updateGamesWonStats(){
+        this.stats.increaseGamesWon()
+    }
+    fun updateGamesLostStats(){
+        this.stats.increaseGamesLost()
+    }
+
 }
