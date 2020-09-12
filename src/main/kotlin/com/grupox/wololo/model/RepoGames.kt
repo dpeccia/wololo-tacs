@@ -33,6 +33,10 @@ object RepoGames {
       gamesInDB.find { it.id == id }?.changeStatus(Status.valueOf(status))
     }
 
+    fun changeGameTownSpecialization(gameId: Int, townId: Int, specialization: Specialization){
+        this.getGameById(gameId)?.changeTownSpecialization(townId, specialization)
+    }
+
     fun insertGame(game: Game) {
         gamesInDB.add(game)
     }

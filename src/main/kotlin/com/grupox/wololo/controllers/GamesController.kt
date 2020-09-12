@@ -97,14 +97,12 @@ class GamesController(@Autowired private val geoRef: GeoRef) {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
 
         if (townData.specialization == "PRODUCTION"){
-            //por ahí mejor una función dentro de repogames que se encarge de hacer esto porque creo que rompo encapsulamiento, despues de adr lo cambio
-            RepoGames.getGameById(id)?.getTownById(idTown)?.changeSpecialization(Production())
+            RepoGames.changeGameTownSpecialization(id,idTown,Production())
         } else{
             if (townData.specialization == "DEFENSE"){
-                RepoGames.getGameById(id)?.getTownById(idTown)?.changeSpecialization(Defense())
+                RepoGames.changeGameTownSpecialization(id,idTown,Defense())
             }
         }
-
 
     }
 
