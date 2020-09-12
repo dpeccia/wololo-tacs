@@ -1,4 +1,4 @@
-package com.grupox.wololo
+package com.grupox.wololo.integration_tests
 
 import arrow.core.Some
 import arrow.core.getOrHandle
@@ -27,7 +27,7 @@ class UserControllerIntegrationTest {
     var webClient: WebClient? = null
 
     @BeforeEach
-    fun initialize() {
+    fun fixture() {
         webClient = WebClient.builder().baseUrl("http://localhost:${serverPort}").build()
     }
 
