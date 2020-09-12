@@ -4,19 +4,17 @@ import arrow.core.getOrHandle
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.helpers.GameData
-import com.grupox.wololo.model.helpers.GameForm
-import com.grupox.wololo.model.helpers.JwtSigner
-import com.grupox.wololo.model.helpers.ProvinceGeoRef
+import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.services.GeoRef
 import io.swagger.annotations.ApiOperation
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
 
 @RequestMapping("/games")
 @RestController
-class GamesController {
+class GamesController(@Autowired private val geoRef: GeoRef) {
     @GetMapping
     @ApiOperation(value = "Gets the games of the current user")
     fun getGames(@RequestParam("sort", required = false) sort: String?,
@@ -104,7 +102,7 @@ class GamesController {
     @ApiOperation(value = "Gets all provinces")
     fun getProvinces(@ApiIgnore @CookieValue("X-Auth") authCookie : String?) : List<ProvinceGeoRef> {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        return GeoRef.requestAvailableProvinces().getOrHandle { throw it }
+        return geoRef.requestAvailableProvinces().getOrHandle { throw it }
     }
 
     @ExceptionHandler(CustomException::class)

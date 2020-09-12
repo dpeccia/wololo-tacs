@@ -25,6 +25,8 @@ allprojects {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-mustache")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework:spring-context-support")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -37,6 +39,7 @@ dependencies {
     implementation("io.springfox:springfox-swagger2:2.7.0")
     implementation("io.springfox:springfox-swagger-ui:2.7.0")
     implementation("io.jsonwebtoken:jjwt-api:0.11.1")
+    implementation("com.github.ben-manes.caffeine:caffeine")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.1")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
