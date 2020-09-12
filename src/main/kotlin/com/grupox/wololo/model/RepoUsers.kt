@@ -23,6 +23,14 @@ object RepoUsers {
 
     fun getUserById(id: Int): Option<User> = this.getNormalUsers().find { it.id == id }.toOption()
 
+    fun updateUserGamesLost(id: Int){
+        this.getUsers().find { it.id == id }?.updateGamesLostStats()
+    }
+
+    fun updateUserGamesWon(id: Int?){
+        this.getUsers().find { it.id == id }?.updateGamesWonStats()
+    }
+
     fun getUserByLogin(loginData: UserCredentials): User? = this.getUsers().find {it.isUserByLoginData(loginData)}
 
     fun getUsersWithoutStats(): List<UserWithoutStats> = this.getNormalUsers().map { it.toUserWithoutStats() }

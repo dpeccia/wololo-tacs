@@ -4,8 +4,8 @@ import arrow.core.*
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.ProvinceGeoRef
-import com.grupox.wololo.model.TownGeoRef
+import com.grupox.wololo.model.helpers.ProvinceGeoRef
+import com.grupox.wololo.model.helpers.TownGeoRef
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private sealed class GeoRefResponse() {
