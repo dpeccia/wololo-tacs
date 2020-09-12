@@ -1,7 +1,9 @@
 package com.grupox.wololo.controllers
 
-import arrow.core.getOrHandle
-import arrow.core.toOption
+import arrow.core.*
+import arrow.core.extensions.either.applicative.applicative
+import arrow.core.extensions.fx
+import arrow.core.extensions.list.traverse.sequence
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.GameForm
@@ -10,6 +12,7 @@ import com.grupox.wololo.model.helpers.ProvinceGeoRef
 import com.grupox.wololo.model.helpers.TownForm
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.services.GeoRef
+import com.grupox.wololo.model.services.TopoData
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -18,7 +21,7 @@ import springfox.documentation.annotations.ApiIgnore
 
 @RequestMapping("/games")
 @RestController
-class GamesController(@Autowired private val geoRef: GeoRef) {
+class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private val topoData: TopoData) {
     @GetMapping
     @ApiOperation(value = "Gets the games of the current user")
     fun getGames(@RequestParam("sort", required = false) sort: String?,
@@ -31,9 +34,24 @@ class GamesController(@Autowired private val geoRef: GeoRef) {
 
     @PostMapping
     @ApiOperation(value = "Creates a new game")
-    fun createGame(@RequestBody game: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
+    fun createGame(@RequestBody form: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        TODO("Crear un game a partir del GameForm")
+
+        val game: Game = Either.fx<CustomException, Game> {
+            val users = !form.participantsIds.map { RepoUsers.getUserById(it).toEither { CustomException.NotFoundException("There is no such user with id=$it") } }
+                                            .sequence(Either.applicative()).fix().map{ it.fix() }
+
+            val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
+            val towns = !townsData.map { data ->
+                topoData.requestElevation(data.coordinates).map { elevation ->
+                    Town(data.name, data.coordinates, elevation)
+                }
+            }.sequence(Either.applicative()).fix().map { it.fix() }
+
+            Game(users, Province(form.provinceName, ArrayList(towns)))
+        }.getOrHandle { throw it }
+
+        RepoGames.insertGame(game)
     }
 
     @GetMapping("/{id}")
@@ -98,10 +116,10 @@ class GamesController(@Autowired private val geoRef: GeoRef) {
 
         if (townData.specialization == "PRODUCTION"){
             //por ahí mejor una función dentro de repogames que se encarge de hacer esto porque creo que rompo encapsulamiento, despues de adr lo cambio
-            RepoGames.getGameById(id)?.getTownById(idTown)?.changeSpecialization(Production())
+            RepoGames.getGameById(id)?.getTownById(idTown)?.specialization = Production()
         } else{
             if (townData.specialization == "DEFENSE"){
-                RepoGames.getGameById(id)?.getTownById(idTown)?.changeSpecialization(Defense())
+                RepoGames.getGameById(id)?.getTownById(idTown)?.specialization = Defense()
             }
         }
 

@@ -1,11 +1,13 @@
 package com.grupox.wololo.model
 
-class Game(val id: Int, val province: Province, status: Status = Status.NEW) {
-    var status: Status = status
-        private set
+import arrow.core.Either
+import arrow.core.extensions.fx
+import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.GameForm
+import com.grupox.wololo.model.services.GeoRef
+import org.springframework.beans.factory.annotation.Autowired
 
-    fun changeStatus(newStatus: Status){
-        status = newStatus
-    }
-    fun getTownById(idTown: Int): Town ? = province.getTownById(idTown)
+class Game(val players: List<User> = listOf(), val province: Province, var status: Status = Status.NEW) {
+    val id: Int = 0 // TODO: Autogenerada
+    fun getTownById(idTown: Int): Town? = province.towns.find { it.id == id }
 }
