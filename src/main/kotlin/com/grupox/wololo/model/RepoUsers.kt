@@ -6,11 +6,7 @@ import com.grupox.wololo.model.helpers.UserCredentials
 import com.grupox.wololo.model.helpers.UserWithoutStats
 import java.util.*
 
-class RepoUsers {
-    companion object {
-        val instance = RepoUsers()
-    }
-
+object RepoUsers {
     private val usersInDB: ArrayList<User> = arrayListOf(
             User(1,"admin", "admin", true, Stats(0, 0)),
             User(2,"unmail@gmail.com", "1234", false, Stats(1, 1))

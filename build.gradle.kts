@@ -44,6 +44,7 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("org.mockito:mockito-inline:2.8.47")
+    testImplementation("io.mockk:mockk:1.10.0")
 
 }
 

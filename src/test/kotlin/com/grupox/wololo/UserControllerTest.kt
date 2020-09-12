@@ -5,11 +5,12 @@ import com.grupox.wololo.model.RepoUsers
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.services.UserService
+import io.mockk.every
+import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito.*
 import java.util.ArrayList
 
 class UserControllerTest {
@@ -23,8 +24,8 @@ class UserControllerTest {
 
     @BeforeEach
     fun fixture() {
-        val repoUsers = spy(RepoUsers.instance)
-        doReturn(users).`when`(repoUsers).getUsers()
+        mockkObject(RepoUsers)
+        every { RepoUsers.getUsers() } returns users
     }
 
     @Test

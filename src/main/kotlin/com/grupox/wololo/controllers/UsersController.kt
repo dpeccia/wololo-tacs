@@ -26,16 +26,16 @@ class UsersController {
     @PostMapping
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
     fun createUser(@RequestBody newUser: UserCredentials) {
-        if(RepoUsers.instance.getUserByName(newUser.mail).nonEmpty())
+        if(RepoUsers.getUserByName(newUser.mail).nonEmpty())
             throw CustomException.NotFoundException("User already exists")
         val user = User(3, newUser.mail, newUser.password, false, Stats(0,0)) // TODO el id se tiene que autoincrementar
-        RepoUsers.instance.insertUser(user)
+        RepoUsers.insertUser(user)
     }
 
     @PostMapping("/tokens")
     @ApiOperation(value = "Log In")
     fun login(@RequestBody _user: UserCredentials): ResponseEntity<Void> {
-        val user = RepoUsers.instance.getUserByLogin(_user) ?: throw CustomException.BadLoginException("Bad Login")
+        val user = RepoUsers.getUserByLogin(_user) ?: throw CustomException.BadLoginException("Bad Login")
 
         val jwt = JwtSigner.createJwt(user.mail)
         val authCookie = ResponseCookie.fromClientResponse("X-Auth", jwt)
