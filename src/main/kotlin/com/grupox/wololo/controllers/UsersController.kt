@@ -8,7 +8,9 @@ import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.UserCredentials
 import com.grupox.wololo.model.helpers.UserWithoutStats
+import com.grupox.wololo.services.UserService
 import io.swagger.annotations.ApiOperation
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
@@ -18,19 +20,22 @@ import springfox.documentation.annotations.ApiIgnore
 @RequestMapping("/users")
 @RestController
 class UsersController {
+    @Autowired
+    lateinit var userService: UserService
+
     @PostMapping
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
     fun createUser(@RequestBody newUser: UserCredentials) {
-        if(RepoUsers.getUserByName(newUser.mail).nonEmpty())
+        if(RepoUsers.instance.getUserByName(newUser.mail).nonEmpty())
             throw CustomException.NotFoundException("User already exists")
         val user = User(3, newUser.mail, newUser.password, false, Stats(0,0)) // TODO el id se tiene que autoincrementar
-        RepoUsers.insertUser(user)
+        RepoUsers.instance.insertUser(user)
     }
 
     @PostMapping("/tokens")
     @ApiOperation(value = "Log In")
     fun login(@RequestBody _user: UserCredentials): ResponseEntity<Void> {
-        val user = RepoUsers.getUserByLogin(_user) ?: throw CustomException.BadLoginException("Bad Login")
+        val user = RepoUsers.instance.getUserByLogin(_user) ?: throw CustomException.BadLoginException("Bad Login")
 
         val jwt = JwtSigner.createJwt(user.mail)
         val authCookie = ResponseCookie.fromClientResponse("X-Auth", jwt)
@@ -62,11 +67,7 @@ class UsersController {
     fun getUsers(@RequestParam("username", required = false) _username: String?,
                  @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserWithoutStats> {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        val username = _username ?: return RepoUsers.getUsers().map { it.toUserWithoutStats() }
-        val user = ArrayList<UserWithoutStats>()
-        user.add(RepoUsers.getUserByName(username)
-                .getOrElse { throw CustomException.NotFoundException("No user with such name") }.toUserWithoutStats())
-        return user
+        return userService.getUsers(_username)
     }
     // TODO obtener usuarios o un usuario en particular (sin stats)
 
