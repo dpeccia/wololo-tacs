@@ -12,7 +12,7 @@ object RepoGames {
 
     private val gamesInDB: ArrayList<Game> = arrayListOf(
             Game(
-                    id = 1, date = Date.from(Instant.now()),
+                    id = 1,
                     players = listOf(User(5, "mail", "password", false)),
                     province = Province( id = 1,
                             name = "Santiago del Estero",
@@ -21,7 +21,7 @@ object RepoGames {
                     status= Status.NEW
             ),
             Game(
-                    id= 2, date = Date.from(Instant.now().plus(Duration.ofDays(10))),
+                    id= 2,
                     players = listOf(User(5, "mail", "password", false)),
                     province = Province( id = 2,
                             name = "Córdoba",

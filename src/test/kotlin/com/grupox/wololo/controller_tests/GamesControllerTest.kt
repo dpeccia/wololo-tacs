@@ -23,7 +23,7 @@ class GamesControllerTest {
     //podrían queda acá y los sacamos del repo games
     private val games: ArrayList<Game> = arrayListOf(
             Game(
-                    id = 1, date = Date.from(Instant.now()),
+                    id = 1,
                     players = listOf(User(5, "mail", "password", false), User(6, "mail2", "password2", false)),
                     province = Province( id = 1,
                             name = "Santiago del Estero",
@@ -31,7 +31,7 @@ class GamesControllerTest {
                     ),
                     status= Status.NEW
             ),
-                    Game(id= 2, date = Date.from(Instant.now().plus(Duration.ofDays(10))),
+                    Game(id= 2,
                     players = listOf(User(5, "mail", "password", false), User(6, "mail2", "password2", false)),
 
                     province = Province( id =2,

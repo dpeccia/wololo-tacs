@@ -25,7 +25,7 @@ class GameTests {
 
     @Test
     fun `creating a game distributes towns with the available players evenly`(){
-        val game = Game(id = 1, date = Date.from(Instant.now()), players = players, province = Province(0,"a_province", ArrayList(towns)))
+        val game = Game(id = 1, players = players, province = Province(0,"a_province", ArrayList(towns)))
 
         val numberOfTownsAssignedToUser1: Int = game.province.towns.count { it.owner?.id == user1.id }
         val numberOfTownsAssignedToUser2: Int = game.province.towns.count { it.owner?.id == user2.id }
@@ -35,16 +35,16 @@ class GameTests {
 
     @Test
     fun `Attempting to create a game with more players than towns throws IlegalGameException`(){
-        assertThrows<CustomException.ModelException.IlegalGameException> { Game(id = 1, date = Date.from(Instant.now()), players = players, province = Province(0,"a_province", ArrayList(listOf(town1)))) }
+        assertThrows<CustomException.ModelException.IlegalGameException> { Game(id = 1, players = players, province = Province(0,"a_province", ArrayList(listOf(town1)))) }
     }
 
     @Test
     fun `Attempting to create a game without players throws IlegalGameException`(){
-        assertThrows<CustomException.ModelException.IlegalGameException> { Game(id = 1, date = Date.from(Instant.now()), players = listOf(), province = Province(0,"a_province", ArrayList(towns))) }
+        assertThrows<CustomException.ModelException.IlegalGameException> { Game(id = 1, players = listOf(), province = Province(0,"a_province", ArrayList(towns))) }
     }
 
     @Test
     fun `Can successfully create a game with none empty list of players`(){
-        assertDoesNotThrow { Game(id = 1, date = Date.from(Instant.now()), players = players, province = Province(0,"a_province", ArrayList(towns))) }
+        assertDoesNotThrow { Game(id = 1, players = players, province = Province(0,"a_province", ArrayList(towns))) }
     }
 }

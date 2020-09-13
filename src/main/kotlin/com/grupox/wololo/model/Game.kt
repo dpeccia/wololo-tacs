@@ -9,7 +9,7 @@ import java.util.Date
 import com.grupox.wololo.errors.CustomException
 
 
-class Game(val id: Int , val date: Date, val players: List<User>, val province: Province, var status: Status = Status.NEW) {
+class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) {
 
     //val id: Int = 0 // TODO: Autogenerada
 
@@ -19,8 +19,11 @@ class Game(val id: Int , val date: Date, val players: List<User>, val province: 
     val playerAmount: Int
         get() = players.size
 
+    var date: Date = Date()
+
     init {
         assignTowns()
+        assignDate()
     }
 
     fun getTownById(idTown: Int): Option<Town> = province.towns.find { it.id == idTown }.toOption()
@@ -35,5 +38,9 @@ class Game(val id: Int , val date: Date, val players: List<User>, val province: 
 
         val townGroups = province.towns.shuffled().chunked(townsAmount / playerAmount)
         townGroups.zip(players).forEach { (townGroup, player) -> townGroup.forEach { it.owner = player } }
+    }
+
+    private fun assignDate() {
+      this.date = Date.from(Instant.now())
     }
 }
