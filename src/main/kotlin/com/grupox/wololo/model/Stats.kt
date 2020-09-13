@@ -1,10 +1,6 @@
 package com.grupox.wololo.model
 
-class Stats(gamesWon: Int, gamesLost: Int) {
-    var gamesWon: Int = gamesWon
-        private set
-    var gamesLost: Int = gamesLost
-        private set
+class Stats(var gamesWon: Int, var gamesLost: Int) {
 
     fun increaseGamesWon(){
         this.gamesWon = this.gamesWon + 1

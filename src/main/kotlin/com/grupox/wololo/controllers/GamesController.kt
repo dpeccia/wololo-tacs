@@ -19,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
+import java.time.Instant
+import java.util.*
+import kotlin.collections.ArrayList
 
 @RequestMapping("/games")
 @RestController
@@ -49,7 +52,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
                 }
             }.sequence(Either.applicative()).fix().map { it.fix() }
 //TODO: id autoincrementada
-            Game(0,users, Province(0,form.provinceName, ArrayList(towns)))
+            Game(0, Date.from(Instant.now()),users, Province(0,form.provinceName, ArrayList(towns)))
         }.getOrHandle { throw it }
 
         RepoGames.insertGame(game)

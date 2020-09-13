@@ -8,6 +8,7 @@ import arrow.core.getOrElse
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.UserCredentials
+import com.grupox.wololo.model.helpers.UserStats
 import com.grupox.wololo.model.helpers.UserWithoutStats
 import java.util.*
 
@@ -43,6 +44,9 @@ object RepoUsers {
 
     fun getUsersWithoutStats(): List<UserWithoutStats> = this.getNormalUsers().map { it.toUserWithoutStats() }
     // TODO: ENCRYPT USER PASSWORD BEFORE SAVING
+
+    fun getUsersStats(): List<UserStats> = this.getNormalUsers().map { it.toUserStats() }
+
     fun insertUser(usuario: User) {
         usersInDB.add(usuario)
     }

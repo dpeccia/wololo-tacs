@@ -10,7 +10,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDateTime
 import java.util.ArrayList
+import java.util.*
 
 class GamesControllerTest {
     val gamesService: GamesService = GamesService()
@@ -19,7 +23,7 @@ class GamesControllerTest {
     //podrían queda acá y los sacamos del repo games
     private val games: ArrayList<Game> = arrayListOf(
             Game(
-                    id = 1,
+                    id = 1, date = Date.from(Instant.now()),
                     province = Province(
                             id = 1,
                             name = "Santiago del Estero",
@@ -28,7 +32,7 @@ class GamesControllerTest {
                     status= Status.NEW
             ),
             Game(
-                    id= 2,
+                    id= 2, date = Date.from(Instant.now().plus(Duration.ofDays(10))),
                     province = Province(
                             id = 3,
                             name = "Córdoba",

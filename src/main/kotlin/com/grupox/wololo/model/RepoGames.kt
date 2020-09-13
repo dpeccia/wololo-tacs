@@ -4,13 +4,15 @@ import arrow.core.Option
 import arrow.core.getOrElse
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
+import java.time.Duration
+import java.time.Instant
 import java.util.*
 
 object RepoGames {
 
     private val gamesInDB: ArrayList<Game> = arrayListOf(
             Game(
-                    id = 1,
+                    id = 1, date = Date.from(Instant.now()),
                     province = Province(
                             id = 1,
                             name = "Santiago del Estero",
@@ -19,7 +21,7 @@ object RepoGames {
                     status= Status.NEW
             ),
             Game(
-                    id= 2,
+                    id= 2, date = Date.from(Instant.now().plus(Duration.ofDays(10))),
                     province = Province(
                             id = 3,
                             name = "Córdoba",
