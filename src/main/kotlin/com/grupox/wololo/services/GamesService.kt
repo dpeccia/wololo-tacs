@@ -1,5 +1,7 @@
 package com.grupox.wololo.services
 
+import arrow.core.extensions.option.foldable.firstOrNone
+import arrow.core.extensions.option.foldable.get
 import arrow.core.getOrElse
 import arrow.core.getOrHandle
 import arrow.core.toOption
@@ -7,14 +9,13 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.RepoUsers.getNormalUsers
 import com.grupox.wololo.model.helpers.JwtSigner
+import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.helpers.UserWithoutStats
 import org.springframework.stereotype.Service
 
+@Service
 class GamesService {
-
-
     fun surrender(gameId: Int, participantsIds: List<Int> , userMail : String) : Int? {
-
         val userID : Int = RepoUsers.getUserByName(userMail).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.id
         val game: Game = RepoGames.getGameById(gameId).getOrElse { throw CustomException.NotFoundException("Game was not found") }
 
@@ -39,4 +40,8 @@ class GamesService {
         }
     }
 
+    fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm) {
+        val game = RepoGames.getGameByIdAndUser(gameId, userId)
+        game.moveGauchosBetweenTowns(userId, movementData)
+    }
 }

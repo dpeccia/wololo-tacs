@@ -7,6 +7,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.Date
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.MovementForm
 
 
 class Game(val id: Int , val date: Date, val players: List<User>, val province: Province, var status: Status = Status.NEW) {
@@ -19,11 +20,15 @@ class Game(val id: Int , val date: Date, val players: List<User>, val province: 
     val playerAmount: Int
         get() = players.size
 
+    lateinit var turno: User
+
     init {
         assignTowns()
     }
 
     fun getTownById(idTown: Int): Option<Town> = province.towns.find { it.id == idTown }.toOption()
+
+    fun getMember(userId: Int): Option<User> = players.find { it.id == userId }.toOption()
 
     fun changeTownSpecialization(townId: Int, specialization: Specialization) {
         this.getTownById(townId).getOrElse { throw CustomException.NotFoundException("Town was not found") }.specialization = specialization
@@ -35,5 +40,11 @@ class Game(val id: Int , val date: Date, val players: List<User>, val province: 
 
         val townGroups = province.towns.shuffled().chunked(townsAmount / playerAmount)
         townGroups.zip(players).forEach { (townGroup, player) -> townGroup.forEach { it.owner = player } }
+    }
+
+    fun moveGauchosBetweenTowns(userId: Int, movementForm: MovementForm) {
+        if(turno.id != userId)
+            throw CustomException.ForbiddenException("It´s not your Turn to play")
+        province.moveGauchosBetweenTowns(userId, movementForm)
     }
 }

@@ -4,6 +4,8 @@ data class ExceptionJSON(val message: String?)
 
 sealed class CustomException(message: String) : Exception(message){
     class NotFoundException(message: String) : CustomException(message)
+    class ForbiddenException(message: String) : CustomException(message)
+    class BadRequestException(message: String) : CustomException(message)
     class BadLoginException(message: String) : CustomException(message)
     class UnsuccessfulExternalRequestException(apiName: String, statusCode: Int)
         : CustomException("Request to $apiName API servers returned status code: $statusCode")

@@ -35,6 +35,12 @@ object RepoGames {
 
     fun getGameById(id: Int): Option<Game> = gamesInDB.find { it.id == id }.toOption()
 
+    fun getGameByIdAndUser(gameId: Int, userId: Int): Game {
+        val game = this.getGameById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}
+        game.getMember(userId).getOrElse { throw CustomException.ForbiddenException("You are not a member of this Game") }
+        return game
+    }
+
     fun filterGames(predicate: (game: Game) -> Boolean) = gamesInDB.filter { predicate(it) }
 
     fun changeGameStatus(id: Int, status: Status){

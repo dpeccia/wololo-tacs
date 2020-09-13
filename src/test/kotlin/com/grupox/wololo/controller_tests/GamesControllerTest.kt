@@ -1,24 +1,21 @@
 package com.grupox.wololo.controller_tests
 
-import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.services.GamesService
-import com.grupox.wololo.services.UserService
+import com.grupox.wololo.services.UsersService
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import java.time.Instant
-import java.time.LocalDateTime
 import java.util.ArrayList
 import java.util.*
 
 class GamesControllerTest {
     val gamesService: GamesService = GamesService()
-    val userService: UserService = UserService()
+    val usersService: UsersService = UsersService()
 
     //podrían queda acá y los sacamos del repo games
     private val games: ArrayList<Game> = arrayListOf(

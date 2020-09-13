@@ -7,7 +7,7 @@ import com.grupox.wololo.model.helpers.UserWithoutStats
 import org.springframework.stereotype.Service
 
 @Service
-class UserService {
+class UsersService {
     fun getUsers(_username: String?): List<UserWithoutStats> {
         val username = _username ?: return RepoUsers.getUsersWithoutStats()
         val user = ArrayList<UserWithoutStats>()
