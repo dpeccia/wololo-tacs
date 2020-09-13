@@ -23,7 +23,7 @@ class GamesControllerTest {
                     province = Province(
                             id = 1,
                             name = "Santiago del Estero",
-                            towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), Production(), TownStats()), Town(2, "La Banda", Coordinates(0f,0f), Defense(), TownStats()))
+                            towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), 0f, null), Town(2, "La Banda", Coordinates(0f,0f), 0f, null))
                     ),
                     status= Status.NEW
             ),
@@ -32,7 +32,7 @@ class GamesControllerTest {
                     province = Province(
                             id = 3,
                             name = "Córdoba",
-                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), Production(), TownStats()))
+                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0f, null))
                     ),
                     status = Status.FINISHED
             )
