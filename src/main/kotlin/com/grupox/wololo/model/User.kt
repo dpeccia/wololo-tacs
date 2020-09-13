@@ -4,7 +4,7 @@ import com.grupox.wololo.model.helpers.UserCredentials
 import com.grupox.wololo.model.helpers.UserStats
 import com.grupox.wololo.model.helpers.UserWithoutStats
 
-class User(val id: Int, mail: String, private var password: String, val esAdmin: Boolean, val stats: Stats) {
+class User(val id: Int, mail: String, private var password: String, val esAdmin: Boolean, val stats: Stats = Stats(0,0)) {
     var mail: String = mail
         private set
 

@@ -18,7 +18,7 @@ class GamesService {
         val userID : Int = RepoUsers.getUserByName(userMail).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.id
         val game: Game = RepoGames.getGameById(gameId).getOrElse { throw CustomException.NotFoundException("Game was not found") }
 
-        if ((participantsIds.size) <= 2) {
+        if (participantsIds.size <= 2) {
             RepoGames.changeGameStatus(gameId, Status.CANCELED)
             RepoUsers.updateUserGamesWon(participantsIds.find { it != userID }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")})
         }

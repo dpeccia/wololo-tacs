@@ -1,4 +1,4 @@
-package com.grupox.wololo
+package com.grupox.wololo.controller_tests
 
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
@@ -24,23 +24,24 @@ class GamesControllerTest {
     private val games: ArrayList<Game> = arrayListOf(
             Game(
                     id = 1, date = Date.from(Instant.now()),
-                    province = Province(
-                            id = 1,
+                    players = listOf(User(5, "mail", "password", false), User(6, "mail2", "password2", false)),
+                    province = Province( id = 1,
                             name = "Santiago del Estero",
                             towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), 0f, null), Town(2, "La Banda", Coordinates(0f,0f), 0f, null))
                     ),
                     status= Status.NEW
             ),
-            Game(
-                    id= 2, date = Date.from(Instant.now().plus(Duration.ofDays(10))),
-                    province = Province(
-                            id = 3,
+                    Game(id= 2, date = Date.from(Instant.now().plus(Duration.ofDays(10))),
+                    players = listOf(User(5, "mail", "password", false), User(6, "mail2", "password2", false)),
+
+                    province = Province( id =2,
                             name = "Córdoba",
-                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0f, null))
+                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0f, null), Town(2, "La Banda", Coordinates(0f,0f), 0f, null))
                     ),
                     status = Status.FINISHED
-            )
     )
+    )
+
 
     private val users: ArrayList<User> = arrayListOf(
             User(1,"example_admin", "example_admin", true, Stats(0, 0)),
@@ -62,6 +63,7 @@ class GamesControllerTest {
     fun `surrender in a game`() {
         assertThat(gamesService.surrender(1, participantIDs, "example_normal_user")).isEqualTo(2)
     }
+
     @Test
     fun `Change town specialization`() {
         assertThat(gamesService.changeSpecialization("PRODUCTION",2, 3))

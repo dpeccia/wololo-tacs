@@ -53,6 +53,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             }.sequence(Either.applicative()).fix().map { it.fix() }
 //TODO: id autoincrementada
             Game(0, Date.from(Instant.now()),users, Province(0,form.provinceName, ArrayList(towns)))
+
         }.getOrHandle { throw it }
 
         RepoGames.insertGame(game)
