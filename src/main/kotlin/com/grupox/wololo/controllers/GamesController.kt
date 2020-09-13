@@ -4,6 +4,7 @@ import arrow.core.*
 import arrow.core.extensions.either.applicative.applicative
 import arrow.core.extensions.fx
 import arrow.core.extensions.list.traverse.sequence
+
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.GameForm
@@ -44,11 +45,11 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
             val towns = !townsData.map { data ->
                 topoData.requestElevation(data.coordinates).map { elevation ->
-                    Town(data.name, data.coordinates, elevation)
+                    Town(data.id, data.name, data.coordinates, elevation)
                 }
             }.sequence(Either.applicative()).fix().map { it.fix() }
-
-            Game(users, Province(form.provinceName, ArrayList(towns)))
+//TODO: id autoincrementada
+            Game(0,users, Province(form.provinceName, ArrayList(towns)))
         }.getOrHandle { throw it }
 
         RepoGames.insertGame(game)
@@ -59,23 +60,26 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     fun getGameById(@PathVariable("id") id: Int,
                     @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        return RepoGames.getGameById(id) ?: throw CustomException.NotFoundException("Game was not found")
+        return RepoGames.getGameById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Modifies a game status (on going, finished, canceled)")
     fun updateGame(@PathVariable("id") id: Int, @RequestBody gameData: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?)  {
 
-        val userID : Int = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject.toInt()
-        val game: Game = RepoGames.getGameById(id) ?: throw CustomException.NotFoundException("Game was not found")
+        val userMail : String = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject
+        val userID : Int = RepoUsers.getUserByName(userMail).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.id
+        val game: Game = RepoGames.getGameById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
         val participantsIds: List<Int> = gameData.participantsIds
+
+        if ((participantsIds.size) <= 2) {
+            RepoGames.changeGameStatus(id, Status.CANCELED)
+            RepoUsers.updateUserGamesWon(participantsIds.find { it != userID }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")})
+        }
 
         RepoUsers.updateUserGamesLost(userID)
 
-        if ((participantsIds.size) <= 2) {
-            RepoGames.changeGameStatus(id, "CANCELED")
-            RepoUsers.updateUserGamesWon(participantsIds.find { it != userID })
-        }
+
 
     }
 

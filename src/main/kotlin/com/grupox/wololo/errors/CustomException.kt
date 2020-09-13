@@ -11,6 +11,11 @@ sealed class CustomException(message: String) : Exception(message){
         : CustomException(message)
     class TokenException(message: String) : CustomException(message)
 
+
+    sealed class ModelException(message: String) : CustomException(message) {
+        class IlegalGameException(message: String) : ModelException(message)
+    }
+
     fun getJSON(): ExceptionJSON = ExceptionJSON(message) // Default
 }
 
