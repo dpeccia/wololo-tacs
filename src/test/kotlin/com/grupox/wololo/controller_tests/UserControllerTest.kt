@@ -1,4 +1,4 @@
-package com.grupox.wololo
+package com.grupox.wololo.controller_tests
 
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.RepoUsers
