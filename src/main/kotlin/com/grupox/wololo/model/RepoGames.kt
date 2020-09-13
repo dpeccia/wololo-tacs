@@ -35,6 +35,8 @@ object RepoGames {
 
     fun getGameById(id: Int): Option<Game> = gamesInDB.find { it.id == id }.toOption()
 
+    fun filterGames(predicate: (game: Game) -> Boolean) = gamesInDB.filter { predicate(it) }
+
     fun changeGameStatus(id: Int, status: Status){
         this.getGameById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.status = status
     }
