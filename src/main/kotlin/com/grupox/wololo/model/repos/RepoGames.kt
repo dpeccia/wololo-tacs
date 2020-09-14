@@ -15,7 +15,7 @@ object RepoGames : Repository<Game> {
                     players = listOf(User(5, "mail", "password", false)),
                     province = Province( id = 1,
                             name = "Santiago del Estero",
-                            towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), 0f, null), Town(2, "La Banda", Coordinates(0f,0f), 0f, null))
+                            towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), 0.0, null), Town(2, "La Banda", Coordinates(0f,0f), 0.0, null))
                     ),
                     status= Status.NEW
             ),
@@ -24,7 +24,7 @@ object RepoGames : Repository<Game> {
                     players = listOf(User(5, "mail", "password", false)),
                     province = Province( id = 2,
                             name = "Córdoba",
-                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0f, null))
+                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0.0, null))
                     ),
                     status = Status.FINISHED
             )
@@ -33,6 +33,12 @@ object RepoGames : Repository<Game> {
     override fun getAll(): List<Game> = gamesInDB
 
     override fun getById(id: Int): Option<Game> = gamesInDB.find { it.id == id }.toOption()
+
+    fun getGameByIdAndUser(gameId: Int, userId: Int): Game {
+        val game = this.getById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}
+        game.getMember(userId).getOrElse { throw CustomException.ForbiddenException("You are not a member of this Game") }
+        return game
+    }
 
     override fun filter(predicate: (game: Game) -> Boolean) = gamesInDB.filter { predicate(it) }
 

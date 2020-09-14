@@ -4,17 +4,19 @@ import com.grupox.wololo.model.*
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesService
-import com.grupox.wololo.services.UserService
+import com.grupox.wololo.services.UsersService
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Duration
+import java.time.Instant
 import java.util.ArrayList
 
 class GamesControllerTest {
     val gamesService: GamesService = GamesService()
-    val userService: UserService = UserService()
+    val usersService: UsersService = UsersService()
 
     //podrían queda acá y los sacamos del repo games
     private val games: ArrayList<Game> = arrayListOf(
@@ -23,7 +25,7 @@ class GamesControllerTest {
                     players = listOf(User(5, "mail", "password", false), User(6, "mail2", "password2", false)),
                     province = Province( id = 1,
                             name = "Santiago del Estero",
-                            towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), 0f, null), Town(2, "La Banda", Coordinates(0f,0f), 0f, null))
+                            towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), 0.0, null), Town(2, "La Banda", Coordinates(0f,0f), 0.0, null))
                     ),
                     status= Status.NEW
             ),
@@ -32,7 +34,7 @@ class GamesControllerTest {
 
                     province = Province( id =2,
                             name = "Córdoba",
-                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0f, null), Town(2, "La Banda", Coordinates(0f,0f), 0f, null))
+                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0.0, null), Town(2, "La Banda", Coordinates(0f,0f), 0.0, null))
                     ),
                     status = Status.FINISHED
     )

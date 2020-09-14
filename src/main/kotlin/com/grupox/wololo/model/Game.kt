@@ -7,6 +7,8 @@ import java.time.Duration
 import java.time.Instant
 import java.util.Date
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.AttackForm
+import com.grupox.wololo.model.helpers.MovementForm
 
 
 class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) {
@@ -19,6 +21,8 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     val playerAmount: Int
         get() = players.size
 
+    lateinit var turno: User
+    
     var date: Date = Date()
 
     init {
@@ -27,6 +31,8 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     }
 
     fun getTownById(idTown: Int): Option<Town> = province.towns.find { it.id == idTown }.toOption()
+
+    fun getMember(userId: Int): Option<User> = players.find { it.id == userId }.toOption()
 
     fun changeTownSpecialization(townId: Int, specialization: Specialization) {
         this.getTownById(townId).getOrElse { throw CustomException.NotFoundException("Town was not found") }.specialization = specialization
@@ -38,5 +44,19 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
 
         val townGroups = province.towns.shuffled().chunked(townsAmount / playerAmount)
         townGroups.zip(players).forEach { (townGroup, player) -> townGroup.forEach { it.owner = player } }
+    }
+
+    //cuando empieza el turno desbloquear todos mis towns y agregar gauchos a todos mis towns
+
+    fun moveGauchosBetweenTowns(userId: Int, movementForm: MovementForm) {
+        if(turno.id != userId)
+            throw CustomException.ForbiddenException("It´s not your Turn to play")
+        province.moveGauchosBetweenTowns(userId, movementForm)
+    }
+
+    fun attackTown(userId: Int, attackForm: AttackForm) {
+        if(turno.id != userId)
+            throw CustomException.ForbiddenException("It´s not your Turn to play")
+        province.attackTown(userId, attackForm)
     }
 }

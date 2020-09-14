@@ -16,6 +16,7 @@ import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.services.GeoRef
 import com.grupox.wololo.model.services.TopoData
+import com.grupox.wololo.services.GamesService
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jws
 import io.swagger.annotations.ApiOperation
@@ -28,6 +29,9 @@ import kotlin.collections.ArrayList
 @RequestMapping("/games")
 @RestController
 class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private val topoData: TopoData) {
+    @Autowired
+    lateinit var gamesService: GamesService
+
     @GetMapping
     @ApiOperation(value = "Gets the games of the current user")
     fun getGames(@RequestParam("sort", required = false) sort: String?,
@@ -50,7 +54,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
             val towns = !townsData.map { data ->
                 topoData.requestElevation(data.coordinates).map { elevation ->
-                    Town(data.id, data.name, data.coordinates, elevation)
+                    Town(data.id, data.name, data.coordinates, elevation.toDouble())
                 }
             }.sequence(Either.applicative()).fix().map { it.fix() }
 //TODO: id autoincrementada
@@ -93,26 +97,20 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     @ApiOperation(value = "Moves the gauchos between towns")
     fun moveGauchosBetweenTowns(
             @PathVariable("id") id: Int,
-            @PathVariable("playerId") playerId: Int,
-            @RequestParam("from") fromTownId: Int,
-            @RequestParam("to") toTownId: Int,
-            @RequestParam("quantity") gauchosQuantity: Int,
+            @RequestBody movementData: MovementForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        checkAndGetToken(authCookie)
-        TODO("mover gauchos de un municipio a otro")
-        // TODO("definir Body")
+        val userId = checkAndGetToken(authCookie).body.subject
+        gamesService.moveGauchosBetweenTowns(userId.toInt(), id, movementData)
     }
 
     @PostMapping("/{id}/actions/attack")
     @ApiOperation(value = "Attacks a town")
     fun attackTown(
             @PathVariable("id") id: Int,
-            @RequestParam("attacker") attackerId: Int,
-            @RequestParam("defender") defenderId: Int,
+            @RequestBody attackData: AttackForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        checkAndGetToken(authCookie)
-        TODO("logica de ataque")
-        // TODO("definir Body")
+        val userId = checkAndGetToken(authCookie).body.subject
+        gamesService.attackTown(userId.toInt(), id, attackData)
     }
 
     @PutMapping("/{id}/towns/{idTown}")
@@ -149,9 +147,17 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
         return geoRef.requestAvailableProvinces().getOrHandle { throw it }
     }
 
-    @ExceptionHandler(CustomException::class)
+    @ExceptionHandler(CustomException.NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleDomainException(exception: CustomException) = exception.getJSON()
+    fun handleNotFoundException(exception: CustomException) = exception.getJSON()
+
+    @ExceptionHandler(CustomException.ForbiddenException::class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    fun handleForbiddenException(exception: CustomException) = exception.getJSON()
+
+    @ExceptionHandler(CustomException.BadRequestException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleBadRequestException(exception: CustomException) = exception.getJSON()
 
     @ExceptionHandler(CustomException.TokenException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
