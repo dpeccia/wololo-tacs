@@ -19,7 +19,9 @@ class UserControllerTest {
     private val users: ArrayList<User> = arrayListOf(
             User(1,"example_admin", "example_admin", true, Stats(0, 0)),
             User(2,"example_normal_user", "example_normal_user", false, Stats(1, 1)),
-            User(3,"example_normal_user2", "example_normal_user2", false, Stats(1, 1))
+            User(3,"example_normal_user2", "example_normal_user2", false, Stats(1, 1)),
+            User(5, "mail", "password", false, Stats(1,1)),
+            User(6, "mail2", "password2", false, Stats(0,0))
     )
 
     @BeforeEach
@@ -30,7 +32,7 @@ class UserControllerTest {
 
     @Test
     fun `get users returns a list of 2 elements`() {
-        assertThat(usersService.getUsers(null)).hasSize(2)
+        assertThat(usersService.getUsers(null)).hasSize(4)
     }
 
     @Test

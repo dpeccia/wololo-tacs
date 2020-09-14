@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
 import kotlin.collections.ArrayList
 
+
 @RequestMapping("/games")
 @RestController
 class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private val topoData: TopoData) {
@@ -74,24 +75,28 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     }
 
     @PutMapping("/{id}")
-    @ApiOperation(value = "Modifies a game status (on going, finished, canceled)")
-    fun updateGame(@PathVariable("id") id: Int, @RequestBody gameData: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?)  {
+    @ApiOperation(value = "Surrenders in a game (it becomes CANCELED)")
+    fun surrender(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
 
-        val userMail : String = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject
-        val userID : Int = RepoUsers.getUserByName(userMail).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.id
+        val userId: String = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject
         val game: Game = RepoGames.getById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
-        val participantsIds: List<Int> = gameData.participantsIds
+        val user: User = game.getMember(userId.toInt()).getOrElse { throw CustomException.NotFoundException("User was not found") }
+        val loserUserId: Int = user.id
 
-        RepoUsers.getUserById(userID).getOrElse {  throw CustomException.NotFoundException("User was not found")}.updateGamesLostStats()
+        val participantsIds: List<Int> = game.players.map{it.id}
+
+        val loserUser: User = RepoUsers.getById(loserUserId).getOrElse {  throw CustomException.NotFoundException("User was not found")}
+
+        loserUser.updateGamesLostStats()
 
         if ((participantsIds.size) <= 2) {
-            val winnerUserID : Int = participantsIds.find { it != userID }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")}
+            val winnerUserID : Int = participantsIds.find { it != userId.toInt() }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")}
             game.status = Status.CANCELED
-            RepoUsers.getUserById(winnerUserID).getOrElse {  throw CustomException.NotFoundException("User was not found")}.updateGamesWonStats()
+            RepoUsers.getById(winnerUserID).getOrElse {  throw CustomException.NotFoundException("User was not found")}.updateGamesWonStats()}
         }
 
 
-    }
+
 
     @PostMapping("/{id}/actions/movement")
     @ApiOperation(value = "Moves the gauchos between towns")
@@ -124,10 +129,10 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
 
         if (townData.specialization == "PRODUCTION"){
 
-            RepoGames.getGameById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(idTown, Production())
+            RepoGames.getById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(idTown, Production())
 
         } else if (townData.specialization == "DEFENSE"){
-            RepoGames.getGameById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(idTown, Defense())
+            RepoGames.getById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(idTown, Defense())
         }
 
     }

@@ -3,6 +3,7 @@ package com.grupox.wololo.services
 import arrow.core.extensions.option.foldable.firstOrNone
 import arrow.core.extensions.option.foldable.get
 import arrow.core.getOrElse
+import arrow.core.getOrHandle
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
@@ -18,19 +19,24 @@ import com.grupox.wololo.model.repos.RepoUsers.getNormalUsers
 @Service
 class GamesService {
 
-    fun surrender(gameId: Int, participantsIds: List<Int> , userMail : String) : Int? {
-        val userID : Int = RepoUsers.getUserByName(userMail).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.id
-        val game: Game = RepoGames.getById(gameId).getOrElse { throw CustomException.NotFoundException("Game was not found") }
+    fun surrender(gameId: Int, userId : String) : Int? {
 
-        RepoUsers.getById(userID).getOrElse {  throw CustomException.NotFoundException("User was not found")}.updateGamesLostStats()
+        val game: Game = RepoGames.getById(gameId).getOrElse { throw CustomException.NotFoundException("Game was not found") }
+        val user: User = game.getMember(userId.toInt()).getOrElse { throw CustomException.NotFoundException("User was not found") }
+        val loserUserId: Int = user.id
+
+        val participantsIds: List<Int> = game.players.map{it.id}
+
+        val loserUser: User = RepoUsers.getById(loserUserId).getOrElse {  throw CustomException.NotFoundException("User was not found")}
+
+        loserUser.updateGamesLostStats()
 
         if ((participantsIds.size) <= 2) {
-            val winnerUserID : Int = participantsIds.find { it != userID }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")}
-            game.status = Status.CANCELED
-            RepoUsers.getById(winnerUserID).getOrElse {  throw CustomException.NotFoundException("User was not found")}.updateGamesWonStats()
-        }
-//lo cambio por option
-        return getNormalUsers().find { it.mail == userMail }?.stats?.gamesLost
+        val winnerUserID : Int = participantsIds.find { it != userId.toInt() }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")}
+        game.status = Status.CANCELED
+        RepoUsers.getById(winnerUserID).getOrElse {  throw CustomException.NotFoundException("User was not found")}.updateGamesWonStats()
+    }
+        return loserUser.stats.gamesLost
     }
 
     fun changeSpecialization(specialization: String, gameId: Int, townId: Int) {

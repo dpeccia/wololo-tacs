@@ -44,7 +44,9 @@ class GamesControllerTest {
     private val users: ArrayList<User> = arrayListOf(
             User(1,"example_admin", "example_admin", true, Stats(0, 0)),
             User(2,"example_normal_user", "example_normal_user", false, Stats(1, 1)),
-            User(3,"example_normal_user2", "example_normal_user2", false, Stats(1, 1))
+            User(3,"example_normal_user2", "example_normal_user2", false, Stats(1, 1)),
+            User(5, "mail", "password", false, Stats(1,1)),
+            User(6, "mail2", "password2", false, Stats(0,0))
     )
 
     val participantIDs : List<Int> = arrayListOf(2,3)
@@ -59,7 +61,7 @@ class GamesControllerTest {
 
     @Test
     fun `surrender in a game`() {
-        assertThat(gamesService.surrender(1, participantIDs, "example_normal_user")).isEqualTo(2)
+        assertThat(gamesService.surrender(1, "5")).isEqualTo(2)
     }
 
     @Test
