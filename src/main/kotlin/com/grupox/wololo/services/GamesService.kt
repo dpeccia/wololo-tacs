@@ -8,6 +8,7 @@ import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.RepoUsers.getNormalUsers
+import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.helpers.UserWithoutStats
@@ -43,5 +44,10 @@ class GamesService {
     fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm) {
         val game = RepoGames.getGameByIdAndUser(gameId, userId)
         game.moveGauchosBetweenTowns(userId, movementData)
+    }
+
+    fun attackTown(userId: Int, gameId: Int, attackData: AttackForm) {
+        val game = RepoGames.getGameByIdAndUser(gameId, userId)
+        game.attackTown(userId, attackData)
     }
 }

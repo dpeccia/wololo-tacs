@@ -16,7 +16,7 @@ object RepoGames {
                     players = listOf(User(5, "mail", "password", false)),
                     province = Province( id = 1,
                             name = "Santiago del Estero",
-                            towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), 0f, null), Town(2, "La Banda", Coordinates(0f,0f), 0f, null))
+                            towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), 0.0, null), Town(2, "La Banda", Coordinates(0f,0f), 0.0, null))
                     ),
                     status= Status.NEW
             ),
@@ -25,7 +25,7 @@ object RepoGames {
                     players = listOf(User(5, "mail", "password", false)),
                     province = Province( id = 2,
                             name = "Córdoba",
-                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0f, null))
+                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0.0, null))
                     ),
                     status = Status.FINISHED
             )

@@ -15,7 +15,6 @@ import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.services.GeoRef
 import com.grupox.wololo.model.services.TopoData
 import com.grupox.wololo.services.GamesService
-import com.grupox.wololo.services.UsersService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -53,7 +52,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
             val towns = !townsData.map { data ->
                 topoData.requestElevation(data.coordinates).map { elevation ->
-                    Town(data.id, data.name, data.coordinates, elevation)
+                    Town(data.id, data.name, data.coordinates, elevation.toDouble())
                 }
             }.sequence(Either.applicative()).fix().map { it.fix() }
 //TODO: id autoincrementada
@@ -106,12 +105,10 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     @ApiOperation(value = "Attacks a town")
     fun attackTown(
             @PathVariable("id") id: Int,
-            @RequestParam("attacker") attackerId: Int,
-            @RequestParam("defender") defenderId: Int,
+            @RequestBody attackData: AttackForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        TODO("logica de ataque")
-        // TODO("definir Body")
+        val userId = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject
+        gamesService.attackTown(userId.toInt(), id, attackData)
     }
 
     @PutMapping("/{id}/towns/{idTown}")

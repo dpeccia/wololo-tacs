@@ -36,7 +36,7 @@ class UsersController {
     fun login(@RequestBody _user: UserCredentials): ResponseEntity<Void> {
         val user = RepoUsers.getUserByLogin(_user) ?: throw CustomException.BadLoginException("Bad Login")
 
-        val jwt = JwtSigner.createJwt(user.mail)
+        val jwt = JwtSigner.createJwt(user.id)
         val authCookie = ResponseCookie.fromClientResponse("X-Auth", jwt)
                 .maxAge(3600)
                 .httpOnly(true)
