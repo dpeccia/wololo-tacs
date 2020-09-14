@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
+import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -31,13 +32,31 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     lateinit var gamesService: GamesService
 
     @GetMapping
-    @ApiOperation(value = "Gets the games of the current user")
+    @ApiOperation(value = "Gets the games of the current user. Params: sort=id|date|numberOfTowns|numberOfPlayers & status & date")
     fun getGames(@RequestParam("sort", required = false) sort: String?, // TODO query params
-                 @RequestParam("filter", required = false) filter: String?,
+                 @RequestParam("status", required = false) status: Status?,
+                 @RequestParam("date", required = false) date: Date?,
                  @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<Game> {
         val token = checkAndGetToken(authCookie)
         val user = RepoUsers.getById(token.body.subject.toInt()).getOrElse { throw CustomException.NotFound.UserNotFoundException() }
-        return RepoGames.filter { it.isParticipating(user) }
+
+        var games: List<Game> = RepoGames.filter { it.isParticipating(user) }
+
+        if(status != null)
+            games = games.filter { it.status == status }
+
+        if(date != null)
+            games = games.filter { it.date == date }
+
+        games = when(sort) {
+            "id"              -> games.sortedBy { it.id }
+            "date"            -> games.sortedBy { it.date }  // Checkear que Date sea comparable
+            "numberOfTowns"   -> games.sortedBy { it.townsAmount }
+            "numberOfPlayers" -> games.sortedBy { it.playerAmount }
+            else              -> games
+        }
+
+        return games
     }
 
 

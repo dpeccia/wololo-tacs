@@ -11,12 +11,14 @@ data class UserWithoutStats @JsonCreator constructor(val id: Int, val mail: Stri
 data class UserStats @JsonCreator constructor(val mail: String, val gamesWon: Int, val gamesLost: Int)
 data class GameStats @JsonCreator constructor(val gamesNew: Int, val gamesOnGoing: Int, val gamesFinished: Int, val gamesCanceled: Int, val games: List<Game>)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class ProvinceGeoRef(@JsonProperty("nombre") val name: String)
 data class GameForm(val provinceName: String, val townAmount: Int, val participantsIds: List<Int>)
 data class TownForm @JsonCreator constructor(val specialization: String)
 data class MovementForm @JsonCreator constructor(val from: Int, val to: Int, val gauchosQty: Int)
 data class AttackForm @JsonCreator constructor(val from: Int, val to: Int)
+
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ProvinceGeoRef(@JsonProperty("nombre") val name: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TownGeoRef(
