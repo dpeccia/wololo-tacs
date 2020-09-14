@@ -1,7 +1,7 @@
 package com.grupox.wololo.model.helpers
 
 import com.grupox.wololo.model.User
-import com.grupox.wololo.model.RepoUsers
+import com.grupox.wololo.model.repos.RepoUsers
 
 fun getFilters(filterString: String): Boolean = filterString === "filter"
 

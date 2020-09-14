@@ -8,6 +8,8 @@ import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.GameStats
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.UserStats
+import com.grupox.wololo.model.repos.RepoGames
+import com.grupox.wololo.model.repos.RepoUsers
 import io.swagger.annotations.ApiOperation
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -23,7 +25,7 @@ class AdminController {
                       @RequestParam("to", required = false) to: Date,
                       @ApiIgnore @CookieValue("X-Auth") authCookie : String?): GameStats {
 
-        val games: List<Game> = RepoGames.getGames().filter { it.date >= from && it.date <= to  }
+        val games: List<Game> = RepoGames.getAll().filter { it.date >= from && it.date <= to  }
 
         fun numberOfGames(status : String) : Int {
             return games.map { it.status }.filter { it.toString() == status }.count()

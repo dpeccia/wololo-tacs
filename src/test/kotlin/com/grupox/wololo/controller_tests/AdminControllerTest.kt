@@ -1,15 +1,9 @@
 package com.grupox.wololo
 
-import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.*
 import com.grupox.wololo.services.AdminService
-import com.grupox.wololo.services.UserService
-import io.mockk.every
-import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import java.time.Instant
 import java.util.*
