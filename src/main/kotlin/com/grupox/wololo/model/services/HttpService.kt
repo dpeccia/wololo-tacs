@@ -10,8 +10,8 @@ abstract class HttpService(val apiName: String) {
     protected inline fun <reified DataT : Any>requestData(url: String, queryParams: Map<String, String>): Either<CustomException, DataT> {
         val finalUrl = appendQueryParams(url, queryParams)
         return Right(finalUrl.httpGet())
-                .filterOrOther({ it.isSuccessful }, { CustomException.UnsuccessfulExternalRequestException(apiName, it.code()) })
-                .flatMap { it.toType<DataT>().rightIfNotNull { CustomException.NotFoundException("Request: GET $finalUrl returned with null") } }
+                .filterOrOther({ it.isSuccessful }, { CustomException.ServiceException.UnsuccessfulExternalRequestException(apiName, it.code()) })
+                .flatMap { it.toType<DataT>().rightIfNotNull { CustomException.ServiceException.InvalidExternalResponseException("Request: GET $finalUrl returned with null") } }
     }
 
     protected fun appendQueryParams(url: String, queryParams: Map<String, String>): String =

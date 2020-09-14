@@ -1,7 +1,6 @@
 package com.grupox.wololo.model.services
 
 import arrow.core.*
-import arrow.core.extensions.either.monad.flatMap
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Coordinates
@@ -31,7 +30,7 @@ class TopoData : HttpService("TopoData"), ITopoData {
             requestData(baseUrl, mapOf("locations" to "${coordinates.latitude},${coordinates.longitude}"))
 
         return queryResponse
-                .filterOrOther({ it.results.isNotEmpty() }, { CustomException.BadDataFromExternalRequestException("Theres is no data for coordinates: $coordinates in $apiName API") })
+                .filterOrOther({ it.results.isNotEmpty() }, { CustomException.ServiceException.InvalidExternalResponseException("Theres is no data for coordinates: $coordinates in $apiName API") })
                 .map { it.results.first().elevation }
     }
 }

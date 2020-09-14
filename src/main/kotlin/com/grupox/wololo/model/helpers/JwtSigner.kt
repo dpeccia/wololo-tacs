@@ -16,10 +16,10 @@ import java.util.Date
 object JwtSigner {
     private val keyPair: KeyPair = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
-    fun createJwt(userMail: String): String {
+    fun createJwt(userId: Int): String {
         return Jwts.builder()
                 .signWith(keyPair.private, SignatureAlgorithm.RS256)
-                .setSubject(userMail)
+                .setSubject(userId.toString())
                 .setIssuer("identity")
                 .setExpiration(Date.from(Instant.now().plus(Duration.ofMinutes(1))))
                 .setIssuedAt(Date.from(Instant.now()))
@@ -31,7 +31,7 @@ object JwtSigner {
                 Right(Jwts.parserBuilder()
                         .setSigningKey(keyPair.public)
                         .build()
-                        .parseClaimsJws(jwt.getOrElse { throw CustomException.TokenException("Token not found. Login Again") }))
-            } catch (ex: ExpiredJwtException) { Left(CustomException.TokenException("Token expired. Login Again"))
+                        .parseClaimsJws(jwt.getOrElse { throw CustomException.UnauthorizedException.TokenException("Token not found. Login Again") }))
+            } catch (ex: ExpiredJwtException) { Left(CustomException.UnauthorizedException.TokenException("Token expired. Login Again"))
             } catch (ex: CustomException) { Left(ex) }
 }

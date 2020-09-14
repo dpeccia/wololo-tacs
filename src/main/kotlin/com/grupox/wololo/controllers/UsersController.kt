@@ -27,7 +27,7 @@ class UsersController {
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
     fun createUser(@RequestBody newUser: UserCredentials) {
         if(RepoUsers.getUserByName(newUser.mail).nonEmpty())
-            throw CustomException.NotFoundException("User already exists")
+            throw CustomException.ModelException.IllegalUserException("User already exists")
         val user = User(3, newUser.mail, newUser.password, false, Stats(0,0)) // TODO el id se tiene que autoincrementar
         RepoUsers.insert(user)
     }
@@ -35,7 +35,7 @@ class UsersController {
     @PostMapping("/tokens")
     @ApiOperation(value = "Log In")
     fun login(@RequestBody _user: UserCredentials): ResponseEntity<Void> {
-        val user = RepoUsers.getUserByLogin(_user) ?: throw CustomException.BadLoginException("Bad Login")
+        val user = RepoUsers.getUserByLogin(_user) ?: throw CustomException.UnauthorizedException.BadLoginException("Bad Login")
 
         val jwt = JwtSigner.createJwt(user.mail)
         val authCookie = ResponseCookie.fromClientResponse("X-Auth", jwt)
@@ -71,15 +71,12 @@ class UsersController {
     }
     // TODO obtener usuarios o un usuario en particular (sin stats)
 
-    @ExceptionHandler(CustomException.NotFoundException::class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundError(exception: CustomException) = exception.getJSON()
 
-    @ExceptionHandler(CustomException.BadLoginException::class)
+    @ExceptionHandler(CustomException.UnauthorizedException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     fun handleBadLoginError(exception: CustomException) = exception.getJSON()
 
-    @ExceptionHandler(CustomException.TokenException::class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    fun handleExpiredTokenError(exception: CustomException) = exception.getJSON()
+    @ExceptionHandler(CustomException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun handleNotFoundError(exception: CustomException) = exception.getJSON()
 }

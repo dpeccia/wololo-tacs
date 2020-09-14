@@ -59,7 +59,7 @@ class AdminController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFoundError(exception: CustomException) = exception.getJSON()
 
-    @ExceptionHandler(CustomException.TokenException::class)
+    @ExceptionHandler(CustomException.UnauthorizedException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     fun handleExpiredTokenError(exception: CustomException) = exception.getJSON()
 }
