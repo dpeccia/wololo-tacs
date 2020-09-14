@@ -1,14 +1,12 @@
 package com.grupox.wololo.services
 
 import arrow.core.getOrElse
-import arrow.core.getOrHandle
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.RepoUsers.getNormalUsers
-import com.grupox.wololo.model.helpers.JwtSigner
-import com.grupox.wololo.model.helpers.UserWithoutStats
-import org.springframework.stereotype.Service
+import com.grupox.wololo.model.repos.RepoGames
+import com.grupox.wololo.model.repos.RepoUsers
+import com.grupox.wololo.model.repos.RepoUsers.getNormalUsers
 
 class GamesService {
 
@@ -16,7 +14,7 @@ class GamesService {
     fun surrender(gameId: Int, participantsIds: List<Int> , userMail : String) : Int? {
 
         val userID : Int = RepoUsers.getUserByName(userMail).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.id
-        val game: Game = RepoGames.getGameById(gameId).getOrElse { throw CustomException.NotFoundException("Game was not found") }
+        val game: Game = RepoGames.getById(gameId).getOrElse { throw CustomException.NotFoundException("Game was not found") }
 
         if (participantsIds.size <= 2) {
             RepoGames.changeGameStatus(gameId, Status.CANCELED)

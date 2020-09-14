@@ -1,6 +1,5 @@
 package com.grupox.wololo.controllers
 
-import arrow.core.getOrElse
 import arrow.core.getOrHandle
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
@@ -8,6 +7,7 @@ import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.UserCredentials
 import com.grupox.wololo.model.helpers.UserWithoutStats
+import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.UserService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +29,7 @@ class UsersController {
         if(RepoUsers.getUserByName(newUser.mail).nonEmpty())
             throw CustomException.NotFoundException("User already exists")
         val user = User(3, newUser.mail, newUser.password, false, Stats(0,0)) // TODO el id se tiene que autoincrementar
-        RepoUsers.insertUser(user)
+        RepoUsers.insert(user)
     }
 
     @PostMapping("/tokens")

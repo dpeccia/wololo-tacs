@@ -12,6 +12,8 @@ import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.ProvinceGeoRef
 import com.grupox.wololo.model.helpers.TownForm
 import com.grupox.wololo.model.helpers.*
+import com.grupox.wololo.model.repos.RepoGames
+import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.services.GeoRef
 import com.grupox.wololo.model.services.TopoData
 import io.swagger.annotations.ApiOperation
@@ -19,8 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
-import java.time.Instant
-import java.util.*
 import kotlin.collections.ArrayList
 
 @RequestMapping("/games")
@@ -32,7 +32,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
                  @RequestParam("filter", required = false) filter: String?,
                  @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<Game> {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        return RepoGames.getGames()
+        return RepoGames.getAll()
     }
     // TODO obtener mis partidas y filtrar u ordenar por fecha y estado
 
@@ -42,7 +42,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
 
         val game: Game = Either.fx<CustomException, Game> {
-            val users = !form.participantsIds.map { RepoUsers.getUserById(it).toEither { CustomException.NotFoundException("There is no such user with id=$it") } }
+            val users = !form.participantsIds.map { RepoUsers.getById(it).toEither { CustomException.NotFoundException("There is no such user with id=$it") } }
                                             .sequence(Either.applicative()).fix().map{ it.fix() }
 
             val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
@@ -56,7 +56,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
 
         }.getOrHandle { throw it }
 
-        RepoGames.insertGame(game)
+        RepoGames.insert(game)
     }
 
     @GetMapping("/{id}")
@@ -64,7 +64,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     fun getGameById(@PathVariable("id") id: Int,
                     @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
-        return RepoGames.getGameById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
+        return RepoGames.getById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
     }
 
     @PutMapping("/{id}")
@@ -73,7 +73,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
 
         val userMail : String = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject
         val userID : Int = RepoUsers.getUserByName(userMail).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.id
-        val game: Game = RepoGames.getGameById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
+        val game: Game = RepoGames.getById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
         val participantsIds: List<Int> = gameData.participantsIds
 
         if ((participantsIds.size) <= 2) {

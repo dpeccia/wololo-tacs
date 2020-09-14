@@ -1,7 +1,8 @@
 package com.grupox.wololo.controller_tests
 
-import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
+import com.grupox.wololo.model.repos.RepoGames
+import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesService
 import com.grupox.wololo.services.UserService
 import io.mockk.every
@@ -9,12 +10,7 @@ import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDateTime
 import java.util.ArrayList
-import java.util.*
 
 class GamesControllerTest {
     val gamesService: GamesService = GamesService()
@@ -55,8 +51,8 @@ class GamesControllerTest {
     fun fixture() {
         mockkObject(RepoUsers)
         mockkObject(RepoGames)
-        every { RepoUsers.getUsers() } returns users
-        every { RepoGames.getGames() } returns games
+        every { RepoUsers.getAll() } returns users
+        every { RepoGames.getAll() } returns games
     }
 
     @Test

@@ -1,14 +1,13 @@
-package com.grupox.wololo.model
+package com.grupox.wololo.model.repos
 
 import arrow.core.Option
 import arrow.core.getOrElse
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
-import java.time.Duration
-import java.time.Instant
+import com.grupox.wololo.model.*
 import java.util.*
 
-object RepoGames {
+object RepoGames : Repository<Game> {
 
     private val gamesInDB: ArrayList<Game> = arrayListOf(
             Game(
@@ -31,21 +30,21 @@ object RepoGames {
             )
     )
 
-    fun getGames(): List<Game> = gamesInDB
+    override fun getAll(): List<Game> = gamesInDB
 
-    fun getGameById(id: Int): Option<Game> = gamesInDB.find { it.id == id }.toOption()
+    override fun getById(id: Int): Option<Game> = gamesInDB.find { it.id == id }.toOption()
 
-    fun filterGames(predicate: (game: Game) -> Boolean) = gamesInDB.filter { predicate(it) }
+    override fun filter(predicate: (game: Game) -> Boolean) = gamesInDB.filter { predicate(it) }
 
     fun changeGameStatus(id: Int, status: Status){
-        this.getGameById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.status = status
+        getById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.status = status
     }
 
     fun changeGameTownSpecialization(gameId: Int, townId: Int, specialization: Specialization){
-        this.getGameById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(townId, specialization)
+        getById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(townId, specialization)
     }
 
-    fun insertGame(game: Game) {
-        gamesInDB.add(game)
+    override fun insert(obj: Game) {
+        gamesInDB.add(obj)
     }
 }
