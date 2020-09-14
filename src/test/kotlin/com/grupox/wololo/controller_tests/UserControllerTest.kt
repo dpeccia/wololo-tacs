@@ -1,7 +1,7 @@
 package com.grupox.wololo.controller_tests
 
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.RepoUsers
+import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.services.UsersService
@@ -25,7 +25,7 @@ class UserControllerTest {
     @BeforeEach
     fun fixture() {
         mockkObject(RepoUsers)
-        every { RepoUsers.getUsers() } returns users
+        every { RepoUsers.getAll() } returns users
     }
 
     @Test

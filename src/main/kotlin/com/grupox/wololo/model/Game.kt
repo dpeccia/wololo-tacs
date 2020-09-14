@@ -11,7 +11,7 @@ import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
 
 
-class Game(val id: Int , val date: Date, val players: List<User>, val province: Province, var status: Status = Status.NEW) {
+class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) {
 
     //val id: Int = 0 // TODO: Autogenerada
 
@@ -22,8 +22,11 @@ class Game(val id: Int , val date: Date, val players: List<User>, val province: 
         get() = players.size
 
     lateinit var turno: User
+    
+    var date: Date = Date()
 
     init {
+        this.date = Date.from(Instant.now())
         assignTowns()
     }
 

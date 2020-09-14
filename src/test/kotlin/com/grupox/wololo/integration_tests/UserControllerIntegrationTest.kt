@@ -2,12 +2,12 @@ package com.grupox.wololo.integration_tests
 
 import arrow.core.Some
 import arrow.core.getOrHandle
-import com.grupox.wololo.model.RepoUsers
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.TownForm
 import com.grupox.wololo.model.helpers.UserCredentials
+import com.grupox.wololo.model.repos.RepoUsers
 import io.mockk.every
 import io.mockk.mockkObject
 import org.junit.jupiter.api.Test
@@ -39,7 +39,7 @@ class UserControllerIntegrationTest {
     fun fixture() {
         webClient = WebClient.builder().baseUrl("http://localhost:${serverPort}").build()
         mockkObject(RepoUsers)
-        every { RepoUsers.getUsers() } returns users
+        every { RepoUsers.getAll() } returns users
     }
 
     @Test

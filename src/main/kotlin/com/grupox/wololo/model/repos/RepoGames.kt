@@ -1,18 +1,17 @@
-package com.grupox.wololo.model
+package com.grupox.wololo.model.repos
 
 import arrow.core.Option
 import arrow.core.getOrElse
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
-import java.time.Duration
-import java.time.Instant
+import com.grupox.wololo.model.*
 import java.util.*
 
-object RepoGames {
+object RepoGames : Repository<Game> {
 
     private val gamesInDB: ArrayList<Game> = arrayListOf(
             Game(
-                    id = 1, date = Date.from(Instant.now()),
+                    id = 1,
                     players = listOf(User(5, "mail", "password", false)),
                     province = Province( id = 1,
                             name = "Santiago del Estero",
@@ -21,7 +20,7 @@ object RepoGames {
                     status= Status.NEW
             ),
             Game(
-                    id= 2, date = Date.from(Instant.now().plus(Duration.ofDays(10))),
+                    id= 2,
                     players = listOf(User(5, "mail", "password", false)),
                     province = Province( id = 2,
                             name = "Córdoba",
@@ -31,27 +30,27 @@ object RepoGames {
             )
     )
 
-    fun getGames(): List<Game> = gamesInDB
+    override fun getAll(): List<Game> = gamesInDB
 
-    fun getGameById(id: Int): Option<Game> = gamesInDB.find { it.id == id }.toOption()
+    override fun getById(id: Int): Option<Game> = gamesInDB.find { it.id == id }.toOption()
 
     fun getGameByIdAndUser(gameId: Int, userId: Int): Game {
-        val game = this.getGameById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}
+        val game = this.getById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}
         game.getMember(userId).getOrElse { throw CustomException.ForbiddenException("You are not a member of this Game") }
         return game
     }
 
-    fun filterGames(predicate: (game: Game) -> Boolean) = gamesInDB.filter { predicate(it) }
+    override fun filter(predicate: (game: Game) -> Boolean) = gamesInDB.filter { predicate(it) }
 
     fun changeGameStatus(id: Int, status: Status){
-        this.getGameById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.status = status
+        getById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.status = status
     }
 
     fun changeGameTownSpecialization(gameId: Int, townId: Int, specialization: Specialization){
-        this.getGameById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(townId, specialization)
+        getById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(townId, specialization)
     }
 
-    fun insertGame(game: Game) {
-        gamesInDB.add(game)
+    override fun insert(obj: Game) {
+        gamesInDB.add(obj)
     }
 }
