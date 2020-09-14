@@ -16,6 +16,8 @@ import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.services.GeoRef
 import com.grupox.wololo.model.services.TopoData
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jws
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -31,7 +33,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     fun getGames(@RequestParam("sort", required = false) sort: String?,
                  @RequestParam("filter", required = false) filter: String?,
                  @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<Game> {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
         return RepoGames.getAll()
     }
     // TODO obtener mis partidas y filtrar u ordenar por fecha y estado
@@ -39,7 +41,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     @PostMapping
     @ApiOperation(value = "Creates a new game")
     fun createGame(@RequestBody form: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
 
         val game: Game = Either.fx<CustomException, Game> {
             val users = !form.participantsIds.map { RepoUsers.getById(it).toEither { CustomException.NotFoundException("There is no such user with id=$it") } }
@@ -63,7 +65,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     @ApiOperation(value = "Gets a game")
     fun getGameById(@PathVariable("id") id: Int,
                     @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
         return RepoGames.getById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
     }
 
@@ -96,7 +98,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             @RequestParam("to") toTownId: Int,
             @RequestParam("quantity") gauchosQuantity: Int,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
         TODO("mover gauchos de un municipio a otro")
         // TODO("definir Body")
     }
@@ -108,7 +110,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             @RequestParam("attacker") attackerId: Int,
             @RequestParam("defender") defenderId: Int,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
         TODO("logica de ataque")
         // TODO("definir Body")
     }
@@ -120,7 +122,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             @PathVariable("idTown") idTown: Int,
             @RequestBody townData: TownForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
 
         if (townData.specialization == "PRODUCTION"){
             RepoGames.changeGameTownSpecialization(id,idTown,Production())
@@ -136,14 +138,14 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             @PathVariable("id") id: Int,
             @PathVariable("idTown") idTown: Int,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
         TODO("visualizar las estadísticas de producción y defensa de cada municipio, y la imagen")
     }
 
     @GetMapping("/provinces")
     @ApiOperation(value = "Gets all provinces")
     fun getProvinces(@ApiIgnore @CookieValue("X-Auth") authCookie : String?) : List<ProvinceGeoRef> {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
         return geoRef.requestAvailableProvinces().getOrHandle { throw it }
     }
 
@@ -154,4 +156,6 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     @ExceptionHandler(CustomException.TokenException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     fun handleExpiredTokenError(exception: CustomException) = exception.getJSON()
+
+    fun checkAndGetToken(authCookie: String?): Jws<Claims> = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
 }
