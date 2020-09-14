@@ -12,7 +12,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import java.util.ArrayList
 
-@DisplayName("User Controller Tests")
 class UserControllerTest {
     val usersService: UsersService = UsersService()
 
@@ -44,9 +43,8 @@ class UserControllerTest {
         }
 
         @Test
-        fun `successful login check returns User`() {
-            assertThat(usersService.checkUserCredentials(UserCredentials("example_admin", "example_admin")))
-                    .isEqualTo(users[0])
+        fun `successful login doesnt throw an Exception`() {
+            assertDoesNotThrow{usersService.checkUserCredentials(UserCredentials("example_admin", "example_admin"))}
         }
     }
 
