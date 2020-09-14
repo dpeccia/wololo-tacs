@@ -7,12 +7,12 @@ import com.grupox.wololo.model.helpers.UserWithoutStats
 import org.springframework.stereotype.Service
 
 @Service
-class UserService {
+class UsersService {
     fun getUsers(_username: String?): List<UserWithoutStats> {
         val username = _username ?: return RepoUsers.getUsersWithoutStats()
         val user = ArrayList<UserWithoutStats>()
         user.add(RepoUsers.getUserByName(username)
-                .getOrElse { throw CustomException.NotFoundException("No user with such name") }.toUserWithoutStats())
+                .getOrElse { throw CustomException.NotFound.UserNotFoundException() }.toUserWithoutStats())
         return user
     }
 }

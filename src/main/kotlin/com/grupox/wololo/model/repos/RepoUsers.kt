@@ -15,7 +15,9 @@ object RepoUsers : Repository<User> {
     private val usersInDB: ArrayList<User> = arrayListOf(
             User(1,"admin", "admin", true, Stats(0, 0)),
             User(2,"unmail@gmail.com", "1234", false, Stats(1, 1)),
-            User(3,"otromail@gmail.com", "1234", false, Stats(1, 2))
+            User(3,"otromail@gmail.com", "1234", false, Stats(1, 2)),
+            User(5, "mail", "password", false, Stats(1,1)),
+            User(6, "mail2", "password2", false, Stats(0,0))
     )
 
     override fun getAll(): List<User> = usersInDB
@@ -30,11 +32,11 @@ object RepoUsers : Repository<User> {
     override fun getById(id: Int): Option<User> = getNormalUsers().find { it.id == id }.toOption()
 
     fun updateUserGamesLost(id: Int){
-        getById(id).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.updateGamesLostStats()
+        getById(id).getOrElse {  throw CustomException.NotFound.UserNotFoundException()  }.updateGamesLostStats()
     }
 
     fun updateUserGamesWon(id: Int){
-        getById(id).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.updateGamesLostStats()
+        getById(id).getOrElse {  throw CustomException.NotFound.UserNotFoundException() }.updateGamesLostStats()
     }
 
     fun getUserByLogin(loginData: UserCredentials): User? = getAll().find {it.isUserByLoginData(loginData)}

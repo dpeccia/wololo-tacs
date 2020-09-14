@@ -30,7 +30,7 @@ class TopoData : HttpService("TopoData"), ITopoData {
             requestData(baseUrl, mapOf("locations" to "${coordinates.latitude},${coordinates.longitude}"))
 
         return queryResponse
-                .filterOrOther({ it.results.isNotEmpty() }, { CustomException.ServiceException.InvalidExternalResponseException("Theres is no data for coordinates: $coordinates in $apiName API") })
+                .filterOrOther({ it.results.isNotEmpty() }, { CustomException.Service.InvalidExternalResponseException("Theres is no data for coordinates: $coordinates in $apiName API") })
                 .map { it.results.first().elevation }
     }
 }

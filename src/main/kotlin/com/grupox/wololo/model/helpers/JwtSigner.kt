@@ -1,8 +1,6 @@
 package com.grupox.wololo.model.helpers
 
 import arrow.core.*
-import arrow.core.extensions.either.applicativeError.handleError
-import arrow.core.extensions.either.applicativeError.raiseError
 import com.grupox.wololo.errors.CustomException
 import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
@@ -31,7 +29,7 @@ object JwtSigner {
                 Right(Jwts.parserBuilder()
                         .setSigningKey(keyPair.public)
                         .build()
-                        .parseClaimsJws(jwt.getOrElse { throw CustomException.UnauthorizedException.TokenException("Token not found. Login Again") }))
-            } catch (ex: ExpiredJwtException) { Left(CustomException.UnauthorizedException.TokenException("Token expired. Login Again"))
+                        .parseClaimsJws(jwt.getOrElse { throw CustomException.Unauthorized.TokenException("Token not found. Login Again") }))
+            } catch (ex: ExpiredJwtException) { Left(CustomException.Unauthorized.TokenException("Token expired. Login Again"))
             } catch (ex: CustomException) { Left(ex) }
 }

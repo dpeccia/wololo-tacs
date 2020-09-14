@@ -16,25 +16,27 @@ import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.services.GeoRef
 import com.grupox.wololo.model.services.TopoData
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.Jws
+import com.grupox.wololo.services.GamesService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
 import kotlin.collections.ArrayList
 
+
 @RequestMapping("/games")
 @RestController
-class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private val topoData: TopoData) {
+class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private val topoData: TopoData) : BaseController() {
+    @Autowired
+    lateinit var gamesService: GamesService
+
     @GetMapping
     @ApiOperation(value = "Gets the games of the current user")
     fun getGames(@RequestParam("sort", required = false) sort: String?, // TODO query params
                  @RequestParam("filter", required = false) filter: String?,
                  @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<Game> {
         val token = checkAndGetToken(authCookie)
-        val user = RepoUsers.getById(token.body.subject.toInt()).getOrElse { throw CustomException.NotFoundException.UserNotFoundException() }
+        val user = RepoUsers.getById(token.body.subject.toInt()).getOrElse { throw CustomException.NotFound.UserNotFoundException() }
         return RepoGames.filter { it.isParticipating(user) }
     }
 
@@ -45,14 +47,14 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
         checkAndGetToken(authCookie)
 
         val game: Game = Either.fx<CustomException, Game> {
-            val users = !form.participantsIds.map { RepoUsers.getById(it).toEither { CustomException.NotFoundException.UserNotFoundException() } }
+            val users = !form.participantsIds.map { RepoUsers.getById(it).toEither { CustomException.NotFound.UserNotFoundException() } }
                                             .sequence(Either.applicative()).fix().map{ it.fix() }
 
             val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
 
             val towns = !townsData.map { data ->
                 topoData.requestElevation(data.coordinates).map { elevation ->
-                    Town(data.id, data.name, data.coordinates, elevation)
+                    Town(data.id, data.name, data.coordinates, elevation.toDouble())
                 }
             }.sequence(Either.applicative()).fix().map { it.fix() }
             Game(0,users,  Province(0,form.provinceName, ArrayList(towns)))
@@ -66,56 +68,55 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     fun getGameById(@PathVariable("id") id: Int,
                     @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         val token = checkAndGetToken(authCookie)
-        val user = RepoUsers.getById(token.body.subject.toInt()).getOrElse { throw CustomException.NotFoundException.UserNotFoundException() }
-        val game = RepoGames.getById(id).getOrElse { throw CustomException.NotFoundException.GameNotFoundException() }
+        val user = RepoUsers.getById(token.body.subject.toInt()).getOrElse { throw CustomException.NotFound.UserNotFoundException() }
+        val game = RepoGames.getById(id).getOrElse { throw CustomException.NotFound.GameNotFoundException() }
 
-        if(!game.isParticipating(user)) throw CustomException.
-        return
+        if(!game.isParticipating(user)) throw CustomException.Unauthorized.TokenException("User not participating in this game") // Por ahi no corresponde esta excepcion
+        return game
     }
 
     @PutMapping("/{id}")
-    @ApiOperation(value = "Modifies a game status (on going, finished, canceled)")
-    fun updateGame(@PathVariable("id") id: Int, @RequestBody gameData: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?)  {
-        val userMail : String = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject
-        val userID : Int = RepoUsers.getUserByName(userMail).getOrElse {  throw CustomException.NotFoundException.UserNotFoundException()  }.id
-        val game: Game = RepoGames.getById(id).getOrElse { throw CustomException.NotFoundException.GameNotFoundException() }
-        val participantsIds: List<Int> = gameData.participantsIds
+    @ApiOperation(value = "Surrenders in a game (it becomes CANCELED)")
+    fun surrender(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
 
-        if (participantsIds.size <= 2) {
-            RepoGames.changeGameStatus(id, Status.CANCELED)
-            RepoUsers.updateUserGamesWon(participantsIds.find { it != userID }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")})
+        val userId: String = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject
+        val game: Game = RepoGames.getById(id).getOrElse { throw CustomException.NotFound.GameNotFoundException() }
+        val user: User = game.getMember(userId.toInt()).getOrElse { throw CustomException.NotFound.UserNotFoundException() }
+        val loserUserId: Int = user.id
+
+        val participantsIds: List<Int> = game.players.map{it.id}
+
+        val loserUser: User = RepoUsers.getById(loserUserId).getOrElse {  throw CustomException.NotFound.UserNotFoundException() }
+
+        loserUser.updateGamesLostStats()
+
+        if ((participantsIds.size) <= 2) {
+            val winnerUserID : Int = participantsIds.find { it != userId.toInt() }.toOption().getOrElse {throw CustomException.BadRequest.IllegalGameException("Not enough participants from game") }
+            game.status = Status.CANCELED
+            RepoUsers.getById(winnerUserID).getOrElse {  throw CustomException.NotFound.UserNotFoundException() }.updateGamesWonStats()}
         }
 
-        RepoUsers.updateUserGamesLost(userID)
 
 
-
-    }
 
     @PostMapping("/{id}/actions/movement")
     @ApiOperation(value = "Moves the gauchos between towns")
     fun moveGauchosBetweenTowns(
             @PathVariable("id") id: Int,
-            @PathVariable("playerId") playerId: Int,
-            @RequestParam("from") fromTownId: Int,
-            @RequestParam("to") toTownId: Int,
-            @RequestParam("quantity") gauchosQuantity: Int,
+            @RequestBody movementData: MovementForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        checkAndGetToken(authCookie)
-        TODO("mover gauchos de un municipio a otro")
-        // TODO("definir Body")
+        val userId = checkAndGetToken(authCookie).body.subject
+        gamesService.moveGauchosBetweenTowns(userId.toInt(), id, movementData)
     }
 
     @PostMapping("/{id}/actions/attack")
     @ApiOperation(value = "Attacks a town")
     fun attackTown(
             @PathVariable("id") id: Int,
-            @RequestParam("attacker") attackerId: Int,
-            @RequestParam("defender") defenderId: Int,
+            @RequestBody attackData: AttackForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        checkAndGetToken(authCookie)
-        TODO("logica de ataque")
-        // TODO("definir Body")
+        val userId = checkAndGetToken(authCookie).body.subject
+        gamesService.attackTown(userId.toInt(), id, attackData)
     }
 
     @PutMapping("/{id}/towns/{idTown}")
@@ -128,9 +129,11 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
         checkAndGetToken(authCookie)
 
         if (townData.specialization == "PRODUCTION"){
-            RepoGames.changeGameTownSpecialization(id,idTown,Production())
+
+            RepoGames.getById(id).getOrElse {throw CustomException.NotFound.GameNotFoundException() }.changeTownSpecialization(idTown, Production())
+
         } else if (townData.specialization == "DEFENSE"){
-            RepoGames.changeGameTownSpecialization(id,idTown,Defense())
+            RepoGames.getById(id).getOrElse {throw CustomException.NotFound.GameNotFoundException() }.changeTownSpecialization(idTown, Defense())
         }
 
     }
@@ -151,14 +154,4 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
         checkAndGetToken(authCookie)
         return geoRef.requestAvailableProvinces().getOrHandle { throw it }
     }
-
-    @ExceptionHandler(CustomException.UnauthorizedException::class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    fun handleExpiredTokenError(exception: CustomException) = exception.getJSON()
-
-    @ExceptionHandler(CustomException::class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleDomainException(exception: CustomException) = exception.getJSON()
-
-    fun checkAndGetToken(authCookie: String?): Jws<Claims> = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
 }

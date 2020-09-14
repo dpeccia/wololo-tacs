@@ -4,37 +4,51 @@ import arrow.core.getOrElse
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
+import com.grupox.wololo.model.helpers.AttackForm
+import com.grupox.wololo.model.helpers.MovementForm
+import org.springframework.stereotype.Service
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
-import com.grupox.wololo.model.repos.RepoUsers.getNormalUsers
 
+@Service
 class GamesService {
 
+    fun surrender(gameId: Int, userId : String) : Int? {
 
-    fun surrender(gameId: Int, participantsIds: List<Int> , userMail : String) : Int? {
+        val game: Game = RepoGames.getById(gameId).getOrElse { throw CustomException.NotFound.GameNotFoundException() }
+        val user: User = game.getMember(userId.toInt()).getOrElse { throw CustomException.NotFound.UserNotFoundException() }
+        val loserUserId: Int = user.id
 
-        val userID : Int = RepoUsers.getUserByName(userMail).getOrElse {  throw CustomException.NotFoundException("User was not found")  }.id
-        val game: Game = RepoGames.getById(gameId).getOrElse { throw CustomException.NotFoundException("Game was not found") }
+        val participantsIds: List<Int> = game.players.map{it.id}
 
-        if (participantsIds.size <= 2) {
-            RepoGames.changeGameStatus(gameId, Status.CANCELED)
-            RepoUsers.updateUserGamesWon(participantsIds.find { it != userID }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")})
-        }
+        val loserUser: User = RepoUsers.getById(loserUserId).getOrElse {  throw CustomException.NotFound.UserNotFoundException() }
 
-        RepoUsers.updateUserGamesLost(userID)
-//lo cambio por option
-        return getNormalUsers().find { it.mail == userMail }?.stats?.gamesLost
+        loserUser.updateGamesLostStats()
+
+        if ((participantsIds.size) <= 2) {
+        val winnerUserID : Int = participantsIds.find { it != userId.toInt() }.toOption().getOrElse { throw CustomException.BadRequest.IllegalGameException("Not enough participants from game") }
+        game.status = Status.CANCELED
+        RepoUsers.getById(winnerUserID).getOrElse {  throw CustomException.NotFound.UserNotFoundException() }.updateGamesWonStats()
+    }
+        return loserUser.stats.gamesLost
     }
 
     fun changeSpecialization(specialization: String, gameId: Int, townId: Int) {
 
         if (specialization == "PRODUCTION"){
-            RepoGames.changeGameTownSpecialization(gameId,townId, Production())
-        } else{
-            if (specialization == "DEFENSE"){
-                RepoGames.changeGameTownSpecialization(gameId,townId, Defense())
-            }
+            RepoGames.getById(gameId).getOrElse {throw CustomException.NotFound.GameNotFoundException() }.changeTownSpecialization(townId, Production())
+        } else if (specialization == "DEFENSE"){
+            RepoGames.getById(gameId).getOrElse {throw CustomException.NotFound.GameNotFoundException() }.changeTownSpecialization(townId, Defense())
         }
     }
 
+    fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm) {
+        val game = RepoGames.getGameByIdAndUser(gameId, userId)
+        game.moveGauchosBetweenTowns(userId, movementData)
+    }
+
+    fun attackTown(userId: Int, gameId: Int, attackData: AttackForm) {
+        val game = RepoGames.getGameByIdAndUser(gameId, userId)
+        game.attackTown(userId, attackData)
+    }
 }

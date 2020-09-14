@@ -12,10 +12,10 @@ object RepoGames : Repository<Game> {
     private val gamesInDB: ArrayList<Game> = arrayListOf(
             Game(
                     id = 1,
-                    players = listOf(User(5, "mail", "password", false)),
+                    players = listOf(User(5, "mail", "password", false, Stats(1,1)),  User(6, "mail2", "password2", false)),
                     province = Province( id = 1,
                             name = "Santiago del Estero",
-                            towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), 0f, null), Town(2, "La Banda", Coordinates(0f,0f), 0f, null))
+                            towns = arrayListOf(Town(1, "Termas de Río Hondo", Coordinates(0f,0f), 0.0, null), Town(2, "La Banda", Coordinates(0f,0f), 0.0, null))
                     ),
                     status= Status.NEW
             ),
@@ -24,7 +24,7 @@ object RepoGames : Repository<Game> {
                     players = listOf(User(5, "mail", "password", false)),
                     province = Province( id = 2,
                             name = "Córdoba",
-                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0f, null))
+                            towns = arrayListOf(Town(3, "Cipolletti", Coordinates(0f,0f), 0.0, null))
                     ),
                     status = Status.FINISHED
             )
@@ -34,14 +34,20 @@ object RepoGames : Repository<Game> {
 
     override fun getById(id: Int): Option<Game> = gamesInDB.find { it.id == id }.toOption()
 
+    fun getGameByIdAndUser(gameId: Int, userId: Int): Game {
+        val game = this.getById(gameId).getOrElse {throw CustomException.NotFound.GameNotFoundException()}
+        game.getMember(userId).getOrElse { throw CustomException.Forbidden.NotAMemberException() }
+        return game
+    }
+
     override fun filter(predicate: (game: Game) -> Boolean) = gamesInDB.filter { predicate(it) }
 
     fun changeGameStatus(id: Int, status: Status){
-        getById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.status = status
+        getById(id).getOrElse { throw CustomException.NotFound.GameNotFoundException() }.status = status
     }
 
     fun changeGameTownSpecialization(gameId: Int, townId: Int, specialization: Specialization){
-        getById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(townId, specialization)
+        getById(gameId).getOrElse {throw CustomException.NotFound.GameNotFoundException()}.changeTownSpecialization(townId, specialization)
     }
 
     override fun insert(obj: Game) {

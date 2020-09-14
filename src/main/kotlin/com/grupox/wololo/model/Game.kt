@@ -1,11 +1,12 @@
 package com.grupox.wololo.model
 
 import arrow.core.Option
-import arrow.core.getOrElse
 import arrow.core.toOption
 import java.time.Instant
 import java.util.Date
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.AttackForm
+import com.grupox.wololo.model.helpers.MovementForm
 
 
 class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) {
@@ -18,6 +19,8 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     val playerAmount: Int
         get() = players.size
 
+    lateinit var turno: User
+    
     var date: Date = Date()
 
     init {
@@ -27,17 +30,33 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
 
     fun getTownById(idTown: Int): Option<Town> = province.towns.find { it.id == idTown }.toOption()
 
+    fun getMember(userId: Int): Option<User> = players.find { it.id == userId }.toOption()
+
     fun changeTownSpecialization(townId: Int, specialization: Specialization) {
-        this.getTownById(townId).getOrElse { throw CustomException.NotFoundException("Town was not found") }.specialization = specialization
+        getTownById(townId).orNull()?.specialization = specialization // Si no la encuentra que no haga nada.
     }
 
     fun isParticipating(user: User): Boolean = players.contains(user)
 
     private fun assignTowns() {  // Este metodo puede modificarse para hacer algun algoritmo mas copado.
-        if (townsAmount < playerAmount) throw CustomException.ModelException.IllegalGameException("There is not enough towns for the given players")
-        else if (players.isEmpty()) throw CustomException.ModelException.IllegalGameException("There is not enough players")
+        if (townsAmount < playerAmount) throw CustomException.BadRequest.IllegalGameException("There is not enough towns for the given players")
+        else if (players.isEmpty()) throw CustomException.BadRequest.IllegalGameException("There is not enough players")
 
         val townGroups = province.towns.shuffled().chunked(townsAmount / playerAmount)
         townGroups.zip(players).forEach { (townGroup, player) -> townGroup.forEach { it.owner = player } }
+    }
+
+    //cuando empieza el turno desbloquear todos mis towns y agregar gauchos a todos mis towns
+
+    fun moveGauchosBetweenTowns(userId: Int, movementForm: MovementForm) {
+        if(turno.id != userId)
+            throw CustomException.Forbidden.NotYourTurnException()
+        province.moveGauchosBetweenTowns(userId, movementForm)
+    }
+
+    fun attackTown(userId: Int, attackForm: AttackForm) {
+        if(turno.id != userId)
+            throw CustomException.Forbidden.NotYourTurnException()
+        province.attackTown(userId, attackForm)
     }
 }

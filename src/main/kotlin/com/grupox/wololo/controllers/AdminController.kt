@@ -18,7 +18,7 @@ import java.util.*
 
 @RequestMapping("/admin")
 @RestController
-class AdminController {
+class AdminController : BaseController() {
     @GetMapping("/games")
     @ApiOperation(value = "Gets the games stats")
     fun getGamesStats(@RequestParam("from", required = false) from: Date,
@@ -31,7 +31,7 @@ class AdminController {
             return games.map { it.status }.filter { it.toString() == status }.count()
         }
 
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
 
         return GameStats(numberOfGames("NEW"), numberOfGames("ONGOING"), numberOfGames("FINISHED"), numberOfGames("CANCELED"), games)
 
@@ -40,7 +40,7 @@ class AdminController {
     @GetMapping("/scoreboard")
     @ApiOperation(value = "Gets the scoreboard")
     fun getScoreBoard(@ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserStats> {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
         return RepoUsers.getUsersStats()
      //   TODO("devolver el scoreboard")
     }
@@ -49,17 +49,9 @@ class AdminController {
     @ApiOperation(value = "Gets the users stats")
     fun getUsersStats(@RequestParam("username", required = false) username: String?,
                       @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<User> {
-        JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+        checkAndGetToken(authCookie)
         // Seguramente no devuelva una lista de users sino algo como lista de UserStats (a confirmar)
 
         TODO("proveer estadísticas de los usuarios permitiendo seleccionar un usuario particular")
     }
-
-    @ExceptionHandler(CustomException.NotFoundException::class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundError(exception: CustomException) = exception.getJSON()
-
-    @ExceptionHandler(CustomException.UnauthorizedException::class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    fun handleExpiredTokenError(exception: CustomException) = exception.getJSON()
 }
