@@ -1,8 +1,6 @@
-[![Build Status](https://travis-ci.com/Tp-Tacs/TP-TACS.svg?token=4w7szGidZvKbpas7n4iA&branch=master)](https://travis-ci.com/Tp-Tacs/TP-TACS)
-
-[![BCH compliance](https://bettercodehub.com/edge/badge/Tp-Tacs/TP-TACS?branch=master)](https://bettercodehub.com/)
-
 # TP-TACS
+[![Build Status](https://travis-ci.com/Tp-Tacs/TP-TACS.svg?token=4w7szGidZvKbpas7n4iA&branch=master)](https://travis-ci.com/Tp-Tacs/TP-TACS) [![codecov](https://codecov.io/gh/Tp-Tacs/TP-TACS/branch/master/graph/badge.svg)](https://codecov.io/gh/Tp-Tacs/TP-TACS) [![BCH compliance](https://bettercodehub.com/edge/badge/Tp-Tacs/TP-TACS?branch=master)](https://bettercodehub.com/)
+
 Tp de la materia cuatrimestral Tecnicas Avanzadas en la Construccion de Software
 
 ## Como correr con Docker
