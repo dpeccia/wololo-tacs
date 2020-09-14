@@ -76,13 +76,13 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
         val game: Game = RepoGames.getGameById(id).getOrElse { throw CustomException.NotFoundException("Game was not found") }
         val participantsIds: List<Int> = gameData.participantsIds
 
+        RepoUsers.getUserById(userID).getOrElse {  throw CustomException.NotFoundException("User was not found")}.updateGamesLostStats()
+
         if ((participantsIds.size) <= 2) {
-            RepoGames.changeGameStatus(id, Status.CANCELED)
-            RepoUsers.updateUserGamesWon(participantsIds.find { it != userID }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")})
+            val winnerUserID : Int = participantsIds.find { it != userID }.toOption().getOrElse {throw CustomException.NotFoundException("Not enough participants from game")}
+            game.status = Status.CANCELED
+            RepoUsers.getUserById(winnerUserID).getOrElse {  throw CustomException.NotFoundException("User was not found")}.updateGamesWonStats()
         }
-
-        RepoUsers.updateUserGamesLost(userID)
-
 
 
     }
@@ -123,9 +123,11 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
         JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
 
         if (townData.specialization == "PRODUCTION"){
-            RepoGames.changeGameTownSpecialization(id,idTown,Production())
+
+            RepoGames.getGameById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(idTown, Production())
+
         } else if (townData.specialization == "DEFENSE"){
-            RepoGames.changeGameTownSpecialization(id,idTown,Defense())
+            RepoGames.getGameById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(idTown, Defense())
         }
 
     }

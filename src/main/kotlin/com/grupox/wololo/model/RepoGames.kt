@@ -37,14 +37,6 @@ object RepoGames {
 
     fun filterGames(predicate: (game: Game) -> Boolean) = gamesInDB.filter { predicate(it) }
 
-    fun changeGameStatus(id: Int, status: Status){
-        this.getGameById(id).getOrElse {throw CustomException.NotFoundException("Game was not found")}.status = status
-    }
-
-    fun changeGameTownSpecialization(gameId: Int, townId: Int, specialization: Specialization){
-        this.getGameById(gameId).getOrElse {throw CustomException.NotFoundException("Game was not found")}.changeTownSpecialization(townId, specialization)
-    }
-
     fun insertGame(game: Game) {
         gamesInDB.add(game)
     }
