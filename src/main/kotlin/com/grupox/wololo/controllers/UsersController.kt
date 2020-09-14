@@ -23,16 +23,13 @@ class UsersController : BaseController() {
     @PostMapping
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
     fun createUser(@RequestBody newUser: UserCredentials) {
-        if(RepoUsers.getUserByName(newUser.mail).nonEmpty())
-            throw CustomException.BadRequest.IllegalUserException("User already exists")
-        val user = User(3, newUser.mail, newUser.password, false, Stats(0,0)) // TODO el id se tiene que autoincrementar
-        RepoUsers.insert(user)
+        usersService.createUser(newUser)
     }
 
     @PostMapping("/tokens")
     @ApiOperation(value = "Log In")
     fun login(@RequestBody _user: UserCredentials): ResponseEntity<Void> {
-        val user = RepoUsers.getUserByLogin(_user) ?: throw CustomException.Unauthorized.BadLoginException("Bad Login")
+        val user = usersService.checkUserCredentials(_user)
 
         val jwt = JwtSigner.createJwt(user.id)
         val authCookie = ResponseCookie.fromClientResponse("X-Auth", jwt)
@@ -66,5 +63,4 @@ class UsersController : BaseController() {
         checkAndGetToken(authCookie)
         return usersService.getUsers(_username)
     }
-    // TODO obtener usuarios o un usuario en particular (sin stats)
 }
