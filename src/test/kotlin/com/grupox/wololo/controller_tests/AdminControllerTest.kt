@@ -16,10 +16,10 @@ class AdminControllerTest {
     fun fixture() {
     }
 
-    @Test
+    /*@Test
     fun `get scoreboard (user stats)`() {
         assertThat(adminService.getScoreBoard()).isNotEmpty
-    }
+    }*/
 
     @Test
     fun `get games by date`() {
