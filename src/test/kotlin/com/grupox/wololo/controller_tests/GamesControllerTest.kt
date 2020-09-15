@@ -101,10 +101,30 @@ class GamesControllerTest {
         }
     }
 
-//    @Test
-//    fun `surrender in a game`() {
-//        assertThat(gamesControllerService.surrender(1, 5)).isEqualTo(2)
-//    }
+    @Nested
+    inner class Surrender {
+        @Test
+        fun `surrender in a game with a user that doesnt belongs to the game throws MemberNotFoundException`() {
+            assertThrows<CustomException.NotFound.MemberNotFoundException>
+            { assertThat(gamesControllerService.surrender(1, 11)) }
+
+        }
+
+        @Test
+        fun `surrender in a game that doesn't exists throws GameNotFoundException `() {
+            assertThrows<CustomException.NotFound.GameNotFoundException>
+            { assertThat(gamesControllerService.surrender(9, 1)) }
+
+        }
+
+        @Test
+        fun `surrender in a game that exists sums one in games lost quantity `() {
+            gamesControllerService.surrender(1, 1)
+            assertThat(user1.stats.gamesLost > 0)
+
+        }
+    }
+
 
 //    @Test
 //    fun `Change town specialization`() {

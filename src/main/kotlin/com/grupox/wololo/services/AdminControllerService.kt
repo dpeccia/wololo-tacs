@@ -15,7 +15,7 @@ class AdminControllerService {
     }
 
     fun getGamesStats(from: Date, to: Date): GamePublicInfo {
-        val games: List<Game> = RepoGames.getAll().filter { it.date > from && it.date <to }
+        val games: List<Game> = RepoGames.getAll().filter { it.date >= from && it.date <= to }
 
         fun numberOfGames(status : String) : Int {
             return games.map { it.status }.filter { it.toString() == status }.count()
