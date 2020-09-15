@@ -1,20 +1,19 @@
 package com.grupox.wololo.model
 
-import com.grupox.wololo.model.helpers.UserCredentials
-import com.grupox.wololo.model.helpers.UserStats
-import com.grupox.wololo.model.helpers.UserWithoutStats
+import com.grupox.wololo.model.helpers.UserForm
+import com.grupox.wololo.model.helpers.UserPublicInfo
+import com.grupox.wololo.model.helpers.UserPublicInfoWithoutStats
 
 class User(val id: Int, mail: String, private var password: String, val esAdmin: Boolean, val stats: Stats = Stats(0,0)) {
     var mail: String = mail
         private set
 
     // TODO: MAKE THIS COMPARATION WITH ENCRYPTED PASSWORDS
-    fun isUserByLoginData(loginData: UserCredentials): Boolean = this.mail == loginData.mail && this.password == loginData.password
+    fun isUserByLoginData(loginData: UserForm): Boolean = this.mail == loginData.mail && this.password == loginData.password
 
-    fun toUserWithoutStats(): UserWithoutStats = UserWithoutStats(this.id, this.mail)
+    fun publicInfoWithoutStats(): UserPublicInfoWithoutStats = UserPublicInfoWithoutStats(this.id, this.mail)
 
-
-    fun toUserStats(): UserStats = UserStats(this.mail,this.stats.gamesWon,this.stats.gamesLost)
+    fun publicInfo(): UserPublicInfo = UserPublicInfo(this.mail,this.stats.gamesWon,this.stats.gamesLost)
 
     fun updateGamesWonStats(){
         this.stats.increaseGamesWon()

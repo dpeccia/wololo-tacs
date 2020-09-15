@@ -4,7 +4,7 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
-import com.grupox.wololo.model.helpers.UserCredentials
+import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.services.UsersService
 import io.mockk.every
 import io.mockk.mockkObject
@@ -33,18 +33,18 @@ class UserControllerTest {
         @Test
         fun `login with wrong username throws BadLoginException`() {
             assertThrows<CustomException.Unauthorized.BadLoginException>
-                {usersService.checkUserCredentials(UserCredentials("wrong_name", "example_admin"))}
+                {usersService.checkUserCredentials(UserForm("wrong_name", "example_admin"))}
         }
 
         @Test
         fun `login with wrong password throws BadLoginException`() {
             assertThrows<CustomException.Unauthorized.BadLoginException>
-                {usersService.checkUserCredentials(UserCredentials("example_admin", "wrong_password"))}
+                {usersService.checkUserCredentials(UserForm("example_admin", "wrong_password"))}
         }
 
         @Test
         fun `successful login doesnt throw an Exception`() {
-            assertDoesNotThrow{usersService.checkUserCredentials(UserCredentials("example_admin", "example_admin"))}
+            assertDoesNotThrow{usersService.checkUserCredentials(UserForm("example_admin", "example_admin"))}
         }
     }
 

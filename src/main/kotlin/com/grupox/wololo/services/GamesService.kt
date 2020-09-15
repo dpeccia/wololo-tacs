@@ -1,6 +1,7 @@
 package com.grupox.wololo.services
 
 import arrow.core.getOrElse
+import arrow.core.getOrHandle
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
@@ -15,20 +16,20 @@ class GamesService {
 
     fun surrender(gameId: Int, userId : String) : Int? {
 
-        val game: Game = RepoGames.getById(gameId).getOrElse { throw CustomException.NotFound.GameNotFoundException() }
-        val user: User = game.getMember(userId.toInt()).getOrElse { throw CustomException.NotFound.UserNotFoundException() }
+        val game: Game = RepoGames.getById(gameId).getOrHandle { throw it }
+        val user: User = game.getMember(userId.toInt()).getOrHandle { throw it }
         val loserUserId: Int = user.id
 
         val participantsIds: List<Int> = game.players.map{it.id}
 
-        val loserUser: User = RepoUsers.getById(loserUserId).getOrElse {  throw CustomException.NotFound.UserNotFoundException() }
+        val loserUser: User = RepoUsers.getById(loserUserId).getOrHandle {throw it }
 
         loserUser.updateGamesLostStats()
 
-        if ((participantsIds.size) <= 2) {
+        if (participantsIds.size <= 2) {
         val winnerUserID : Int = participantsIds.find { it != userId.toInt() }.toOption().getOrElse { throw CustomException.BadRequest.IllegalGameException("Not enough participants from game") }
         game.status = Status.CANCELED
-        RepoUsers.getById(winnerUserID).getOrElse {  throw CustomException.NotFound.UserNotFoundException() }.updateGamesWonStats()
+        RepoUsers.getById(winnerUserID).getOrHandle { throw it }.updateGamesWonStats()
     }
         return loserUser.stats.gamesLost
     }
@@ -36,19 +37,19 @@ class GamesService {
     fun changeSpecialization(specialization: String, gameId: Int, townId: Int) {
 
         if (specialization == "PRODUCTION"){
-            RepoGames.getById(gameId).getOrElse {throw CustomException.NotFound.GameNotFoundException() }.changeTownSpecialization(townId, Production())
+            RepoGames.getById(gameId).getOrHandle {throw it }.changeTownSpecialization(townId, Production())
         } else if (specialization == "DEFENSE"){
-            RepoGames.getById(gameId).getOrElse {throw CustomException.NotFound.GameNotFoundException() }.changeTownSpecialization(townId, Defense())
+            RepoGames.getById(gameId).getOrHandle {throw it }.changeTownSpecialization(townId, Defense())
         }
     }
 
     fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm) {
-        val game = RepoGames.getGameByIdAndUser(gameId, userId)
+        val game = RepoGames.getById(gameId).getOrHandle { throw it }
         game.moveGauchosBetweenTowns(userId, movementData)
     }
 
     fun attackTown(userId: Int, gameId: Int, attackData: AttackForm) {
-        val game = RepoGames.getGameByIdAndUser(gameId, userId)
+        val game = RepoGames.getById(gameId).getOrHandle { throw it }
         game.attackTown(userId, attackData)
     }
 }
