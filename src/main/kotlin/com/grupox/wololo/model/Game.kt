@@ -29,10 +29,6 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
 
     fun getMember(userId: Int): Either<CustomException.NotFound, User> = players.find { it.id == userId }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
 
-    fun changeTownSpecialization(townId: Int, specialization: Specialization) {
-        getTownById(townId).getOrHandle { throw it }.specialization = specialization
-    }
-
     fun isParticipating(user: User): Boolean = players.contains(user)
 
     fun isParticipating(userId: Int): Boolean = players.any { it.id == userId }
@@ -47,13 +43,25 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
 
     //cuando empieza el turno desbloquear todos mis towns y agregar gauchos a todos mis towns
 
+    /* ACTIONS */
+    fun changeTownSpecialization(userId: Int, townId: Int, specialization: Specialization) {
+        checkForbiddenAction(userId)
+        getTownById(townId).getOrHandle { throw it }.specialization = specialization
+    }
+
     fun moveGauchosBetweenTowns(userId: Int, movementForm: MovementForm) {
-        if (turno.id != userId) throw CustomException.Forbidden.NotYourTurnException()
+        checkForbiddenAction(userId)
         province.moveGauchosBetweenTowns(userId, movementForm)
     }
 
     fun attackTown(userId: Int, attackForm: AttackForm) {
-        if (turno.id != userId) throw CustomException.Forbidden.NotYourTurnException()
+        checkForbiddenAction(userId)
         province.attackTown(userId, attackForm)
+    }
+    /* ACTIONS-END */
+
+    private fun checkForbiddenAction(userId: Int){
+        if(!isParticipating(userId)) throw CustomException.Forbidden.NotAMemberException()
+        if (turno.id != userId) throw CustomException.Forbidden.NotYourTurnException()
     }
 }

@@ -39,17 +39,11 @@ class GamesControllerService {
 
     fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm) {
         val game = RepoGames.getById(gameId).getOrHandle { throw it }
-
-        if (!game.isParticipating(userId)) throw CustomException.Forbidden.NotAMemberException()
-
         game.moveGauchosBetweenTowns(userId, movementData)
     }
 
     fun attackTown(userId: Int, gameId: Int, attackData: AttackForm) {
         val game = RepoGames.getById(gameId).getOrHandle { throw it }
-
-        if (!game.isParticipating(userId)) throw CustomException.Forbidden.NotAMemberException()
-
         game.attackTown(userId, attackData)
     }
 
@@ -105,11 +99,9 @@ class GamesControllerService {
     fun updateTownSpecialization(userId: Int, gameId: Int, townId: Int, newSpecialization: String){
         val game = RepoGames.getById(gameId).getOrHandle { throw it }
 
-        if(!game.isParticipating(userId)) throw CustomException.Forbidden.NotAMemberException()
-
         when (newSpecialization.toUpperCase()) {
-            "PRODUCTION" -> game.changeTownSpecialization(townId, Production())
-            "DEFENSE"    -> game.changeTownSpecialization(townId, Defense())
+            "PRODUCTION" -> game.changeTownSpecialization(userId, townId, Production())
+            "DEFENSE"    -> game.changeTownSpecialization(userId, townId, Defense())
         }
     }
 }
