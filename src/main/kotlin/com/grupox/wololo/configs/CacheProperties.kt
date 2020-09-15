@@ -1,4 +1,4 @@
-package com.grupox.wololo.model.configs
+package com.grupox.wololo.configs
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties

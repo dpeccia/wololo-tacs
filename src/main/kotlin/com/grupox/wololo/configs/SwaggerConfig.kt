@@ -1,4 +1,4 @@
-package com.grupox.wololo.model.configs
+package com.grupox.wololo.configs
 
 import com.google.common.base.Predicates
 import org.springframework.context.annotation.Bean
