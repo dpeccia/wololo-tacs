@@ -27,7 +27,7 @@ import kotlin.collections.ArrayList
 
 @RequestMapping("/games")
 @RestController
-class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private val topoData: TopoData) : BaseController() {
+class GamesController : BaseController() {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
 
@@ -38,48 +38,15 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
                  @RequestParam("date", required = false) date: Date?,
                  @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<Game> {
         val token = checkAndGetToken(authCookie)
-        val user = RepoUsers.getById(token.body.subject.toInt()).getOrHandle { throw it }
-
-        var games: List<Game> = RepoGames.filter { it.isParticipating(user) }
-
-        if(status != null)
-            games = games.filter { it.status == status }
-
-        if(date != null)
-            games = games.filter { it.date == date }
-
-        games = when(sort) {
-            "id"              -> games.sortedBy { it.id }
-            "date"            -> games.sortedBy { it.date }  // Checkear que Date sea comparable
-            "numberOfTowns"   -> games.sortedBy { it.townsAmount }
-            "numberOfPlayers" -> games.sortedBy { it.playerAmount }
-            else              -> games
-        }
-
-        return games
+        val userId = token.body.subject.toInt()
+        return gamesControllerService.getGames(userId, sort, status, date)
     }
-
 
     @PostMapping
     @ApiOperation(value = "Creates a new game")
     fun createGame(@RequestBody form: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
         checkAndGetToken(authCookie)
-
-        val game: Game = Either.fx<CustomException, Game> {
-            val users = !form.participantsIds.map { RepoUsers.getById(it) }
-                                            .sequence(Either.applicative()).fix().map{ it.fix() }
-
-            val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
-
-            val towns = !townsData.map { data ->
-                topoData.requestElevation(data.coordinates).map { elevation ->
-                    Town(data.id, data.name, data.coordinates, elevation.toDouble())
-                }
-            }.sequence(Either.applicative()).fix().map { it.fix() }
-            Game(0,users,  Province(0,form.provinceName, ArrayList(towns)))
-        }.getOrHandle { throw it }
-
-        RepoGames.insert(game)
+        gamesControllerService.createGame(form)
     }
 
     @GetMapping("/{id}")
@@ -87,37 +54,17 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     fun getGameById(@PathVariable("id") id: Int,
                     @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         val token = checkAndGetToken(authCookie)
-        val user = RepoUsers.getById(token.body.subject.toInt()).getOrHandle { throw it}
-        val game = RepoGames.getById(id).getOrHandle { throw it }
-
-        if(!game.isParticipating(user)) throw CustomException.Unauthorized.TokenException("User not participating in this game") // Por ahi no corresponde esta excepcion
-        return game
+        val userId = token.body.subject.toInt()
+        return gamesControllerService.getGame(id, userId)
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Surrenders in a game (it becomes CANCELED)")
     fun surrender(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-
-        val userId: String = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }.body.subject
-        val game: Game = RepoGames.getById(id).getOrHandle { throw it }
-        val user: User = game.getMember(userId.toInt()).getOrHandle { throw it }
-        val loserUserId: Int = user.id
-
-        val participantsIds: List<Int> = game.players.map{it.id}
-
-        val loserUser: User = RepoUsers.getById(loserUserId).getOrHandle {  throw it }
-
-        loserUser.updateGamesLostStats()
-
-        if (participantsIds.size <= 2) {
-            val winnerUserID : Int = participantsIds.find { it != userId.toInt() }.toOption().getOrElse {throw CustomException.BadRequest.IllegalGameException("Not enough participants from game") }
-            game.status = Status.CANCELED
-            RepoUsers.getById(winnerUserID).getOrHandle {  throw it }.updateGamesWonStats()
-        }
+        val token = checkAndGetToken(authCookie)
+        val userId: Int = token.body.subject.toInt()
+        gamesControllerService.surrender(id, userId)
     }
-
-
-
 
     @PostMapping("/{id}/actions/movement")
     @ApiOperation(value = "Moves the gauchos between towns")
@@ -125,8 +72,8 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             @PathVariable("id") id: Int,
             @RequestBody movementData: MovementForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        val userId = checkAndGetToken(authCookie).body.subject
-        gamesControllerService.moveGauchosBetweenTowns(userId.toInt(), id, movementData)
+        val userId = checkAndGetToken(authCookie).body.subject.toInt()
+        gamesControllerService.moveGauchosBetweenTowns(userId, id, movementData)
     }
 
     @PostMapping("/{id}/actions/attack")
@@ -135,27 +82,20 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             @PathVariable("id") id: Int,
             @RequestBody attackData: AttackForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        val userId = checkAndGetToken(authCookie).body.subject
-        gamesControllerService.attackTown(userId.toInt(), id, attackData)
+        val userId = checkAndGetToken(authCookie).body.subject.toInt()
+        gamesControllerService.attackTown(userId, id, attackData)
     }
 
     @PutMapping("/{id}/towns/{idTown}")
     @ApiOperation(value = "Updates the town specialization")
     fun updateTownSpecialization(
             @PathVariable("id") id: Int,
-            @PathVariable("idTown") idTown: Int,
-            @RequestBody townData: TownForm,
+            @PathVariable("idTown") townId: Int,
+            @RequestBody newSpecialization: String,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        checkAndGetToken(authCookie)
-
-        if (townData.specialization == "PRODUCTION"){
-
-            RepoGames.getById(id).getOrHandle { throw it }.changeTownSpecialization(idTown, Production())
-
-        } else if (townData.specialization == "DEFENSE"){
-            RepoGames.getById(id).getOrHandle { throw it }.changeTownSpecialization(idTown, Defense())
-        }
-
+        val token = checkAndGetToken(authCookie)
+        val userId = token.body.subject.toInt()
+        gamesControllerService.updateTownSpecialization(userId, id, townId, newSpecialization)
     }
 
     @GetMapping("/{id}/towns/{idTown}")
@@ -172,6 +112,6 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
     @ApiOperation(value = "Gets all provinces")
     fun getProvinces(@ApiIgnore @CookieValue("X-Auth") authCookie : String?) : List<ProvinceGeoRef> {
         checkAndGetToken(authCookie)
-        return geoRef.requestAvailableProvinces().getOrHandle { throw it }
+        return gamesControllerService.getProvinces()
     }
 }

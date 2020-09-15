@@ -2,8 +2,10 @@ package com.grupox.wololo.model_tests
 
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import kotlin.collections.ArrayList
 
 class GameTests {
@@ -45,6 +47,38 @@ class GameTests {
         @Test
         fun `Can successfully create a game with none empty list of players`() {
             assertDoesNotThrow { Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns))) }
+        }
+
+        @Test
+        fun `Towns specialization is PRODUCTION by default`() {
+            val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
+            val aTown = game.province.towns[0]
+            assertThat(aTown.specialization).isInstanceOf(Production::class.java)
+        }
+
+        @Test
+        fun `Can change a towns specialization from PRODUCTION to DEFENSE`() {
+            val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
+            val aTown = game.province.towns[0]
+            game.changeTownSpecialization(aTown.id, Defense())
+            assertThat(aTown.specialization).isInstanceOf(Defense::class.java)
+        }
+
+        @Test
+        fun `Can change a towns specialization from DEFENSE to PRODUCTION`() {
+            val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
+            val aTown = game.province.towns[0]
+            game.changeTownSpecialization(aTown.id, Defense())
+            // Change back to production
+            game.changeTownSpecialization(aTown.id, Production())
+            assertThat(aTown.specialization).isInstanceOf(Production::class.java)
+        }
+
+        @Test
+        fun `Attempting to change the specialization of a town that doesnt exist in the game will result in an exception`() {
+            val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
+            val aTownThatDoesntExistId = 9999
+            assertThrows<CustomException.NotFound.TownNotFoundException> { game.changeTownSpecialization(aTownThatDoesntExistId, Defense()) }
         }
     }
 }

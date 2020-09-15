@@ -9,21 +9,19 @@ import com.grupox.wololo.model.helpers.MovementForm
 
 
 class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) {
-
-    //val id: Int = 0 // TODO: Autogenerada
-
     val townsAmount: Int
         get() = province.towns.size
 
     val playerAmount: Int
         get() = players.size
 
+    //val id: Int = 0 // TODO: Autogenerada
+
     lateinit var turno: User
     
-    var date: Date = Date()
+    var date: Date = Date.from(Instant.now())
 
     init {
-        this.date = Date.from(Instant.now())
         assignTowns()
     }
 
@@ -50,17 +48,12 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     //cuando empieza el turno desbloquear todos mis towns y agregar gauchos a todos mis towns
 
     fun moveGauchosBetweenTowns(userId: Int, movementForm: MovementForm) {
-        checkIfForbidden(userId)
+        if (turno.id != userId) throw CustomException.Forbidden.NotYourTurnException()
         province.moveGauchosBetweenTowns(userId, movementForm)
     }
 
     fun attackTown(userId: Int, attackForm: AttackForm) {
-        checkIfForbidden(userId)
-        province.attackTown(userId, attackForm)
-    }
-
-    private fun checkIfForbidden(userId: Int){
-        if (!isParticipating(userId)) throw CustomException.Forbidden.NotAMemberException()
         if (turno.id != userId) throw CustomException.Forbidden.NotYourTurnException()
+        province.attackTown(userId, attackForm)
     }
 }

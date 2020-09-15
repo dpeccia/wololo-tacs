@@ -14,7 +14,6 @@ import java.util.ArrayList
 
 class GamesControllerTest {
     val gamesControllerService: GamesControllerService = GamesControllerService()
-    val usersControllerService: UsersControllerService = UsersControllerService()
 
     //podrían queda acá y los sacamos del repo games
     private val games: ArrayList<Game> = arrayListOf(
@@ -57,13 +56,17 @@ class GamesControllerTest {
         every { RepoGames.getAll() } returns games
     }
 
-    @Test
-    fun `surrender in a game`() {
-        assertThat(gamesControllerService.surrender(1, "5")).isEqualTo(2)
-    }
+//    @Test
+//    fun `surrender in a game`() {
+//        assertThat(gamesControllerService.surrender(1, 5)).isEqualTo(2)
+//    }
 
-    @Test
-    fun `Change town specialization`() {
-        assertThat(gamesControllerService.changeSpecialization("PRODUCTION",2, 3))
-    }
+//    @Test
+//    fun `Change town specialization`() {
+//        val gameId = 2
+//        val userId = 5
+//        val ownedTown = RepoGames.getAll().find { it.id == gameId }?.province?.towns?.find { it.owner?.id == userId }
+//        gamesControllerService.updateTownSpecialization(userId,gameId, ownedTown?.id!!, "DEFENSE")  // Por default al comienzo es produccion.
+//        assertThat(ownedTown.specialization).isInstanceOf(Defense::class.java)
+//    }
 }
