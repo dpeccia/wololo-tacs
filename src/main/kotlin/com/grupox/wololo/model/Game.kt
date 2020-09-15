@@ -25,7 +25,7 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
 
     init {
         assignTowns()
-        startTurn()
+        startGame()
     }
     //endregion
 
@@ -38,9 +38,10 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
         townGroups.zip(players).forEach { (townGroup, player) -> townGroup.forEach { it.owner = player } }
     }
 
-    private fun startTurn() {
+    private fun startGame() {
         turn = players.shuffled().first()
         province.addGauchosToAllTowns()
+        status = Status.ONGOING
     }
 
     private fun changeTurn() {
@@ -53,9 +54,12 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     }
 
     private fun checkForbiddenAction(user: User) {
+        if (status == Status.FINISHED || status == Status.CANCELED) throw CustomException.Forbidden.FinishedGameException()
         if (!isParticipating(user)) throw CustomException.Forbidden.NotAMemberException()
         if (turn != user) throw CustomException.Forbidden.NotYourTurnException()
     }
+
+    private fun userWon(user: User): Boolean = province.allOccupiedTownsAreFrom(user)
     //endregion
 
     //region Public Methods
@@ -68,7 +72,12 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     fun finishTurn(user: User) {
         checkForbiddenAction(user)
         province.unlockAllTownsFrom(user)
-        changeTurn()
+        if(userWon(user)) {
+            status = Status.FINISHED
+            TODO("update user and game stats")
+        }
+        else
+            changeTurn()
     }
 
     fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {

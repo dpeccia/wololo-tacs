@@ -18,6 +18,8 @@ class Province(id: Int, val name: String, val towns: ArrayList<Town>){
 
     fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
 
+    fun allOccupiedTownsAreFrom(user: User): Boolean = towns.filter { it.owner != null }.stream().allMatch { it.owner == user }
+
     fun addGauchosToAllTowns() {
         towns.forEach { it.addGauchos(maxAltitude(), minAltitude()) }
     }
