@@ -6,6 +6,7 @@ import java.util.Date
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
+import kotlin.random.Random.Default.nextInt
 
 
 class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) {
@@ -17,12 +18,13 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
 
     //val id: Int = 0 // TODO: Autogenerada
 
-    lateinit var turno: User
+    lateinit var turn: User // No sacar el "lateinit"
     
     var date: Date = Date.from(Instant.now())
 
     init {
         assignTowns()
+        turn = players[nextInt(from = 0, until = playerAmount)] // IMPORTANTE: va despues de la asignacion. La asignacion chequea que el game sea valido.
     }
 
     fun getTownById(idTown: Int): Either<CustomException.NotFound, Town> = province.towns.find { it.id == idTown }.rightIfNotNull { CustomException.NotFound.TownNotFoundException() }
@@ -62,6 +64,6 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
 
     private fun checkForbiddenAction(userId: Int){
         if(!isParticipating(userId)) throw CustomException.Forbidden.NotAMemberException()
-        if (turno.id != userId) throw CustomException.Forbidden.NotYourTurnException()
+        if (turn.id != userId) throw CustomException.Forbidden.NotYourTurnException()
     }
 }

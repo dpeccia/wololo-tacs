@@ -5,7 +5,6 @@ import com.grupox.wololo.model.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertSame
 import kotlin.collections.ArrayList
 
 class GameTests {
@@ -59,18 +58,18 @@ class GameTests {
         @Test
         fun `Can change a towns specialization from PRODUCTION to DEFENSE`() {
             val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
-            val aTown = game.province.towns[0]
-            game.changeTownSpecialization(aTown.id, Defense())
+            val aTown = game.province.towns.find { it.owner?.id == game.turn.id }
+            game.changeTownSpecialization(aTown?.owner?.id!!, aTown.id, Defense())
             assertThat(aTown.specialization).isInstanceOf(Defense::class.java)
         }
 
         @Test
         fun `Can change a towns specialization from DEFENSE to PRODUCTION`() {
             val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
-            val aTown = game.province.towns[0]
-            game.changeTownSpecialization(aTown.id, Defense())
+            val aTown = game.province.towns.find { it.owner?.id == game.turn.id }
+            game.changeTownSpecialization(aTown?.owner?.id!!, aTown.id, Defense())
             // Change back to production
-            game.changeTownSpecialization(aTown.id, Production())
+            game.changeTownSpecialization(aTown.owner?.id!!, aTown.id, Production())
             assertThat(aTown.specialization).isInstanceOf(Production::class.java)
         }
 
@@ -78,7 +77,8 @@ class GameTests {
         fun `Attempting to change the specialization of a town that doesnt exist in the game will result in an exception`() {
             val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
             val aTownThatDoesntExistId = 9999
-            assertThrows<CustomException.NotFound.TownNotFoundException> { game.changeTownSpecialization(aTownThatDoesntExistId, Defense()) }
+            val aValidUserID = game.turn.id
+            assertThrows<CustomException.NotFound.TownNotFoundException> { game.changeTownSpecialization(aValidUserID, aTownThatDoesntExistId, Defense()) }
         }
     }
 }
