@@ -74,7 +74,7 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
         province.unlockAllTownsFrom(user)
         if(userWon(user)) {
             status = Status.FINISHED
-            TODO("update user and game stats")
+            // TODO update user and game stats
         }
         else
             changeTurn()

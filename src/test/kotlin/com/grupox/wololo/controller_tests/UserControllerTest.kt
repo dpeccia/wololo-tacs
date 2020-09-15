@@ -28,7 +28,6 @@ class UserControllerTest {
     }
 
     @Nested
-    @DisplayName("POST /users/tokens")
     inner class LoginTest {
         @Test
         fun `login with wrong username throws BadLoginException`() {
@@ -49,7 +48,6 @@ class UserControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /users")
     inner class GetUsersTest {
         @Test
         fun `get users returns a list of 2 elements`() {
