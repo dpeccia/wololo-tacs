@@ -1,7 +1,6 @@
 package com.grupox.wololo.model
 
-import arrow.core.Option
-import arrow.core.toOption
+import arrow.core.*
 import java.time.Instant
 import java.util.Date
 import com.grupox.wololo.errors.CustomException
@@ -28,15 +27,17 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
         assignTowns()
     }
 
-    fun getTownById(idTown: Int): Option<Town> = province.towns.find { it.id == idTown }.toOption()
+    fun getTownById(idTown: Int): Either<CustomException.NotFound, Town> = province.towns.find { it.id == idTown }.rightIfNotNull { CustomException.NotFound.TownNotFoundException() }
 
-    fun getMember(userId: Int): Option<User> = players.find { it.id == userId }.toOption()
+    fun getMember(userId: Int): Either<CustomException.NotFound, User> = players.find { it.id == userId }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
 
     fun changeTownSpecialization(townId: Int, specialization: Specialization) {
-        getTownById(townId).orNull()?.specialization = specialization // Si no la encuentra que no haga nada.
+        getTownById(townId).getOrHandle { throw it }.specialization = specialization
     }
 
     fun isParticipating(user: User): Boolean = players.contains(user)
+
+    fun isParticipating(userId: Int): Boolean = players.any { it.id == userId }
 
     private fun assignTowns() {  // Este metodo puede modificarse para hacer algun algoritmo mas copado.
         if (townsAmount < playerAmount) throw CustomException.BadRequest.IllegalGameException("There is not enough towns for the given players")
@@ -49,14 +50,17 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     //cuando empieza el turno desbloquear todos mis towns y agregar gauchos a todos mis towns
 
     fun moveGauchosBetweenTowns(userId: Int, movementForm: MovementForm) {
-        if(turno.id != userId)
-            throw CustomException.Forbidden.NotYourTurnException()
+        checkIfForbidden(userId)
         province.moveGauchosBetweenTowns(userId, movementForm)
     }
 
     fun attackTown(userId: Int, attackForm: AttackForm) {
-        if(turno.id != userId)
-            throw CustomException.Forbidden.NotYourTurnException()
+        checkIfForbidden(userId)
         province.attackTown(userId, attackForm)
+    }
+
+    private fun checkIfForbidden(userId: Int){
+        if (!isParticipating(userId)) throw CustomException.Forbidden.NotAMemberException()
+        if (turno.id != userId) throw CustomException.Forbidden.NotYourTurnException()
     }
 }

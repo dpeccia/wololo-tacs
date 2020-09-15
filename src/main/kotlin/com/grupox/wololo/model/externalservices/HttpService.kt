@@ -1,4 +1,4 @@
-package com.grupox.wololo.model.services
+package com.grupox.wololo.model.externalservices
 
 import arrow.core.*
 import arrow.core.extensions.list.foldable.foldLeft

@@ -1,17 +1,12 @@
 package com.grupox.wololo.controllers
 
 import arrow.core.extensions.list.functorFilter.filter
-import arrow.core.getOrHandle
-import arrow.core.toOption
-import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.helpers.GameStats
-import com.grupox.wololo.model.helpers.JwtSigner
-import com.grupox.wololo.model.helpers.UserStats
+import com.grupox.wololo.model.helpers.GamePublicInfo
+import com.grupox.wololo.model.helpers.UserPublicInfo
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import io.swagger.annotations.ApiOperation
-import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
 import java.util.*
@@ -23,7 +18,7 @@ class AdminController : BaseController() {
     @ApiOperation(value = "Gets the games stats")
     fun getGamesStats(@RequestParam("from", required = false) from: Date,
                       @RequestParam("to", required = false) to: Date,
-                      @ApiIgnore @CookieValue("X-Auth") authCookie : String?): GameStats {
+                      @ApiIgnore @CookieValue("X-Auth") authCookie : String?): GamePublicInfo {
 
         val games: List<Game> = RepoGames.getAll().filter { it.date >= from && it.date <= to  }
 
@@ -33,13 +28,13 @@ class AdminController : BaseController() {
 
         checkAndGetToken(authCookie)
 
-        return GameStats(numberOfGames("NEW"), numberOfGames("ONGOING"), numberOfGames("FINISHED"), numberOfGames("CANCELED"), games)
+        return GamePublicInfo(numberOfGames("NEW"), numberOfGames("ONGOING"), numberOfGames("FINISHED"), numberOfGames("CANCELED"), games)
 
     }
 
     @GetMapping("/scoreboard")
     @ApiOperation(value = "Gets the scoreboard")
-    fun getScoreBoard(@ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserStats> {
+    fun getScoreBoard(@ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserPublicInfo> {
         checkAndGetToken(authCookie)
         return RepoUsers.getUsersStats()
      //   TODO("devolver el scoreboard")

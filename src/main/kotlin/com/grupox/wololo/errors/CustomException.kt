@@ -4,19 +4,20 @@ data class ExceptionJSON(val message: String?)
 
 sealed class CustomException(message: String) : Exception(message){
     sealed class NotFound(message: String) : CustomException("Not found: $message") {
-        class UserNotFoundException : NotFound("User not found in database")
-        class GameNotFoundException : NotFound("Game not found in database")
-        class TownNotFoundException : NotFound("Town was not found")
+        class UserNotFoundException : NotFound("user not found in database")
+        class GameNotFoundException : NotFound("game not found in database")
+        class TownNotFoundException : NotFound("town was not found")
+        class MemberNotFoundException : NotFound("there is no such member in the game")
     }
 
     sealed class Unauthorized(message: String) : CustomException("Unauthorized: $message") {
         class TokenException(message: String) : Unauthorized(message)
-        class BadLoginException(message: String) : Unauthorized(message)
+        class BadLoginException : Unauthorized("wrong username or password")
     }
 
     sealed class Service(message: String) : CustomException("Service exception: $message") {
         class UnsuccessfulExternalRequestException(apiName: String, statusCode: Int)
-            : Service("Request to $apiName API servers returned status code: $statusCode")
+            : Service("request to $apiName API servers returned status code: $statusCode")
         class InvalidExternalResponseException(message: String)
             : Service(message)
     }
@@ -25,12 +26,12 @@ sealed class CustomException(message: String) : Exception(message){
         class IllegalGameException(message: String) : BadRequest(message)
         class IllegalUserException(message: String) : BadRequest(message)
         class NotEnoughGauchosException(toMoveQty: Int, actualQty: Int)
-            : BadRequest("You want to move $toMoveQty gauchos, when there are only $actualQty in this Town")
+            : BadRequest("you want to move $toMoveQty gauchos, when there are only $actualQty in this Town")
     }
 
     sealed class Forbidden(message: String) : CustomException("Forbidden: $message") {
-        class NotYourTurnException : Forbidden("It´s not your Turn to play")
-        class NotAMemberException : Forbidden("You are not a member of this Game")
+        class NotYourTurnException : Forbidden("it´s not your Turn to play")
+        class NotAMemberException : Forbidden("you are not a member of this Game")
         class IllegalGauchoMovement(message: String) : Forbidden(message)
         class IllegalAttack(message: String) : Forbidden(message)
     }

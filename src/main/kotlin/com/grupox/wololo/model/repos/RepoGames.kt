@@ -1,8 +1,6 @@
 package com.grupox.wololo.model.repos
 
-import arrow.core.Option
-import arrow.core.getOrElse
-import arrow.core.toOption
+import arrow.core.*
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import java.util.*
@@ -32,23 +30,9 @@ object RepoGames : Repository<Game> {
 
     override fun getAll(): List<Game> = gamesInDB
 
-    override fun getById(id: Int): Option<Game> = gamesInDB.find { it.id == id }.toOption()
-
-    fun getGameByIdAndUser(gameId: Int, userId: Int): Game {
-        val game = this.getById(gameId).getOrElse {throw CustomException.NotFound.GameNotFoundException()}
-        game.getMember(userId).getOrElse { throw CustomException.Forbidden.NotAMemberException() }
-        return game
-    }
+    override fun getById(id: Int): Either<CustomException.NotFound, Game> = gamesInDB.find { it.id == id }.rightIfNotNull { CustomException.NotFound.GameNotFoundException() }
 
     override fun filter(predicate: (game: Game) -> Boolean) = gamesInDB.filter { predicate(it) }
-
-    fun changeGameStatus(id: Int, status: Status){
-        getById(id).getOrElse { throw CustomException.NotFound.GameNotFoundException() }.status = status
-    }
-
-    fun changeGameTownSpecialization(gameId: Int, townId: Int, specialization: Specialization){
-        getById(gameId).getOrElse {throw CustomException.NotFound.GameNotFoundException()}.changeTownSpecialization(townId, specialization)
-    }
 
     override fun insert(obj: Game) {
         gamesInDB.add(obj)

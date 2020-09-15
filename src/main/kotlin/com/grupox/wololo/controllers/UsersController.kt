@@ -1,11 +1,8 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.JwtSigner
-import com.grupox.wololo.model.helpers.UserCredentials
-import com.grupox.wololo.model.helpers.UserWithoutStats
-import com.grupox.wololo.model.repos.RepoUsers
+import com.grupox.wololo.model.helpers.UserForm
+import com.grupox.wololo.model.helpers.UserPublicInfoWithoutStats
 import com.grupox.wololo.services.UsersService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,13 +19,13 @@ class UsersController : BaseController() {
 
     @PostMapping
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
-    fun createUser(@RequestBody newUser: UserCredentials) {
+    fun createUser(@RequestBody newUser: UserForm) {
         usersService.createUser(newUser)
     }
 
     @PostMapping("/tokens")
     @ApiOperation(value = "Log In")
-    fun login(@RequestBody _user: UserCredentials): ResponseEntity<Void> {
+    fun login(@RequestBody _user: UserForm): ResponseEntity<Void> {
         val user = usersService.checkUserCredentials(_user)
 
         val jwt = JwtSigner.createJwt(user.id)
@@ -59,7 +56,7 @@ class UsersController : BaseController() {
     @GetMapping
     @ApiOperation(value = "Gets the users without stats")
     fun getUsers(@RequestParam("username", required = false) _username: String?,
-                 @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserWithoutStats> {
+                 @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserPublicInfoWithoutStats> {
         checkAndGetToken(authCookie)
         return usersService.getUsers(_username)
     }
