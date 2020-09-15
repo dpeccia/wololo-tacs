@@ -66,6 +66,13 @@ class GamesController : BaseController() {
         gamesControllerService.surrender(id, userId)
     }
 
+    @PutMapping("/{id}/actions/turn")
+    @ApiOperation(value = "Finishes the current Turn")
+    fun finishTurn(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
+        val userId = checkAndGetToken(authCookie).body.subject.toInt()
+        gamesControllerService.finishTurn(userId, id)
+    }
+
     @PostMapping("/{id}/actions/movement")
     @ApiOperation(value = "Moves the gauchos between towns")
     fun moveGauchosBetweenTowns(

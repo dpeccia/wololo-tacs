@@ -37,14 +37,22 @@ class GamesControllerService {
         }
     }
 
+    fun finishTurn(userId: Int, gameId: Int) {
+        val game = RepoGames.getById(gameId).getOrHandle {throw it }
+        val user = RepoUsers.getById(userId).getOrHandle {throw it }
+        game.finishTurn(user)
+    }
+
     fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm) {
         val game = RepoGames.getById(gameId).getOrHandle { throw it }
-        game.moveGauchosBetweenTowns(userId, movementData)
+        val user = RepoUsers.getById(userId).getOrHandle {throw it }
+        game.moveGauchosBetweenTowns(user, movementData)
     }
 
     fun attackTown(userId: Int, gameId: Int, attackData: AttackForm) {
         val game = RepoGames.getById(gameId).getOrHandle { throw it }
-        game.attackTown(userId, attackData)
+        val user = RepoUsers.getById(userId).getOrHandle {throw it }
+        game.attackTown(user, attackData)
     }
 
     fun getProvinces() = geoRef.requestAvailableProvinces().getOrHandle { throw it }
@@ -98,10 +106,10 @@ class GamesControllerService {
 
     fun updateTownSpecialization(userId: Int, gameId: Int, townId: Int, newSpecialization: String){
         val game = RepoGames.getById(gameId).getOrHandle { throw it }
-
+        val user = RepoUsers.getById(userId).getOrHandle { throw it }
         when (newSpecialization.toUpperCase()) {
-            "PRODUCTION" -> game.changeTownSpecialization(userId, townId, Production())
-            "DEFENSE"    -> game.changeTownSpecialization(userId, townId, Defense())
+            "PRODUCTION" -> game.changeTownSpecialization(user, townId, Production())
+            "DEFENSE"    -> game.changeTownSpecialization(user, townId, Defense())
         }
     }
 }

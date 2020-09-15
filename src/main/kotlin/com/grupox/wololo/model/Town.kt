@@ -1,4 +1,4 @@
-package com.grupox.wololo.model
+package com. grupox.wololo.model
 
 import com.grupox.wololo.errors.CustomException
 import kotlin.math.ceil
@@ -6,11 +6,15 @@ import kotlin.math.floor
 import kotlin.math.max
 
 class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, var owner: User? = null){
-    var isBlocked: Boolean = false
+    var isLocked: Boolean = false
     var specialization : Specialization = Production()
     var gauchos = 0
 
-    fun isFrom(userId: Int) = owner!!.id == userId
+    fun isFrom(user: User) = owner == user
+
+    fun unlock() {
+        isLocked = false
+    }
 
     fun multDefense(): Double = specialization.multDefense()
 
@@ -26,7 +30,7 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordin
 
     fun receiveGauchos(qty: Int) {
         gauchos += qty
-        this.isBlocked = true
+        isLocked = true
     }
 
     fun attack(defender: Town, multDistance: Double, multAltitude: Double) {

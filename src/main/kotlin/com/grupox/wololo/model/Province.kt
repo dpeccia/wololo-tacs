@@ -16,25 +16,35 @@ class Province(id: Int, val name: String, val towns: ArrayList<Town>){
 
     fun multAltitude(): Double = TODO("logica multAlt")
 
-    // addGauchosToAllMyTowns
+    fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
 
-    // desbloquearTodosMisTowns
+    fun addGauchosToAllTowns() {
+        towns.forEach { it.addGauchos(maxAltitude(), minAltitude()) }
+    }
 
-    fun moveGauchosBetweenTowns(userId: Int, movementForm: MovementForm) {
+    fun addGauchosToAllTownsFrom(user: User) {
+        townsFrom(user).forEach { it.addGauchos(maxAltitude(), minAltitude()) }
+    }
+
+    fun unlockAllTownsFrom(user: User) {
+        townsFrom(user).forEach { it.unlock() }
+    }
+
+    fun moveGauchosBetweenTowns(user: User, movementForm: MovementForm) {
         val fromTown = this.getTownById(movementForm.from).getOrHandle { throw it }
         val toTown = this.getTownById(movementForm.to).getOrHandle { throw it }
-        if(!fromTown.isFrom(userId) || !toTown.isFrom(userId))
+        if(!fromTown.isFrom(user) || !toTown.isFrom(user))
             throw CustomException.Forbidden.IllegalGauchoMovement("You only can move gauchos between your current towns")
-        if(toTown.isBlocked)
-            throw CustomException.Forbidden.IllegalGauchoMovement("You only can move gauchos to a town that is not blocked")
+        if(toTown.isLocked)
+            throw CustomException.Forbidden.IllegalGauchoMovement("You only can move gauchos to a town that is unlocked")
         fromTown.giveGauchos(movementForm.gauchosQty)
         toTown.receiveGauchos(movementForm.gauchosQty)
     }
 
-    fun attackTown(userId: Int, attackForm: AttackForm) {
+    fun attackTown(user: User, attackForm: AttackForm) {
         val attacker = this.getTownById(attackForm.from).getOrHandle { throw it }
         val defender = this.getTownById(attackForm.to).getOrHandle { throw it }
-        if(!attacker.isFrom(userId) || defender.isFrom(userId))
+        if(!attacker.isFrom(user) || defender.isFrom(user))
             throw CustomException.Forbidden.IllegalAttack("You only can attack from your town to an enemy town")
         attacker.attack(defender, multDistance(), multAltitude())
     }
