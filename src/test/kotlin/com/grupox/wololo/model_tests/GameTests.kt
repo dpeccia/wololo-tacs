@@ -24,6 +24,9 @@ class GameTests {
 
     @Nested
     inner class GameCreation {
+
+        // TODO test addGauchosToAllTowns
+        // TODO test status sea ONGOING
         @Test
         fun `creating a game distributes towns with the available players evenly`() {
             val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
@@ -167,6 +170,7 @@ class GameTests {
         private val towns: List<Town> = listOf(town1, town2)
         private val game = Game(id = 1, players = listOf(user1), province = Province(0, "a_province", ArrayList(towns)))
 
+        // TODO tests change turn and user won
         @Test
         fun `trying to finished turn from a finished game throws FinishedGameException`() {
             game.status = Status.FINISHED

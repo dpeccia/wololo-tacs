@@ -20,9 +20,10 @@ class AdminControllerTest {
         assertThat(adminService.getScoreBoard()).isNotEmpty
     }*/
 
-    @Test
+    // TODO hay que meter mocks
+    /*@Test
     fun `get games by date`() {
         assertThat(adminControllerService.getGamesStats(Date.from(Instant.now().minus(Duration.ofDays(5))), Date.from(Instant.now().plus(Duration.ofDays(20)))).gamesNew).isEqualTo(1)
-    }
+    }*/
 
 }
