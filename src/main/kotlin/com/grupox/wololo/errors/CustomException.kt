@@ -34,6 +34,7 @@ sealed class CustomException(message: String) : Exception(message){
         class NotAMemberException : Forbidden("you are not a member of this Game")
         class IllegalGauchoMovement(message: String) : Forbidden(message)
         class IllegalAttack(message: String) : Forbidden(message)
+        class NotYourTownException : Forbidden("this is not one of your towns")
     }
 
     fun getJSON(): ExceptionJSON = ExceptionJSON(message) // Default

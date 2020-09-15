@@ -48,7 +48,11 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     /* ACTIONS */
     fun changeTownSpecialization(userId: Int, townId: Int, specialization: Specialization) {
         checkForbiddenAction(userId)
-        getTownById(townId).getOrHandle { throw it }.specialization = specialization
+        val town = getTownById(townId).getOrHandle { throw it }
+
+        if(town.owner?.id != userId) throw CustomException.Forbidden.NotYourTownException()
+
+        town.specialization = specialization
     }
 
     fun moveGauchosBetweenTowns(userId: Int, movementForm: MovementForm) {

@@ -80,5 +80,21 @@ class GameTests {
             val aValidUserID = game.turn.id
             assertThrows<CustomException.NotFound.TownNotFoundException> { game.changeTownSpecialization(aValidUserID, aTownThatDoesntExistId, Defense()) }
         }
+
+        @Test
+        fun `Attempting to change the specialization by an user that has not the turn will result in an exception`() {
+            val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
+            val forbiddenUserID = game.players.find { it.id != game.turn.id }?.id!!
+            val aTown = game.province.towns.find { it.owner?.id!! == forbiddenUserID }!!
+            assertThrows<CustomException.Forbidden.NotYourTurnException> { game.changeTownSpecialization(forbiddenUserID, aTown.id, Defense()) }
+        }
+
+        @Test
+        fun `Attempting to change the specialization of a town that doesnt belong to the user in turn results in an exception`() {
+            val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
+            val aValidUserID = game.turn.id
+            val notUsersTownID = game.province.towns.find { it.owner?.id != aValidUserID }?.id!!
+            assertThrows<CustomException.Forbidden.NotYourTownException> { game.changeTownSpecialization(aValidUserID, notUsersTownID, Defense()) }
+        }
     }
 }
