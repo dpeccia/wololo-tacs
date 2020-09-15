@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsersController.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">wololo</a> &gt; <a href="index.source.html" class="el_package">com.grupox.wololo.controllers</a> &gt; <span class="el_source">UsersController.kt</span></div><h1>UsersController.kt</h1><pre class="source lang-java linenums">package com.grupox.wololo.controllers
+
+import com.grupox.wololo.model.helpers.JwtSigner
+import com.grupox.wololo.model.helpers.UserForm
+import com.grupox.wololo.model.helpers.UserPublicInfoWithoutStats
+import com.grupox.wololo.services.UsersControllerService
+import io.swagger.annotations.ApiOperation
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseCookie
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import springfox.documentation.annotations.ApiIgnore
+
+@RequestMapping(&quot;/users&quot;)
+@RestController
+<span class="fc" id="L16">class UsersController : BaseController() {</span>
+    @Autowired
+<span class="pc" id="L18">    lateinit var usersControllerService: UsersControllerService</span>
+
+    @PostMapping
+    @ApiOperation(value = &quot;Creates a new user (Sign Up / Register)&quot;)
+    fun createUser(@RequestBody newUser: UserForm) {
+<span class="nc" id="L23">        usersControllerService.createUser(newUser)</span>
+<span class="nc" id="L24">    }</span>
+
+    @PostMapping(&quot;/tokens&quot;)
+    @ApiOperation(value = &quot;Log In&quot;)
+    fun login(@RequestBody _user: UserForm): ResponseEntity&lt;Void&gt; {
+<span class="fc" id="L29">        val user = usersControllerService.checkUserCredentials(_user)</span>
+
+<span class="fc" id="L31">        val jwt = JwtSigner.createJwt(user.id)</span>
+<span class="fc" id="L32">        val authCookie = ResponseCookie.fromClientResponse(&quot;X-Auth&quot;, jwt)</span>
+<span class="fc" id="L33">                .maxAge(3600)</span>
+<span class="fc" id="L34">                .httpOnly(true)</span>
+<span class="fc" id="L35">                .path(&quot;/&quot;)</span>
+<span class="fc" id="L36">                .secure(false) // Setear a true si tenemos https</span>
+<span class="fc" id="L37">                .build()</span>
+
+<span class="fc" id="L39">        return ResponseEntity.ok().header(&quot;Set-Cookie&quot;, authCookie.toString()).build&lt;Void&gt;()</span>
+    }
+
+    @DeleteMapping(&quot;/tokens&quot;)
+    @ApiOperation(value = &quot;Log Out&quot;)
+    fun logout(@ApiIgnore @CookieValue(&quot;X-Auth&quot;) _authCookie : String?): ResponseEntity&lt;Void&gt; {
+<span class="fc" id="L45">        checkAndGetToken(_authCookie)</span>
+<span class="fc" id="L46">        val authCookie = ResponseCookie.fromClientResponse(&quot;X-Auth&quot;, _authCookie.toString())</span>
+<span class="fc" id="L47">                .maxAge(0)</span>
+<span class="fc" id="L48">                .httpOnly(true)</span>
+<span class="fc" id="L49">                .path(&quot;/&quot;)</span>
+<span class="fc" id="L50">                .secure(false)</span>
+<span class="fc" id="L51">                .build()</span>
+
+<span class="fc" id="L53">        return ResponseEntity.ok().header(&quot;Set-Cookie&quot;, authCookie.toString()).build&lt;Void&gt;()</span>
+    }
+
+    @GetMapping
+    @ApiOperation(value = &quot;Gets the users without stats&quot;)
+    fun getUsers(@RequestParam(&quot;username&quot;, required = false) _username: String?,
+                 @ApiIgnore @CookieValue(&quot;X-Auth&quot;) authCookie : String?): List&lt;UserPublicInfoWithoutStats&gt; {
+<span class="fc" id="L60">        checkAndGetToken(authCookie)</span>
+<span class="fc" id="L61">        return usersControllerService.getUsers(_username)</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

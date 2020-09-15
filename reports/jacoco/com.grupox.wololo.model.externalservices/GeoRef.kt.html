@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GeoRef.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">wololo</a> &gt; <a href="index.source.html" class="el_package">com.grupox.wololo.model.externalservices</a> &gt; <span class="el_source">GeoRef.kt</span></div><h1>GeoRef.kt</h1><pre class="source lang-java linenums">package com.grupox.wololo.model.externalservices
+
+import arrow.core.*
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.ProvinceGeoRef
+import com.grupox.wololo.model.helpers.TownGeoRef
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
+import org.springframework.stereotype.Service
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+private sealed class GeoRefResponse() {
+<span class="nc" id="L17">    data class ProvinceQuery(</span>
+<span class="nc" id="L18">        @JsonProperty(&quot;provincias&quot;) val matches: List&lt;ProvinceGeoRef&gt;</span>
+<span class="nc" id="L19">    ) : GeoRefResponse()</span>
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+<span class="nc" id="L22">    data class TownsQuery(</span>
+<span class="nc" id="L23">        @JsonProperty(&quot;municipios&quot;) val matches: List&lt;TownGeoRef&gt;</span>
+<span class="nc" id="L24">    ) : GeoRefResponse()</span>
+}
+
+interface IGeoRef {
+    fun requestAvailableProvinces(): Either&lt;CustomException, List&lt;ProvinceGeoRef&gt;&gt;
+    fun requestTownsData(provinceName: String): Either&lt;CustomException, List&lt;TownGeoRef&gt;&gt;
+}
+
+@Service
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+<span class="fc" id="L34">class GeoRef(@Autowired private val self: GeoRef?) : HttpService(&quot;GeoRef&quot;), IGeoRef{</span>
+<span class="fc" id="L35">    private val provinceDataUrl = &quot;https://apis.datos.gob.ar/georef/api/provincias&quot;</span>
+<span class="fc" id="L36">    private val townsDataUrl = &quot;https://apis.datos.gob.ar/georef/api/municipios&quot;</span>
+<span class="fc" id="L37">    private val maxMatches = &quot;200&quot;</span>
+
+    @Cacheable(cacheNames = [&quot;withTimeToLive&quot;])
+    override fun requestTownsData(provinceName: String): Either&lt;CustomException, List&lt;TownGeoRef&gt;&gt; {
+<span class="nc" id="L41">        return requestData&lt;GeoRefResponse.TownsQuery&gt;(townsDataUrl, mapOf(&quot;provincia&quot; to provinceName, &quot;max&quot; to maxMatches)).map { it.matches }</span>
+    }
+
+    fun requestTownsData(provinceName: String, amount: Int): Either&lt;CustomException, List&lt;TownGeoRef&gt;&gt; =
+<span class="nc" id="L45">        self!!.requestTownsData(provinceName).map { it.take(amount) }</span>
+
+    @Cacheable(cacheNames = [&quot;withTimeToLive&quot;])
+    override fun requestAvailableProvinces(): Either&lt;CustomException, List&lt;ProvinceGeoRef&gt;&gt; {
+<span class="nc" id="L49">        return requestData&lt;GeoRefResponse.ProvinceQuery&gt;(provinceDataUrl, mapOf()).map { it.matches }</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

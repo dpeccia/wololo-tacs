@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JSONModels.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">wololo</a> &gt; <a href="index.source.html" class="el_package">com.grupox.wololo.model.helpers</a> &gt; <span class="el_source">JSONModels.kt</span></div><h1>JSONModels.kt</h1><pre class="source lang-java linenums">package com.grupox.wololo.model.helpers
+
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.grupox.wololo.model.Coordinates
+import com.grupox.wololo.model.Game
+
+<span class="fc" id="L9">data class UserForm @JsonCreator constructor(val mail: String, val password: String)</span>
+<span class="pc" id="L10">data class UserPublicInfoWithoutStats @JsonCreator constructor(val id: Int, val mail: String)</span>
+<span class="nc" id="L11">data class UserPublicInfo @JsonCreator constructor(val mail: String, val gamesWon: Int, val gamesLost: Int)</span>
+<span class="nc" id="L12">data class GamePublicInfo @JsonCreator constructor(val gamesNew: Int, val gamesOnGoing: Int, val gamesFinished: Int, val gamesCanceled: Int, val games: List&lt;Game&gt;)</span>
+
+<span class="nc" id="L14">data class GameForm(val provinceName: String, val townAmount: Int, val participantsIds: List&lt;Int&gt;)</span>
+<span class="nc" id="L15">data class TownForm @JsonCreator constructor(val specialization: String)</span>
+<span class="fc" id="L16">data class MovementForm @JsonCreator constructor(val from: Int, val to: Int, val gauchosQty: Int)</span>
+<span class="fc" id="L17">data class AttackForm @JsonCreator constructor(val from: Int, val to: Int)</span>
+
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+<span class="nc" id="L21">data class ProvinceGeoRef(@JsonProperty(&quot;nombre&quot;) val name: String)</span>
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+<span class="nc" id="L24">data class TownGeoRef(</span>
+<span class="nc" id="L25">        @JsonProperty(&quot;id&quot;) val id: Int,</span>
+<span class="nc" id="L26">        @JsonProperty(&quot;nombre&quot;) val name: String,</span>
+<span class="nc" id="L27">        @JsonProperty(&quot;centroide&quot;) val coordinates: Coordinates</span>
+)
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
