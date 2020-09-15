@@ -16,7 +16,7 @@ import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.externalservices.GeoRef
 import com.grupox.wololo.model.externalservices.TopoData
-import com.grupox.wololo.services.GamesService
+import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -29,7 +29,7 @@ import kotlin.collections.ArrayList
 @RestController
 class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private val topoData: TopoData) : BaseController() {
     @Autowired
-    lateinit var gamesService: GamesService
+    lateinit var gamesControllerService: GamesControllerService
 
     @GetMapping
     @ApiOperation(value = "Gets the games of the current user. Params: sort=id|date|numberOfTowns|numberOfPlayers & status & date")
@@ -126,7 +126,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             @RequestBody movementData: MovementForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
         val userId = checkAndGetToken(authCookie).body.subject
-        gamesService.moveGauchosBetweenTowns(userId.toInt(), id, movementData)
+        gamesControllerService.moveGauchosBetweenTowns(userId.toInt(), id, movementData)
     }
 
     @PostMapping("/{id}/actions/attack")
@@ -136,7 +136,7 @@ class GamesController(@Autowired private val geoRef: GeoRef, @Autowired private 
             @RequestBody attackData: AttackForm,
             @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
         val userId = checkAndGetToken(authCookie).body.subject
-        gamesService.attackTown(userId.toInt(), id, attackData)
+        gamesControllerService.attackTown(userId.toInt(), id, attackData)
     }
 
     @PutMapping("/{id}/towns/{idTown}")

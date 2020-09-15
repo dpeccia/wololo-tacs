@@ -3,20 +3,18 @@ package com.grupox.wololo.controller_tests
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
-import com.grupox.wololo.services.GamesService
-import com.grupox.wololo.services.UsersService
+import com.grupox.wololo.services.GamesControllerService
+import com.grupox.wololo.services.UsersControllerService
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Duration
-import java.time.Instant
 import java.util.ArrayList
 
 class GamesControllerTest {
-    val gamesService: GamesService = GamesService()
-    val usersService: UsersService = UsersService()
+    val gamesControllerService: GamesControllerService = GamesControllerService()
+    val usersControllerService: UsersControllerService = UsersControllerService()
 
     //podrían queda acá y los sacamos del repo games
     private val games: ArrayList<Game> = arrayListOf(
@@ -61,11 +59,11 @@ class GamesControllerTest {
 
     @Test
     fun `surrender in a game`() {
-        assertThat(gamesService.surrender(1, "5")).isEqualTo(2)
+        assertThat(gamesControllerService.surrender(1, "5")).isEqualTo(2)
     }
 
     @Test
     fun `Change town specialization`() {
-        assertThat(gamesService.changeSpecialization("PRODUCTION",2, 3))
+        assertThat(gamesControllerService.changeSpecialization("PRODUCTION",2, 3))
     }
 }

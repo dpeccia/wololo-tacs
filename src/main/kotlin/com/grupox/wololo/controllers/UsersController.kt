@@ -3,7 +3,7 @@ package com.grupox.wololo.controllers
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.model.helpers.UserPublicInfoWithoutStats
-import com.grupox.wololo.services.UsersService
+import com.grupox.wololo.services.UsersControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseCookie
@@ -15,18 +15,18 @@ import springfox.documentation.annotations.ApiIgnore
 @RestController
 class UsersController : BaseController() {
     @Autowired
-    lateinit var usersService: UsersService
+    lateinit var usersControllerService: UsersControllerService
 
     @PostMapping
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
     fun createUser(@RequestBody newUser: UserForm) {
-        usersService.createUser(newUser)
+        usersControllerService.createUser(newUser)
     }
 
     @PostMapping("/tokens")
     @ApiOperation(value = "Log In")
     fun login(@RequestBody _user: UserForm): ResponseEntity<Void> {
-        val user = usersService.checkUserCredentials(_user)
+        val user = usersControllerService.checkUserCredentials(_user)
 
         val jwt = JwtSigner.createJwt(user.id)
         val authCookie = ResponseCookie.fromClientResponse("X-Auth", jwt)
@@ -58,6 +58,6 @@ class UsersController : BaseController() {
     fun getUsers(@RequestParam("username", required = false) _username: String?,
                  @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserPublicInfoWithoutStats> {
         checkAndGetToken(authCookie)
-        return usersService.getUsers(_username)
+        return usersControllerService.getUsers(_username)
     }
 }

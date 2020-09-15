@@ -10,7 +10,7 @@ import com.grupox.wololo.model.helpers.UserPublicInfoWithoutStats
 import org.springframework.stereotype.Service
 
 @Service
-class UsersService {
+class UsersControllerService {
     fun createUser(newUser: UserForm) {
         if(RepoUsers.getUserByName(newUser.mail).isRight())
             throw CustomException.BadRequest.IllegalUserException("There is already an user under that email")

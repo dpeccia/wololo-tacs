@@ -12,10 +12,9 @@ import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 
 @Service
-class GamesService {
+class GamesControllerService {
 
     fun surrender(gameId: Int, userId : String) : Int? {
-
         val game: Game = RepoGames.getById(gameId).getOrHandle { throw it }
         val user: User = game.getMember(userId.toInt()).getOrHandle { throw it }
         val loserUserId: Int = user.id
@@ -35,7 +34,6 @@ class GamesService {
     }
 
     fun changeSpecialization(specialization: String, gameId: Int, townId: Int) {
-
         if (specialization == "PRODUCTION"){
             RepoGames.getById(gameId).getOrHandle {throw it }.changeTownSpecialization(townId, Production())
         } else if (specialization == "DEFENSE"){

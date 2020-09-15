@@ -8,7 +8,7 @@ import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import java.util.*
 
-class AdminService {
+class AdminControllerService {
 
     fun getScoreBoard(): List<UserPublicInfo> {
         return RepoUsers.getUsersStats()
