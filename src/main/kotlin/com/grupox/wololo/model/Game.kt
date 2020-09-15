@@ -56,8 +56,6 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
         if (!isParticipating(user)) throw CustomException.Forbidden.NotAMemberException()
         if (turn != user) throw CustomException.Forbidden.NotYourTurnException()
     }
-
-    private fun getTownById(idTown: Int): Either<CustomException.NotFound, Town> = province.towns.find { it.id == idTown }.rightIfNotNull { CustomException.NotFound.TownNotFoundException() }
     //endregion
 
     //region Public Methods
@@ -75,7 +73,7 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
 
     fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {
         checkForbiddenAction(user)
-        val town = getTownById(townId).getOrHandle { throw it }
+        val town = province.getTownById(townId).getOrHandle { throw it }
         if(town.owner != user) throw CustomException.Forbidden.NotYourTownException()
         town.specialization = specialization
     }
