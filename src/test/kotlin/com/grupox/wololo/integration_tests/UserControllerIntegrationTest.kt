@@ -6,6 +6,7 @@ import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.UserForm
+import com.grupox.wololo.model.helpers.getOrThrow
 import com.grupox.wololo.model.repos.RepoUsers
 import io.mockk.every
 import io.mockk.mockkObject
@@ -68,7 +69,7 @@ class UserControllerIntegrationTest {
                 .bodyValue(UserForm("example_admin", "example_admin")).exchange().block()
         val jwtToken = response?.cookies()?.get("X-Auth")?.get(0)?.value ?: throw RuntimeException("No JWT Token in response")
         val validation = jwtSigner.validateJwt(Some(jwtToken))
-        assertThat(validation.getOrHandle { throw it }.body.subject).isEqualTo("1")
+        assertThat(validation.getOrThrow().body.subject).isEqualTo("1")
     }
 
     @Test
@@ -77,7 +78,7 @@ class UserControllerIntegrationTest {
                 .bodyValue(UserForm("example_admin", "example_admin")).exchange().block()
         val jwtToken = response?.cookies()?.get("X-Auth")?.get(0)?.value ?: throw RuntimeException("No JWT Token in response")
         val validation = jwtSigner.validateJwt(Some(jwtToken))
-        assertThat(validation.getOrHandle { throw it }.body.subject).isEqualTo("1")
+        assertThat(validation.getOrThrow().body.subject).isEqualTo("1")
 
         val responseCookies = response.cookies()
                 .map { it.key to it.value.map { cookie -> cookie.value } }

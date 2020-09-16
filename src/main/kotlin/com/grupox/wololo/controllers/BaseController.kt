@@ -4,6 +4,7 @@ import arrow.core.getOrHandle
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.JwtSigner
+import com.grupox.wololo.model.helpers.getOrThrow
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jws
 import org.springframework.http.HttpStatus
@@ -31,5 +32,5 @@ abstract class BaseController {
     @ResponseStatus(HttpStatus.FAILED_DEPENDENCY) // Revisar si es correcto esta http status
     fun handleServiceException(exception: CustomException) = exception.getJSON()
 
-    fun checkAndGetToken(authCookie: String?): Jws<Claims> = JwtSigner.validateJwt(authCookie.toOption()).getOrHandle { throw it }
+    fun checkAndGetToken(authCookie: String?): Jws<Claims> = JwtSigner.validateJwt(authCookie.toOption()).getOrThrow()
 }

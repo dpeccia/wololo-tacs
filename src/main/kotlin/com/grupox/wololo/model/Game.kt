@@ -5,6 +5,7 @@ import java.util.Date
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
+import com.grupox.wololo.model.helpers.getOrThrow
 import java.time.Instant
 
 
@@ -82,7 +83,7 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
 
     fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {
         checkForbiddenAction(user)
-        val town = province.getTownById(townId).getOrHandle { throw it }
+        val town = province.getTownById(townId).getOrThrow()
         if(town.owner != user) throw CustomException.Forbidden.NotYourTownException()
         town.specialization = specialization
     }

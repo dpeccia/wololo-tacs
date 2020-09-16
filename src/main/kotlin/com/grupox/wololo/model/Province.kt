@@ -4,6 +4,7 @@ import arrow.core.*
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
+import com.grupox.wololo.model.helpers.getOrThrow
 
 class Province(id: Int, val name: String, val towns: ArrayList<Town>){
     fun getTownById(id: Int): Either<CustomException.NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { CustomException.NotFound.TownNotFoundException() }
@@ -33,8 +34,8 @@ class Province(id: Int, val name: String, val towns: ArrayList<Town>){
     }
 
     fun moveGauchosBetweenTowns(user: User, movementForm: MovementForm) {
-        val fromTown = this.getTownById(movementForm.from).getOrHandle { throw it }
-        val toTown = this.getTownById(movementForm.to).getOrHandle { throw it }
+        val fromTown = this.getTownById(movementForm.from).getOrThrow()
+        val toTown = this.getTownById(movementForm.to).getOrThrow()
         if(!fromTown.isFrom(user) || !toTown.isFrom(user))
             throw CustomException.Forbidden.IllegalGauchoMovement("You only can move gauchos between your current towns")
         if(toTown.isLocked)
@@ -44,8 +45,8 @@ class Province(id: Int, val name: String, val towns: ArrayList<Town>){
     }
 
     fun attackTown(user: User, attackForm: AttackForm) {
-        val attacker = this.getTownById(attackForm.from).getOrHandle { throw it }
-        val defender = this.getTownById(attackForm.to).getOrHandle { throw it }
+        val attacker = this.getTownById(attackForm.from).getOrThrow()
+        val defender = this.getTownById(attackForm.to).getOrThrow()
         if(!attacker.isFrom(user) || defender.isFrom(user))
             throw CustomException.Forbidden.IllegalAttack("You only can attack from your town to an enemy town")
         attacker.attack(defender, multDistance(), multAltitude())

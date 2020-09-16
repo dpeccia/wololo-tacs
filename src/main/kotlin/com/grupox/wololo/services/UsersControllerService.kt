@@ -7,6 +7,7 @@ import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.helpers.UserPublicInfoWithoutStats
+import com.grupox.wololo.model.helpers.getOrThrow
 import org.springframework.stereotype.Service
 
 @Service
@@ -19,12 +20,12 @@ class UsersControllerService {
     }
 
     fun checkUserCredentials(user: UserForm): User =
-            RepoUsers.getUserByLogin(user).getOrHandle { throw it }
+            RepoUsers.getUserByLogin(user).getOrThrow()
 
     fun getUsers(_username: String?): List<UserPublicInfoWithoutStats> {
         val username = _username ?: return RepoUsers.getUsersWithoutStats()
         val user = ArrayList<UserPublicInfoWithoutStats>()
-        user.add(RepoUsers.getUserByName(username).getOrHandle { throw it }.publicInfoWithoutStats())
+        user.add(RepoUsers.getUserByName(username).getOrThrow().publicInfoWithoutStats())
         return user
     }
 }
