@@ -4,33 +4,38 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
-import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
-import com.grupox.wololo.services.UsersControllerService
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.not
 import org.junit.jupiter.api.*
-import org.mockito.ArgumentMatchers.any
-import java.util.ArrayList
+import java.util.*
 
 class GamesControllerTest {
     val gamesControllerService: GamesControllerService = GamesControllerService()
 
     val user1: User = User(1,"a_mail", "a_password", false)
-    val user_not_in_repo: User = User(2,"other_mail", "other_password", false)
-    val users: List<User> = listOf(user1)
+    val user2: User = User(2,"a_mail2", "a_password2", false)
+    val user3: User = User(3,"a_mail3", "a_password3", false)
+    val userNotInRepo: User = User(4,"other_mail", "other_password", false)
+    val users: List<User> = listOf(user1, user2, user3)
 
     val town1: Town = Town(id = 1, name = "town1", elevation = 10.0)
     val town2: Town = Town(id = 2, name = "town2", elevation = 10.0)
-    val towns: List<Town> = listOf(town1, town2)
+    val town3: Town = Town(id = 3, name = "town3", elevation = 10.0)
+    val town4: Town = Town(id = 4, name = "town4", elevation = 10.0)
+    val town5: Town = Town(id = 5, name = "town5", elevation = 10.0)
+    val town6: Town = Town(id = 6, name = "town6", elevation = 10.0)
+    val towns: List<Town> = listOf(town1, town2, town3, town4, town5, town6)
 
-    val game1: Game = Game(1, listOf(user1), Province(0, "a_province", ArrayList(towns)))
-    val game_not_in_repo: Game = Game(2, listOf(user1), Province(1, "another_province", ArrayList(towns)))
-    val games: List<Game> = listOf(game1)
+    val singlePlayerGame: Game = Game(1, listOf(user1), Province(0, "a_province", ArrayList(listOf(town1, town2))))
+    val game2: Game = Game(2, users, Province(0, "a_province", ArrayList(listOf(town1, town2, town3, town4))))
+    val game3: Game = Game(3, listOf(user1, user2), Province(0, "a_province", ArrayList(listOf(town1, town2, town3))))
+    val game4: Game = Game(4, listOf(user2, user3), Province(0, "a_province", ArrayList(towns)))
+    val gameNotInRepo: Game = Game(5, listOf(user1), Province(1, "another_province", ArrayList(towns)))
+    val games: List<Game> = listOf(singlePlayerGame, game2, game3, game4)
 
     @BeforeEach
     fun fixture() {
@@ -45,18 +50,18 @@ class GamesControllerTest {
         @Test
         fun `trying to finish turn in a game that doesnt exist throws GameNotFoundException`() {
             assertThrows<CustomException.NotFound.GameNotFoundException>
-            { gamesControllerService.finishTurn(user1.id, game_not_in_repo.id) }
+            { gamesControllerService.finishTurn(user1.id, gameNotInRepo.id) }
         }
 
         @Test
         fun `trying to finish turn with a user that doesnt exist throws UserNotFoundException`() {
             assertThrows<CustomException.NotFound.UserNotFoundException>
-            { gamesControllerService.finishTurn(user_not_in_repo.id, game1.id) }
+            { gamesControllerService.finishTurn(userNotInRepo.id, singlePlayerGame.id) }
         }
 
         @Test
         fun `trying to finish turn with a user that exists and a game that exists doesnt throw an Exception`() {
-            assertDoesNotThrow { gamesControllerService.finishTurn(user1.id, game1.id) }
+            assertDoesNotThrow { gamesControllerService.finishTurn(user1.id, singlePlayerGame.id) }
         }
     }
 
@@ -65,18 +70,18 @@ class GamesControllerTest {
         @Test
         fun `trying to move gauchos in a game that doesnt exist throws GameNotFoundException`() {
             assertThrows<CustomException.NotFound.GameNotFoundException>
-            { gamesControllerService.moveGauchosBetweenTowns(user1.id, game_not_in_repo.id, MovementForm(1,2,2)) }
+            { gamesControllerService.moveGauchosBetweenTowns(user1.id, gameNotInRepo.id, MovementForm(1,2,2)) }
         }
 
         @Test
         fun `trying to move gauchos with a user that doesnt exist throws UserNotFoundException`() {
             assertThrows<CustomException.NotFound.UserNotFoundException>
-            { gamesControllerService.moveGauchosBetweenTowns(user_not_in_repo.id, game1.id, MovementForm(1,2,2)) }
+            { gamesControllerService.moveGauchosBetweenTowns(userNotInRepo.id, singlePlayerGame.id, MovementForm(1,2,2)) }
         }
 
         @Test
         fun `trying to move gauchos with a user that exists and a game that exists doesnt throw an Exception`() {
-            assertDoesNotThrow { gamesControllerService.moveGauchosBetweenTowns(user1.id, game1.id, MovementForm(1,2,2)) }
+            assertDoesNotThrow { gamesControllerService.moveGauchosBetweenTowns(user1.id, singlePlayerGame.id, MovementForm(1,2,2)) }
         }
     }
 
@@ -85,19 +90,19 @@ class GamesControllerTest {
         @Test
         fun `trying to attack town in a game that doesnt exist throws GameNotFoundException`() {
             assertThrows<CustomException.NotFound.GameNotFoundException>
-            { gamesControllerService.attackTown(user1.id, game_not_in_repo.id, AttackForm(1,2)) }
+            { gamesControllerService.attackTown(user1.id, gameNotInRepo.id, AttackForm(1,2)) }
         }
 
         @Test
         fun `trying to attack town with a user that doesnt exist throws UserNotFoundException`() {
             assertThrows<CustomException.NotFound.UserNotFoundException>
-            { gamesControllerService.attackTown(user_not_in_repo.id, game1.id, AttackForm(1,2)) }
+            { gamesControllerService.attackTown(userNotInRepo.id, singlePlayerGame.id, AttackForm(1,2)) }
         }
 
         @Test
         fun `trying to attack town with a user that exists and a game that exists doesnt throw UserNotFound or GameNotFound`() {
             assertThrows<CustomException.Forbidden.IllegalAttack>
-            { gamesControllerService.attackTown(user1.id, game1.id, AttackForm(1,2)) }
+            { gamesControllerService.attackTown(user1.id, singlePlayerGame.id, AttackForm(1,2)) }
         }
     }
 
@@ -107,7 +112,6 @@ class GamesControllerTest {
         fun `surrender in a game with a user that doesnt belongs to the game throws MemberNotFoundException`() {
             assertThrows<CustomException.NotFound.MemberNotFoundException>
             { assertThat(gamesControllerService.surrender(1, 11)) }
-
         }
 
         @Test
@@ -125,6 +129,73 @@ class GamesControllerTest {
         }
     }
 
+    @Nested
+    inner class GetGames {
+        @Test
+        fun `Attempting get games returns all the games in the DB where the player is participating`() {
+            val user = user1
+            val playerGames = gamesControllerService.getGames(user.id, null, null, null)
+            assertThat(playerGames).isEqualTo(listOf(singlePlayerGame, game2, game3))
+        }
+
+        @Test
+        fun `Get game's result can be sorted by id`() {
+            val user = user2
+            val sortedGames = gamesControllerService.getGames(user.id, "id", null, null)
+            assertThat(sortedGames).isEqualTo(listOf(game2, game3, game4))
+        }
+
+        @Test
+        fun `Get game's result can be sorted by date`() {
+            val user = user1
+            val sortedGames = gamesControllerService.getGames(user.id, "date", null, null)
+            assertThat(sortedGames).isEqualTo(listOf(singlePlayerGame, game2, game3))
+        }
+
+        @Test
+        fun `Get game's result can be sorted by the number of towns`() {
+            val user = user1
+            val sortedGames = gamesControllerService.getGames(user.id, "numberOfTowns", null, null)
+            assertThat(sortedGames).isEqualTo(listOf(singlePlayerGame, game3, game2))
+        }
+
+        @Test
+        fun `Get game's result can be sorted by the number of players`() {
+            val user = user1
+            val sortedGames = gamesControllerService.getGames(user.id, "numberOfPlayers", null, null)
+            assertThat(sortedGames).isEqualTo(listOf(singlePlayerGame, game3, game2))
+        }
+
+        @Test
+        fun `Get games with an invalid sorting parameter is equivalent to getting all games`() {
+            val user = user1
+            val playerGames = gamesControllerService.getGames(user.id, "asd", null, null)
+            assertThat(playerGames).isEqualTo(listOf(singlePlayerGame, game2, game3))
+        }
+
+        @Test
+        fun `Get game's result can be filtered by status`() {
+            val user = user1
+            singlePlayerGame.finishTurn(user) // Como es el unico deberia ganar y por lo tanto status = FINISHED
+            val playerGames = gamesControllerService.getGames(user.id, null, Status.FINISHED, null)
+            assertThat(playerGames).isEqualTo(listOf(singlePlayerGame))
+        }
+
+//        @Test
+//        fun `Get game's result can be filtered by date`() {
+//          TODO("Not implemented")
+//        }
+
+//        @Test
+//        fun `Get games can be sorted and filtered altogether`() {
+//          TODO("Not implemented")
+//        }
+
+        @Test
+        fun `Get games fails if the given user doesn't exist with UserNotFoundException`(){
+            assertThrows<CustomException.NotFound.UserNotFoundException> { gamesControllerService.getGames(userNotInRepo.id, null, null, null) }
+        }
+    }
 
 //    @Test
 //    fun `Change town specialization`() {
