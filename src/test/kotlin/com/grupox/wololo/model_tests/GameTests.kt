@@ -5,9 +5,11 @@ import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import kotlin.collections.ArrayList
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 class GameTests {
     val user1: User = User(1,"a_mail", "a_password", false)
@@ -31,8 +33,8 @@ class GameTests {
         fun `creating a game distributes towns with the available players evenly`() {
             val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
 
-            val numberOfTownsAssignedToUser1: Int = game.province.towns.count { it.owner?.id == user1.id }
-            val numberOfTownsAssignedToUser2: Int = game.province.towns.count { it.owner?.id == user2.id }
+            val numberOfTownsAssignedToUser1: Int = game.province.towns.count { it.owner!!.id == user1.id }
+            val numberOfTownsAssignedToUser2: Int = game.province.towns.count { it.owner!!.id == user2.id }
 
             assertEquals(numberOfTownsAssignedToUser1, numberOfTownsAssignedToUser2)
         }
@@ -65,15 +67,15 @@ class GameTests {
         @Test
         fun `Can change a towns specialization from PRODUCTION to DEFENSE`() {
             val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
-            val aTown = game.province.towns.find { it.owner?.id == game.turn.id }
-            game.changeTownSpecialization(aTown?.owner!!, aTown.id, Defense())
+            val aTown = game.province.towns.find { it.owner!!.id == game.turn.id }!!
+            game.changeTownSpecialization(aTown.owner!!, aTown.id, Defense())
             assertThat(aTown.specialization).isInstanceOf(Defense::class.java)
         }
 
         @Test
         fun `Can change a towns specialization from DEFENSE to PRODUCTION`() {
             val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
-            val aTown = game.province.towns.filter { it.owner != null }.find { it.owner?.id == game.turn.id }!!
+            val aTown = game.province.towns.filter { it.owner != null }.find { it.owner!!.id == game.turn.id }!!
             game.changeTownSpecialization(aTown.owner!!, aTown.id, Defense())
             // Change back to production
             game.changeTownSpecialization(aTown.owner!!, aTown.id, Production())

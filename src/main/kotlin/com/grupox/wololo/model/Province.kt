@@ -1,12 +1,13 @@
 package com.grupox.wololo.model
 
-import arrow.core.*
+import arrow.core.Either
+import arrow.core.rightIfNotNull
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.helpers.getOrThrow
 
-class Province(id: Int, val name: String, val towns: ArrayList<Town>){
+class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageUrl: String = ""){
     fun getTownById(id: Int): Either<CustomException.NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { CustomException.NotFound.TownNotFoundException() }
 
     fun maxAltitude(): Double = towns.map { it.elevation }.max()!!

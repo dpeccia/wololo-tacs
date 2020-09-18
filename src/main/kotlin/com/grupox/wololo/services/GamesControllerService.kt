@@ -5,9 +5,11 @@ import arrow.core.extensions.either.applicative.applicative
 import arrow.core.extensions.fx
 import arrow.core.extensions.list.traverse.sequence
 import arrow.core.fix
+import arrow.optics.extensions.list.cons.cons
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.externalservices.GeoRef
+import com.grupox.wololo.model.externalservices.ProvincesImages
 import com.grupox.wololo.model.externalservices.TopoData
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoGames
@@ -22,6 +24,8 @@ class GamesControllerService {
     lateinit var geoRef: GeoRef
     @Autowired
     lateinit var topoData: TopoData
+    @Autowired
+    lateinit var provinceImages: ProvincesImages
 
     fun surrender(gameId: Int, userId: Int) {
         val game: Game = RepoGames.getById(gameId).getOrThrow()
@@ -84,19 +88,20 @@ class GamesControllerService {
         return games
     }
 
-    fun createGame(form: GameForm) {
+    fun createGame(userId: Int, form: GameForm) {
         val game: Game = Either.fx<CustomException, Game> {
-            val users = !form.participantsIds.map { RepoUsers.getById(it) }
+            val users = !userId.cons(form.participantsIds).distinct().map { RepoUsers.getById(it) }
                     .sequence(Either.applicative()).fix().map{ it.fix() }
 
             val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
-
             val towns = !townsData.map { data ->
                 topoData.requestElevation(data.coordinates).map { elevation ->
                     Town(data.id, data.name, data.coordinates, elevation.toDouble())
                 }
             }.sequence(Either.applicative()).fix().map { it.fix() }
-            Game(0,users,  Province(0,form.provinceName, ArrayList(towns)))
+
+            val provinceImage: String = !provinceImages.getUrl(form.provinceName)
+            Game(0,users,  Province(0, form.provinceName, ArrayList(towns), provinceImage))
         }.getOrThrow()
 
         RepoGames.insert(game)

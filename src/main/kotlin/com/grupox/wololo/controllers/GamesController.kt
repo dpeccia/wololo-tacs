@@ -34,8 +34,9 @@ class GamesController : BaseController() {
     @PostMapping
     @ApiOperation(value = "Creates a new game")
     fun createGame(@RequestBody form: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
-        checkAndGetToken(authCookie)
-        gamesControllerService.createGame(form)
+        val token = checkAndGetToken(authCookie)
+        val userId = token.body.subject.toInt()
+        gamesControllerService.createGame(userId, form)
     }
 
     @GetMapping("/{id}")

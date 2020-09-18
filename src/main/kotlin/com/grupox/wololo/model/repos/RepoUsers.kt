@@ -1,6 +1,7 @@
 package com.grupox.wololo.model.repos
 
-import arrow.core.*
+import arrow.core.Either
+import arrow.core.rightIfNotNull
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
@@ -14,8 +15,8 @@ object RepoUsers : Repository<User> {
             User(1,"admin", "admin", true, Stats(0, 0)),
             User(2,"unmail@gmail.com", "1234", false, Stats(1, 1)),
             User(3,"otromail@gmail.com", "1234", false, Stats(1, 2)),
-            User(5, "mail", "password", false, Stats(1,1)),
-            User(6, "mail2", "password2", false, Stats(0,0))
+            User(4, "mail", "password", false, Stats(1,1)),
+            User(5, "mail2", "password2", false, Stats(0,0))
     )
 
     fun getNormalUsers(): List<User> = getAll().filter { !it.esAdmin }
