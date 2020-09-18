@@ -197,6 +197,37 @@ class GamesControllerTest {
         }
     }
 
+    @Nested
+    inner class GetGame {
+        @Test
+        fun `An user can get one of its games by id`(){
+            val user = user1
+            val userGame = gamesControllerService.getGame(user.id, 2)
+            assertThat(userGame).isEqualTo(game2)
+        }
+
+        @Test
+        fun `Attempting to get a game that doesn't belong to the user results in Unauthorized TokenException`(){
+            val user = user1
+            val gameThatDoesntBelongToUser = game4
+            assertThrows<CustomException.Unauthorized.TokenException> { gamesControllerService.getGame(user.id, gameThatDoesntBelongToUser.id) }
+        }
+
+        @Test
+        fun `Attempting a game that doesn't exist in the repo results in GameNotFoundException`(){
+            val user = user1
+            val gameThatDoesntExist = gameNotInRepo
+            assertThrows<CustomException.NotFound.GameNotFoundException> { gamesControllerService.getGame(user.id, gameThatDoesntExist.id) }
+        }
+
+        @Test
+        fun `Attempting a game by a non existent user results in UserNotFoundException`(){
+            val nonExistentUser = userNotInRepo
+            val anyGame = game2
+            assertThrows<CustomException.NotFound.UserNotFoundException> { gamesControllerService.getGame(nonExistentUser.id, anyGame.id) }
+        }
+    }
+
 //    @Test
 //    fun `Change town specialization`() {
 //        val gameId = 2

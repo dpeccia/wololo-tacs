@@ -1,28 +1,17 @@
 package com.grupox.wololo.controllers
 
-import arrow.core.*
-import arrow.core.extensions.either.applicative.applicative
-import arrow.core.extensions.fx
-import arrow.core.extensions.list.traverse.sequence
-
-import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.*
+import com.grupox.wololo.model.Game
+import com.grupox.wololo.model.Status
+import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.GameForm
-import com.grupox.wololo.model.helpers.JwtSigner
+import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.helpers.ProvinceGeoRef
-import com.grupox.wololo.model.helpers.TownForm
-import com.grupox.wololo.model.helpers.*
-import com.grupox.wololo.model.repos.RepoGames
-import com.grupox.wololo.model.repos.RepoUsers
-import com.grupox.wololo.model.externalservices.GeoRef
-import com.grupox.wololo.model.externalservices.TopoData
 import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 @RequestMapping("/games")
@@ -55,7 +44,7 @@ class GamesController : BaseController() {
                     @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         val token = checkAndGetToken(authCookie)
         val userId = token.body.subject.toInt()
-        return gamesControllerService.getGame(id, userId)
+        return gamesControllerService.getGame(userId, id)
     }
 
     @PutMapping("/{id}")

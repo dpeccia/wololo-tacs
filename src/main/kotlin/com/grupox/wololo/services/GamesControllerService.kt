@@ -1,18 +1,19 @@
 package com.grupox.wololo.services
 
-import arrow.core.*
+import arrow.core.Either
 import arrow.core.extensions.either.applicative.applicative
 import arrow.core.extensions.fx
 import arrow.core.extensions.list.traverse.sequence
+import arrow.core.fix
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.externalservices.GeoRef
 import com.grupox.wololo.model.externalservices.TopoData
 import com.grupox.wololo.model.helpers.*
-import org.springframework.stereotype.Service
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
@@ -54,7 +55,7 @@ class GamesControllerService {
 
     fun getProvinces() = geoRef.requestAvailableProvinces().getOrThrow()
 
-    fun getGame(gameId: Int, userId: Int): Game {
+    fun getGame(userId: Int, gameId: Int): Game {
         val user = RepoUsers.getById(userId).getOrThrow()
         val game = RepoGames.getById(gameId).getOrThrow()
         if(!game.isParticipating(user)) throw CustomException.Unauthorized.TokenException("User not participating in this game") // Por ahi no corresponde esta excepcion
