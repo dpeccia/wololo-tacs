@@ -33,8 +33,8 @@ class GameTests {
         fun `creating a game distributes towns with the available players evenly`() {
             val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
 
-            val numberOfTownsAssignedToUser1: Int = game.province.towns.count { it.owner!!.id == user1.id }
-            val numberOfTownsAssignedToUser2: Int = game.province.towns.count { it.owner!!.id == user2.id }
+            val numberOfTownsAssignedToUser1: Int = game.province.towns.count { it.owner?.id == user1.id }
+            val numberOfTownsAssignedToUser2: Int = game.province.towns.count { it.owner?.id == user2.id }
 
             assertEquals(numberOfTownsAssignedToUser1, numberOfTownsAssignedToUser2)
         }
