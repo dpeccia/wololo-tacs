@@ -25,12 +25,13 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordin
     }
 
     fun giveGauchos(qty: Int) {
-        if(qty > gauchos)
-            throw CustomException.BadRequest.NotEnoughGauchosException(qty, gauchos)
+        if (qty <= 0) throw CustomException.BadRequest.IllegalGauchosQtyException()
+        if (qty > gauchos) throw CustomException.BadRequest.NotEnoughGauchosException(qty, gauchos)
         gauchos -= qty
     }
 
     fun receiveGauchos(qty: Int) {
+        if (qty <= 0) throw CustomException.BadRequest.IllegalGauchosQtyException()
         gauchos += qty
         isLocked = true
     }
