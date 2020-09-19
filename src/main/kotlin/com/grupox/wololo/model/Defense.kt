@@ -7,4 +7,8 @@ class Defense : Specialization {
             round(10 * this.gauchosBaseFormula(townAltitude, maxAltitude, minAltitude)).toInt()
 
     override fun multDefense(): Double = 1.25
+
+    override fun updateStats(townAltitude: Double, maxAltitude: Double, minAltitude: Double, town: Town) {
+        town.updateGauchosByDefense(gauchos(townAltitude, maxAltitude, minAltitude))
+    }
 }

@@ -67,7 +67,7 @@ class GameTests {
         @Test
         fun `Can change a towns specialization from PRODUCTION to DEFENSE`() {
             val game = Game(id = 1, players = players, province = Province(0, "a_province", ArrayList(towns)))
-            val aTown = game.province.towns.find { it.owner!!.id == game.turn.id }!!
+            val aTown = game.province.towns.find { it.owner?.id == game.turn.id }!!
             game.changeTownSpecialization(aTown.owner!!, aTown.id, Defense())
             assertThat(aTown.specialization).isInstanceOf(Defense::class.java)
         }

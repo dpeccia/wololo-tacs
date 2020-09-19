@@ -11,6 +11,9 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordin
     var isLocked: Boolean = false
     var specialization : Specialization = Production()
     var gauchos = 0
+    //Esto podría ir en Town Stats si queremos hacerlo similar a User Stats, por ahora lo dejo acá para ir testeando al menos
+    var gauchosGeneratedByDefense = 0
+    var gauchosGeneratedByProduction = 0
 
     fun isFrom(user: User) = owner == user
 
@@ -20,8 +23,18 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordin
 
     fun multDefense(): Double = specialization.multDefense()
 
+    fun updateGauchosByDefense(gauchosAmount: Int){
+        this.gauchosGeneratedByDefense = gauchosAmount + gauchosGeneratedByDefense
+        }
+
+    fun updateGauchosByProduction(gauchosAmount: Int){
+        this.gauchosGeneratedByProduction = gauchosAmount + gauchosGeneratedByProduction
+    }
+
     fun addGauchos(maxAltitude: Double, minAltitude: Double) {
-        gauchos += specialization.gauchos(elevation, maxAltitude, minAltitude)
+        val gauchosAmount: Int = specialization.gauchos(elevation, maxAltitude, minAltitude)
+        gauchos += gauchosAmount
+        specialization.updateStats(elevation, maxAltitude, minAltitude, this)
     }
 
     fun giveGauchos(qty: Int) {

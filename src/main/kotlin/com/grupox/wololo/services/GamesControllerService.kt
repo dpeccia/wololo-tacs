@@ -57,6 +57,15 @@ class GamesControllerService {
         game.attackTown(user, attackData)
     }
 
+    fun getTownStats(gameId: Int, townId: Int): TownInfo {
+
+        val game = RepoGames.getById(gameId).getOrThrow()
+        val town = game.province.getTownById(townId).getOrThrow()
+        val image: String = game.province.imageUrl
+
+        return TownInfo(town.gauchosGeneratedByDefense, town.gauchosGeneratedByProduction, image)
+    }
+
     fun getProvinces() = geoRef.requestAvailableProvinces().getOrThrow()
 
     fun getGame(userId: Int, gameId: Int): Game {
