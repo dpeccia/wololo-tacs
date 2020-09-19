@@ -35,7 +35,7 @@ class GamesControllerTest {
     val game3: Game = Game(3, listOf(user1, user2), Province(0, "a_province", ArrayList(listOf(town1, town2, town3, town4))))
     val game4: Game = Game(4, listOf(user2, user3), Province(0, "a_province", ArrayList(towns)))
     val gameNotInRepo: Game = Game(5, listOf(user1), Province(1, "another_province", ArrayList(towns)))
-    val games: List<Game> = listOf(singlePlayerGame, game2, game3, game4)
+    val games: List<Game> = listOf(game2, game3, singlePlayerGame, game4)
 
     @BeforeEach
     fun fixture() {
@@ -155,9 +155,6 @@ class GamesControllerTest {
         fun `Getting town stats from a town that doesn't exists returns TownNotFound exception `(){
             assertThrows<CustomException.NotFound.TownNotFoundException>{gamesControllerService.getTownStats(2,20)}
         }
-
-
-
     }
 
     @Nested
@@ -165,22 +162,24 @@ class GamesControllerTest {
         @Test
         fun `Attempting get games returns all the games in the DB where the player is participating`() {
             val user = user1
-            val playerGames = gamesControllerService.getGames(user.id, null, null, null)
-            assertThat(playerGames).isEqualTo(listOf(singlePlayerGame, game2, game3))
+            val playerGames = gamesControllerService.getGames(user.id, null, null, null).toSet()
+            assertThat(playerGames).isEqualTo(setOf(singlePlayerGame, game2, game3))
         }
 
         @Test
         fun `Get game's result can be sorted by id`() {
             val user = user2
             val sortedGames = gamesControllerService.getGames(user.id, "id", null, null)
-            assertThat(sortedGames).isEqualTo(listOf(game2, game3, game4))
+            val ids = sortedGames.map { it.id }
+            assertThat(ids).isSorted  //isEqualTo(listOf(game2, game3, game4))
         }
 
         @Test
         fun `Get game's result can be sorted by date`() {
             val user = user1
             val sortedGames = gamesControllerService.getGames(user.id, "date", null, null)
-            assertThat(sortedGames).isEqualTo(listOf(singlePlayerGame, game2, game3))
+            val dates = sortedGames.map { it.date }
+            assertThat(dates).isSorted   //isEqualTo(listOf(singlePlayerGame, game2, game3))
         }
 
         @Test
@@ -200,8 +199,9 @@ class GamesControllerTest {
         @Test
         fun `Get games with an invalid sorting parameter is equivalent to getting all games`() {
             val user = user1
-            val playerGames = gamesControllerService.getGames(user.id, "asd", null, null)
-            assertThat(playerGames).isEqualTo(listOf(singlePlayerGame, game2, game3))
+            val playerGamesWithInvalidParameter = gamesControllerService.getGames(user.id, "asd", null, null)
+            val allPlayerGames = gamesControllerService.getGames(user.id, null, null, null)
+            assertThat(playerGamesWithInvalidParameter).isEqualTo(allPlayerGames)
         }
 
         @Test
@@ -209,7 +209,7 @@ class GamesControllerTest {
             val user = user1
             singlePlayerGame.finishTurn(user) // Como es el unico deberia ganar y por lo tanto status = FINISHED
             val playerGames = gamesControllerService.getGames(user.id, null, Status.FINISHED, null)
-            assertThat(playerGames).isEqualTo(listOf(singlePlayerGame))
+            assertThat(playerGames).allMatch { it.status == Status.FINISHED }
         }
 
 //        @Test
