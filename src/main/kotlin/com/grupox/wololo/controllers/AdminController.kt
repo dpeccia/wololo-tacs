@@ -6,7 +6,10 @@ import com.grupox.wololo.model.helpers.GamePublicInfo
 import com.grupox.wololo.model.helpers.UserPublicInfo
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
+import com.grupox.wololo.services.AdminControllerService
+import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
 import java.util.*
@@ -14,6 +17,10 @@ import java.util.*
 @RequestMapping("/admin")
 @RestController
 class AdminController : BaseController() {
+
+    @Autowired
+    lateinit var adminControllerService: AdminControllerService
+
     @GetMapping("/games")
     @ApiOperation(value = "Gets the games stats")
     fun getGamesStats(@RequestParam("from", required = false) from: Date,
@@ -32,12 +39,19 @@ class AdminController : BaseController() {
 
     }
 
+    //Esto creo que conviene separarlo en dos requests, porque o devuelvo una lista, o devuelvo uno solo
     @GetMapping("/scoreboard")
     @ApiOperation(value = "Gets the scoreboard")
     fun getScoreBoard(@ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserPublicInfo> {
         checkAndGetToken(authCookie)
-        return RepoUsers.getUsersStats()
-     //   TODO("devolver el scoreboard")
+        return adminControllerService.getScoreBoard()
+    }
+
+    @GetMapping("/scoreboard/{id}")
+    @ApiOperation(value = "Gets the scoreboard")
+    fun getScoreBoardById(@RequestParam("username", required = false) id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): UserPublicInfo {
+        checkAndGetToken(authCookie)
+        return adminControllerService.getScoreBoardById(id)
     }
 
     @GetMapping("/users")

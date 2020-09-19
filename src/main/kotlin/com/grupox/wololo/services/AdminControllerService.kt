@@ -4,6 +4,7 @@ import arrow.core.extensions.list.functorFilter.filter
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.GamePublicInfo
 import com.grupox.wololo.model.helpers.UserPublicInfo
+import com.grupox.wololo.model.helpers.getOrThrow
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import java.util.*
@@ -12,6 +13,10 @@ class AdminControllerService {
 
     fun getScoreBoard(): List<UserPublicInfo> {
         return RepoUsers.getUsersStats()
+    }
+
+    fun getScoreBoardById(id: Int): UserPublicInfo {
+        return RepoUsers.getById(id).getOrThrow().publicInfo()
     }
 
     fun getGamesStats(from: Date, to: Date): GamePublicInfo {
