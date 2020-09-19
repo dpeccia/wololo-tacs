@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.grupox.wololo.model.Coordinates
 import com.grupox.wololo.model.Game
 
-data class UserForm @JsonCreator constructor(val mail: String, val password: String)
+data class UserForm @JsonCreator constructor(val mail: String, val username: String, val password: String)
+data class LoginForm @JsonCreator constructor(val mail: String, val password: String)
 data class UserPublicInfoWithoutStats @JsonCreator constructor(val id: Int, val mail: String)
 data class UserPublicInfo @JsonCreator constructor(val mail: String, val gamesWon: Int, val gamesLost: Int)
 data class GamePublicInfo @JsonCreator constructor(val gamesNew: Int, val gamesOnGoing: Int, val gamesFinished: Int, val gamesCanceled: Int, val games: List<Game>)

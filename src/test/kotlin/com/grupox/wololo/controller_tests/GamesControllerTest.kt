@@ -16,10 +16,10 @@ import java.util.*
 class GamesControllerTest {
     val gamesControllerService: GamesControllerService = GamesControllerService()
 
-    val user1: User = User(1,"a_mail", "a_password", false)
-    val user2: User = User(2,"a_mail2", "a_password2", false)
-    val user3: User = User(3,"a_mail3", "a_password3", false)
-    val userNotInRepo: User = User(4,"other_mail", "other_password", false)
+    val user1: User = User(1, "", "a_mail", "a_password", false)
+    val user2: User = User(2, "", "a_mail2", "a_password2", false)
+    val user3: User = User(3, "", "a_mail3", "a_password3", false)
+    val userNotInRepo: User = User(4, "", "other_mail", "other_password", false)
     val users: List<User> = listOf(user1, user2, user3)
 
     val town1: Town = Town(id = 1, name = "town1", elevation = 10.0)
