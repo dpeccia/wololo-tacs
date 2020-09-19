@@ -1,11 +1,7 @@
 package com.grupox.wololo
 
-import com.grupox.wololo.model.Game
-import com.grupox.wololo.model.Province
-import com.grupox.wololo.model.Town
-import com.grupox.wololo.model.User
+import com.grupox.wololo.model.*
 import com.grupox.wololo.model.repos.RepoGames
-import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.AdminControllerService
 import io.mockk.every
 import io.mockk.mockkObject
@@ -39,9 +35,8 @@ class AdminControllerTest {
         assertThat(adminService.getScoreBoard()).isNotEmpty
     }*/
 
-
     @Test
-    fun `get games by date`() {
+    fun `get on going games by date from 5 days before to 20 days after actual date returns 2 when there are 2 games that are being played`() {
         assertThat(adminControllerService.getGamesStats(Date.from(Instant.now().minus(Duration.ofDays(5))), Date.from(Instant.now().plus(Duration.ofDays(20)))).gamesOnGoing).isEqualTo(2)
     }
 

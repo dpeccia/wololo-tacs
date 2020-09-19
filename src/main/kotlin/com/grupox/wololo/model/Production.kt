@@ -7,4 +7,8 @@ class Production : Specialization {
             round(15 * this.gauchosBaseFormula(townAltitude, maxAltitude, minAltitude)).toInt()
 
     override fun multDefense(): Double = 1.0
+
+    override fun updateStats(townAltitude: Double, maxAltitude: Double, minAltitude: Double, town: Town) {
+        town.updateGauchosByProduction(gauchos(townAltitude, maxAltitude, minAltitude))
+    }
 }

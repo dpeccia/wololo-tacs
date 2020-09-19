@@ -15,7 +15,7 @@ data class GameForm(val provinceName: String, val townAmount: Int, val participa
 data class TownForm @JsonCreator constructor(val specialization: String)
 data class MovementForm @JsonCreator constructor(val from: Int, val to: Int, val gauchosQty: Int)
 data class AttackForm @JsonCreator constructor(val from: Int, val to: Int)
-
+data class TownInfo @JsonCreator constructor(val gauchosGeneratedByDefense: Int, val gauchosGeneratedByProduction: Int)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class ProvinceGeoRef(@JsonProperty("nombre") val name: String)
