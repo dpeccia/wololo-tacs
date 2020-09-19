@@ -7,8 +7,10 @@ import com.grupox.wololo.model.helpers.UserPublicInfo
 import com.grupox.wololo.model.helpers.getOrThrow
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
+import org.springframework.stereotype.Service
 import java.util.*
 
+@Service
 class AdminControllerService {
 
     fun getScoreBoard(): List<UserPublicInfo> {

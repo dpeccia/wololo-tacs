@@ -187,7 +187,7 @@ class GamesControllerTest {
         fun `Get game's result can be sorted by the number of towns`() {
             val user = user1
             val sortedGames = gamesControllerService.getGames(user.id, "numberOfTowns", null, null)
-            assertThat(sortedGames).isEqualTo(listOf(singlePlayerGame, game3, game2))
+            assertThat(sortedGames).isEqualTo(listOf(singlePlayerGame, game2, game3))
         }
 
         @Test
