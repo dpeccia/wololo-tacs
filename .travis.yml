@@ -3,6 +3,9 @@ language: java
 jdk:
   - oraclejdk11
 
+env:
+  - CODECOV_TOKEN="d159f153-92a3-4c61-9767-028306713e3d"
+
 before_install:
   - chmod +x gradlew
   - chmod +x gradle/wrapper/gradle-wrapper.jar
@@ -11,4 +14,4 @@ script:
   - ./gradlew test build
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -t d159f153-92a3-4c61-9767-028306713e3d
+  - bash <(curl -s https://codecov.io/bash)
