@@ -15,5 +15,5 @@ class ProvincesImages {
     private lateinit var env: Environment
 
     fun getUrl(provinceName: String): Either<CustomException.Service.InvalidExternalResponseException, String> =
-        env.getProperty("${provinceName.toUpperCase().replace(' ', '_')}.url")?.removeSurrounding("\"").rightIfNotNull { CustomException.Service.InvalidExternalResponseException("") }
+        env.getProperty("${provinceName.toUpperCase().replace(' ', '_')}.url").rightIfNotNull { CustomException.Service.InvalidExternalResponseException("") }
 }

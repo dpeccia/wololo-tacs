@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 import java.security.KeyPair
 import java.time.Duration
 import java.time.Instant
-import java.util.Date
+import java.util.*
 
 @Service
 object JwtSigner {
@@ -19,7 +19,7 @@ object JwtSigner {
                 .signWith(keyPair.private, SignatureAlgorithm.RS256)
                 .setSubject(userId.toString())
                 .setIssuer("identity")
-                .setExpiration(Date.from(Instant.now().plus(Duration.ofMinutes(1))))
+                .setExpiration(Date.from(Instant.now().plus(Duration.ofMinutes(60))))
                 .setIssuedAt(Date.from(Instant.now()))
                 .compact()
     }

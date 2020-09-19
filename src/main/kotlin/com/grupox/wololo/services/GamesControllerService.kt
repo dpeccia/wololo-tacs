@@ -8,10 +8,11 @@ import arrow.core.fix
 import arrow.optics.extensions.list.cons.cons
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.externalservices.GeoRef
-import com.grupox.wololo.model.externalservices.ProvincesImages
-import com.grupox.wololo.model.externalservices.TopoData
-import com.grupox.wololo.model.helpers.*
+import com.grupox.wololo.model.externalservices.*
+import com.grupox.wololo.model.helpers.AttackForm
+import com.grupox.wololo.model.helpers.GameForm
+import com.grupox.wololo.model.helpers.MovementForm
+import com.grupox.wololo.model.helpers.getOrThrow
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,6 +27,8 @@ class GamesControllerService {
     lateinit var topoData: TopoData
     @Autowired
     lateinit var provinceImages: ProvincesImages
+    @Autowired
+    lateinit var pixabay: Pixabay
 
     fun surrender(gameId: Int, userId: Int) {
         val game: Game = RepoGames.getById(gameId).getOrThrow()
@@ -57,7 +60,7 @@ class GamesControllerService {
         game.attackTown(user, attackData)
     }
 
-    fun getProvinces() = geoRef.requestAvailableProvinces().getOrThrow()
+    fun getProvinces(): List<String> = geoRef.requestAvailableProvinces().getOrThrow()
 
     fun getGame(userId: Int, gameId: Int): Game {
         val user = RepoUsers.getById(userId).getOrThrow()
@@ -94,11 +97,11 @@ class GamesControllerService {
                     .sequence(Either.applicative()).fix().map{ it.fix() }
 
             val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
-            val towns = !townsData.map { data ->
-                topoData.requestElevation(data.coordinates).map { elevation ->
-                    Town(data.id, data.name, data.coordinates, elevation.toDouble())
-                }
-            }.sequence(Either.applicative()).fix().map { it.fix() }
+            val towns = townsData.map { data ->
+                val elevation = !topoData.requestElevation(data.coordinates)
+                val imageUrl = !pixabay.requestTownImage(data.name)
+                Town(data.id, data.name, data.coordinates, elevation, imageUrl)
+            }//.sequence(Either.applicative()).fix().map { it.fix() }
 
             val provinceImage: String = !provinceImages.getUrl(form.provinceName)
             Game(0,users,  Province(0, form.provinceName, ArrayList(towns), provinceImage))

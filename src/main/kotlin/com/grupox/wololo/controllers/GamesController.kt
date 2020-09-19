@@ -5,7 +5,6 @@ import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.GameForm
 import com.grupox.wololo.model.helpers.MovementForm
-import com.grupox.wololo.model.helpers.ProvinceGeoRef
 import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -107,7 +106,7 @@ class GamesController : BaseController() {
 
     @GetMapping("/provinces")
     @ApiOperation(value = "Gets all provinces")
-    fun getProvinces(@ApiIgnore @CookieValue("X-Auth") authCookie : String?) : List<ProvinceGeoRef> {
+    fun getProvinces(@ApiIgnore @CookieValue("X-Auth") authCookie : String?) : List<String> {
         checkAndGetToken(authCookie)
         return gamesControllerService.getProvinces()
     }

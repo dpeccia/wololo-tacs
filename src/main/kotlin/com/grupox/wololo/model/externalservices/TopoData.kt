@@ -1,6 +1,7 @@
 package com.grupox.wololo.model.externalservices
 
-import arrow.core.*
+import arrow.core.Either
+import arrow.core.filterOrOther
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Coordinates
@@ -13,10 +14,10 @@ import org.springframework.stereotype.Service
 private data class TopoDataResponse(val results: List<ElevationData>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-private data class ElevationData(val elevation: Float)
+private data class ElevationData(val elevation: Double)
 
 interface ITopoData {
-    fun requestElevation(coordinates: Coordinates): Either<CustomException, Float>
+    fun requestElevation(coordinates: Coordinates): Either<CustomException, Double>
 }
 
 @Service
@@ -25,7 +26,7 @@ class TopoData : HttpService("TopoData"), ITopoData {
     private val baseUrl: String = "http://api.opentopodata.org/v1/test-dataset"
 
     @Cacheable("withTimeToLive")
-    override fun requestElevation(coordinates: Coordinates): Either<CustomException, Float> {
+    override fun requestElevation(coordinates: Coordinates): Either<CustomException, Double> {
         val queryResponse: Either<CustomException, TopoDataResponse> =
             requestData(baseUrl, mapOf("locations" to "${coordinates.latitude},${coordinates.longitude}"))
 

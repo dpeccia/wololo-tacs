@@ -1,11 +1,11 @@
 package com.grupox.wololo.model.externalservices
 
-import arrow.core.*
+import arrow.core.Either
+import arrow.core.mapOf
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.helpers.ProvinceGeoRef
-import com.grupox.wololo.model.helpers.TownGeoRef
+import com.grupox.wololo.model.Coordinates
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Scope
@@ -24,8 +24,18 @@ private sealed class GeoRefResponse() {
     ) : GeoRefResponse()
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+private data class ProvinceGeoRef(@JsonProperty("nombre") val name: String)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class TownGeoRef(
+        @JsonProperty("id") val id: Int,
+        @JsonProperty("nombre") val name: String,
+        @JsonProperty("centroide") val coordinates: Coordinates
+)
+
 interface IGeoRef {
-    fun requestAvailableProvinces(): Either<CustomException, List<ProvinceGeoRef>>
+    fun requestAvailableProvinces(): Either<CustomException, List<String>>
     fun requestTownsData(provinceName: String): Either<CustomException, List<TownGeoRef>>
 }
 
@@ -45,8 +55,8 @@ class GeoRef(@Autowired private val self: GeoRef?) : HttpService("GeoRef"), IGeo
         self!!.requestTownsData(provinceName).map { it.take(amount) }
 
     @Cacheable(cacheNames = ["withTimeToLive"])
-    override fun requestAvailableProvinces(): Either<CustomException, List<ProvinceGeoRef>> {
-        return requestData<GeoRefResponse.ProvinceQuery>(provinceDataUrl, mapOf()).map { it.matches }
+    override fun requestAvailableProvinces(): Either<CustomException, List<String>> {
+        return requestData<GeoRefResponse.ProvinceQuery>(provinceDataUrl, mapOf()).map { list -> list.matches.map { it.name } }
     }
 
 }
