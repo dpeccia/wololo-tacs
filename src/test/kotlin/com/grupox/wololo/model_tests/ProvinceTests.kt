@@ -6,6 +6,7 @@ import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.repos.RepoUsers
 import io.mockk.every
 import io.mockk.mockkObject
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -30,8 +31,63 @@ class ProvinceTests {
     @Nested
     inner class MoveGauchos {
         @Test
-        fun `a`() {
+        fun `trying to move gauchos to a Town that doesnt exist throws TownNotFoundException`() {
+            assertThrows<CustomException.NotFound.TownNotFoundException>
+                { province.moveGauchosBetweenTowns(user1, MovementForm(1, 3,2)) }
+        }
 
+        @Test
+        fun `trying to move gauchos from a Town that doesnt exist throws TownNotFoundException`() {
+            assertThrows<CustomException.NotFound.TownNotFoundException>
+                { province.moveGauchosBetweenTowns(user1, MovementForm(3, 1,2)) }
+        }
+
+        @Test
+        fun `user1 cannot move gauchos from a town that doesnt belong to him`() {
+            town1.owner = user2
+            town2.owner = user1
+            assertThrows<CustomException.Forbidden.IllegalGauchoMovement>
+            { province.moveGauchosBetweenTowns(user1, MovementForm(1, 2,2)) }
+        }
+
+        @Test
+        fun `user1 cannot move gauchos to a town that doesnt belong to him`() {
+            town1.owner = user1
+            town2.owner = user2
+            assertThrows<CustomException.Forbidden.IllegalGauchoMovement>
+            { province.moveGauchosBetweenTowns(user1, MovementForm(1, 2,2)) }
+        }
+
+        @Test
+        fun `user1 cannot move gauchos between towns that belong to an enemy`() {
+            town1.owner = user2
+            town2.owner = user2
+            assertThrows<CustomException.Forbidden.IllegalGauchoMovement>
+            { province.moveGauchosBetweenTowns(user1, MovementForm(1, 2,2)) }
+        }
+
+        @Test
+        fun `user1 cannot move gauchos between towns that doesnt belong to someone`() {
+            assertThrows<CustomException.Forbidden.IllegalGauchoMovement>
+            { province.moveGauchosBetweenTowns(user1, MovementForm(1, 2,2)) }
+        }
+
+        @Test
+        fun `user1 cannot move gauchos to a town that is locked`() {
+            town1.owner = user1
+            town2.owner = user1
+            town2.isLocked = true
+            assertThrows<CustomException.Forbidden.IllegalGauchoMovement>
+            { province.moveGauchosBetweenTowns(user1, MovementForm(1, 2,2)) }
+        }
+
+        @Test
+        fun `successfully move 3 gauchos from town1 to town2 leaves town1 with 7 gauchos and town2 with 23 gauchos`() {
+            town1.owner = user1
+            town2.owner = user1
+            province.moveGauchosBetweenTowns(user1, MovementForm(1, 2,3))
+            assertThat(town1.gauchos).isEqualTo(7)
+            assertThat(town2.gauchos).isEqualTo(23)
         }
     }
 
