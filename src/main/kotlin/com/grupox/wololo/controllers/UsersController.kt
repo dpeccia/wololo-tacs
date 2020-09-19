@@ -1,6 +1,7 @@
 package com.grupox.wololo.controllers
 
 import com.grupox.wololo.model.helpers.JwtSigner
+import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.model.helpers.UserPublicInfoWithoutStats
 import com.grupox.wololo.services.UsersControllerService
@@ -25,7 +26,7 @@ class UsersController : BaseController() {
 
     @PostMapping("/tokens")
     @ApiOperation(value = "Log In")
-    fun login(@RequestBody _user: UserForm): ResponseEntity<Void> {
+    fun login(@RequestBody _user: LoginForm): ResponseEntity<Void> {
         val user = usersControllerService.checkUserCredentials(_user)
 
         val jwt = JwtSigner.createJwt(user.id)

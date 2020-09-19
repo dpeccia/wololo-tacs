@@ -1,11 +1,13 @@
-package com. grupox.wololo.model
+package com.grupox.wololo.model
 
 import com.grupox.wololo.errors.CustomException
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, var owner: User? = null){
+class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, val townImage: String = ""){
+    var owner: User? = null
+
     var isLocked: Boolean = false
     var specialization : Specialization = Production()
     var gauchos = 0

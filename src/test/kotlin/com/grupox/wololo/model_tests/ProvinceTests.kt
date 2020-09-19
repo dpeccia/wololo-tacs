@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class ProvinceTests {
-    val user1: User = User(1,"a_mail", "a_password", false)
-    val user2: User = User(2,"other_mail", "other_password", false)
+    val user1: User = User(1, "", "a_mail", "a_password", false)
+    val user2: User = User(2, "", "other_mail", "other_password", false)
 
     val town1: Town = Town(id = 1, name = "town1", elevation = 10.0)
     val town2: Town = Town(id = 2, name = "town2", elevation = 10.0)

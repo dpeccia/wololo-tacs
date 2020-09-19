@@ -15,7 +15,7 @@ import java.util.*
 class AdminControllerTest {
     val adminControllerService: AdminControllerService = AdminControllerService()
 
-    val user1: User = User(1,"a_mail", "a_password", false)
+    val user1: User = User(1, "", "a_mail", "a_password", false)
   //  val users: List<User> = listOf(user1)
     val town1: Town = Town(id = 1, name = "town1", elevation = 10.0)
     val towns: List<Town> = listOf(town1)

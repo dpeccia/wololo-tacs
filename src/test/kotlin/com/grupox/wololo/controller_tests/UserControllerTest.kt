@@ -4,6 +4,7 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
+import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.services.UsersControllerService
 import io.mockk.every
@@ -16,9 +17,9 @@ class UserControllerTest {
     val usersControllerService: UsersControllerService = UsersControllerService()
 
     private val users: ArrayList<User> = arrayListOf(
-            User(1,"example_admin", "example_admin", true, Stats(0, 0)),
-            User(2,"example_normal_user", "example_normal_user", false, Stats(1, 1)),
-            User(3,"example_normal_user2", "example_normal_user2", false, Stats(1, 1))
+            User(1, "", "example_admin", "example_admin", true, Stats(0, 0)),
+            User(2, "", "example_normal_user", "example_normal_user", false, Stats(1, 1)),
+            User(3, "", "example_normal_user2", "example_normal_user2", false, Stats(1, 1))
     )
 
     @BeforeEach
@@ -32,18 +33,18 @@ class UserControllerTest {
         @Test
         fun `login with wrong username throws BadLoginException`() {
             assertThrows<CustomException.Unauthorized.BadLoginException>
-                {usersControllerService.checkUserCredentials(UserForm("wrong_name", "example_admin"))}
+                {usersControllerService.checkUserCredentials(LoginForm("wrong_name", "example_admin"))}
         }
 
         @Test
         fun `login with wrong password throws BadLoginException`() {
             assertThrows<CustomException.Unauthorized.BadLoginException>
-                {usersControllerService.checkUserCredentials(UserForm("example_admin", "wrong_password"))}
+                {usersControllerService.checkUserCredentials(LoginForm("example_admin", "wrong_password"))}
         }
 
         @Test
         fun `successful login doesnt throw an Exception`() {
-            assertDoesNotThrow{usersControllerService.checkUserCredentials(UserForm("example_admin", "example_admin"))}
+            assertDoesNotThrow{usersControllerService.checkUserCredentials(LoginForm("example_admin", "example_admin"))}
         }
     }
 

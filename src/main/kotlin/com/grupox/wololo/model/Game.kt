@@ -11,7 +11,6 @@ import java.time.Instant
 
 class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) {
 
-    //region Initialization
     //val id: Int = 0 // TODO: Autogenerada
 
     val townsAmount: Int
@@ -28,9 +27,7 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
         assignTowns()
         startGame()
     }
-    //endregion
 
-    //region Private Methods
     private fun assignTowns() {  // Este metodo puede modificarse para hacer algun algoritmo mas copado.
         if (townsAmount < playerAmount) throw CustomException.BadRequest.IllegalGameException("There is not enough towns for the given players")
         else if (players.isEmpty()) throw CustomException.BadRequest.IllegalGameException("There is not enough players")
@@ -61,15 +58,11 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     }
 
     private fun userWon(user: User): Boolean = province.allOccupiedTownsAreFrom(user)
-    //endregion
 
-    //region Public Methods
     fun getMember(userId: Int): Either<CustomException.NotFound, User> = players.find { it.id == userId }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
 
     fun isParticipating(user: User): Boolean = players.contains(user)
-    //endregion
 
-    //region Actions
     fun finishTurn(user: User) {
         checkForbiddenAction(user)
         province.unlockAllTownsFrom(user)
@@ -97,5 +90,4 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
         checkForbiddenAction(user)
         province.attackTown(user, attackForm)
     }
-    //endregion
 }

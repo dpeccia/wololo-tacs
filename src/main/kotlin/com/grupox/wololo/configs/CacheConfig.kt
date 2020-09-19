@@ -1,6 +1,7 @@
 package com.grupox.wololo.configs
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.grupox.wololo.configs.properties.CacheProperties
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cache.caffeine.CaffeineCacheManager

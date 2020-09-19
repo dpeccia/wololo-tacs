@@ -26,7 +26,7 @@ sealed class CustomException(message: String) : Exception(message){
         class IllegalGameException(message: String) : BadRequest(message)
         class IllegalUserException(message: String) : BadRequest(message)
         class NotEnoughGauchosException(toMoveQty: Int, actualQty: Int)
-            : BadRequest("you want to move $toMoveQty gauchos, when there are only $actualQty in this Town")
+            : BadRequest("you want to move $toMoveQty gauchos, when there are only $actualQty in this com.grupox.wololo.model.Town")
     }
 
     sealed class Forbidden(message: String) : CustomException("Forbidden: $message") {
