@@ -20,8 +20,7 @@ sealed class CustomException(message: String) : Exception(message){
             : Service("request to $apiName API servers returned status code: $statusCode")
         class InvalidExternalResponseException(message: String)
             : Service(message)
-
-        class PixabayNoHitsException(query: String) : Service("Request to pixabay returned no images for q = $query")
+        class ProvincePropertiesNotAvailableException() : Service("there are no provinces available")
     }
 
     sealed class BadRequest(message: String) : CustomException("Bad request: $message") {
