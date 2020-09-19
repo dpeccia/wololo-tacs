@@ -12,15 +12,23 @@ import com.grupox.wololo.model.helpers.getOrThrow
 class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageUrl: String = ""){
     fun getTownById(id: Int): Either<NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { TownNotFoundException() }
 
-    fun maxAltitude(): Double = towns.map { it.elevation }.max()!!
+    private fun maxAltitude(): Double = towns.map { it.elevation }.max()!!
 
-    fun minAltitude(): Double = towns.map { it.elevation }.min()!!
+    private fun minAltitude(): Double = towns.map { it.elevation }.min()!!
 
-    fun multDistance(): Double = TODO("logica multDist")
+    private fun distanceBetween(attacker: Town, defender: Town): Double = TODO("implement")
 
-    fun multAltitude(): Double = TODO("logica multAlt")
+    private fun maxDistance(): Double = TODO("implement")
 
-    fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
+    private fun minDistance(): Double = TODO("implement")
+
+    private fun multDistance(attacker: Town, defender: Town): Double =
+            1 - ((distanceBetween(attacker, defender) - minDistance()) / (2 * (maxDistance() - minDistance())))
+
+    private fun multAltitude(defender: Town): Double =
+            1 + ((defender.elevation - minAltitude()) / (2 * (maxAltitude() - minAltitude())))
+
+    private fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
 
     fun allOccupiedTownsAreFrom(user: User): Boolean = towns.filter { it.owner != null }.stream().allMatch { it.owner == user }
 
@@ -58,7 +66,9 @@ class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageU
         if(!attacker.isFrom(user) || defender.isFrom(user))
             throw IllegalAttack("You only can attack from your town to an enemy town")
         val attackerQtyBeforeAttack = attacker.gauchos
-        attacker.attack(defender.gauchos, multDistance(), multAltitude())
-        defender.defend(attacker.owner!!, attackerQtyBeforeAttack, multDistance(), multAltitude())
+        val multDist = multDistance(attacker, defender)
+        val multAlt = multAltitude(defender)
+        attacker.attack(defender.gauchos, multDist, multAlt)
+        defender.defend(attacker.owner!!, attackerQtyBeforeAttack, multDist, multAlt)
     }
 }
