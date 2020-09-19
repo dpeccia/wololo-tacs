@@ -2,13 +2,15 @@ package com.grupox.wololo.model
 
 import arrow.core.Either
 import arrow.core.rightIfNotNull
-import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.errors.CustomException.*
+import com.grupox.wololo.errors.CustomException.Forbidden.*
+import com.grupox.wololo.errors.CustomException.NotFound.*
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.helpers.getOrThrow
 
 class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageUrl: String = ""){
-    fun getTownById(id: Int): Either<CustomException.NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { CustomException.NotFound.TownNotFoundException() }
+    fun getTownById(id: Int): Either<NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { TownNotFoundException() }
 
     fun maxAltitude(): Double = towns.map { it.elevation }.max()!!
 
@@ -34,13 +36,18 @@ class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageU
         townsFrom(user).forEach { it.unlock() }
     }
 
+    private fun checkIllegalMovements(user: User, fromTown: Town, toTown: Town) {
+        when {
+            toTown.id == fromTown.id -> throw IllegalGauchoMovement("You can´t move gauchos from a town to itself")
+            !fromTown.isFrom(user) || !toTown.isFrom(user) -> throw IllegalGauchoMovement("You only can move gauchos between your current towns")
+            toTown.isLocked -> throw IllegalGauchoMovement("You only can move gauchos to a town that is unlocked")
+        }
+    }
+
     fun moveGauchosBetweenTowns(user: User, movementForm: MovementForm) {
         val fromTown = this.getTownById(movementForm.from).getOrThrow()
         val toTown = this.getTownById(movementForm.to).getOrThrow()
-        if(!fromTown.isFrom(user) || !toTown.isFrom(user))
-            throw CustomException.Forbidden.IllegalGauchoMovement("You only can move gauchos between your current towns")
-        if(toTown.isLocked)
-            throw CustomException.Forbidden.IllegalGauchoMovement("You only can move gauchos to a town that is unlocked")
+        checkIllegalMovements(user, fromTown, toTown)
         fromTown.giveGauchos(movementForm.gauchosQty)
         toTown.receiveGauchos(movementForm.gauchosQty)
     }
@@ -49,7 +56,9 @@ class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageU
         val attacker = this.getTownById(attackForm.from).getOrThrow()
         val defender = this.getTownById(attackForm.to).getOrThrow()
         if(!attacker.isFrom(user) || defender.isFrom(user))
-            throw CustomException.Forbidden.IllegalAttack("You only can attack from your town to an enemy town")
-        attacker.attack(defender, multDistance(), multAltitude())
+            throw IllegalAttack("You only can attack from your town to an enemy town")
+        val attackerQtyBeforeAttack = attacker.gauchos
+        attacker.attack(defender.gauchos, multDistance(), multAltitude())
+        defender.defend(attacker.owner!!, attackerQtyBeforeAttack, multDistance(), multAltitude())
     }
 }

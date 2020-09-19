@@ -9,10 +9,7 @@ import arrow.optics.extensions.list.cons.cons
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.externalservices.*
-import com.grupox.wololo.model.helpers.AttackForm
-import com.grupox.wololo.model.helpers.GameForm
-import com.grupox.wololo.model.helpers.MovementForm
-import com.grupox.wololo.model.helpers.getOrThrow
+import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,6 +58,15 @@ class GamesControllerService {
     }
 
     fun getProvinces(): List<String> = geoRef.requestAvailableProvinces().getOrThrow()
+
+    fun getTownStats(gameId: Int, townId: Int): TownInfo {
+
+        val game = RepoGames.getById(gameId).getOrThrow()
+        val town = game.province.getTownById(townId).getOrThrow()
+        val image: String = game.province.imageUrl
+
+        return TownInfo(town.gauchosGeneratedByDefense, town.gauchosGeneratedByProduction, image)
+    }
 
     fun getGame(userId: Int, gameId: Int): Game {
         val user = RepoUsers.getById(userId).getOrThrow()
