@@ -43,6 +43,13 @@ class ProvinceTests {
         }
 
         @Test
+        fun `user1 cannot move gauchos from a town to itself`() {
+            town1.owner = user1
+            assertThrows<CustomException.Forbidden.IllegalGauchoMovement>
+            { province.moveGauchosBetweenTowns(user1, MovementForm(1, 1,2)) }
+        }
+
+        @Test
         fun `user1 cannot move gauchos from a town that doesnt belong to him`() {
             town1.owner = user2
             town2.owner = user1

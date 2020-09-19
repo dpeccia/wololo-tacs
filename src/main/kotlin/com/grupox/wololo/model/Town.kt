@@ -35,17 +35,16 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordin
         isLocked = true
     }
 
-    fun attack(defender: Town, multDistance: Double, multAltitude: Double) {
-        val gauchosAttackFinal = floor(gauchos * multDistance - defender.gauchos * multAltitude * this.multDefense()).toInt()
-        defender.defend(this, multDistance, multAltitude)
+    fun attack(defenderQty: Int, multDistance: Double, multAltitude: Double) {
+        val gauchosAttackFinal = floor(gauchos * multDistance - defenderQty * multAltitude * this.multDefense()).toInt()
         this.gauchos = max(gauchosAttackFinal, 0)
     }
 
-    fun defend(attacker: Town, multDistance: Double, multAltitude: Double) {
+    fun defend(attackerOwner: User, attackerQty: Int, multDistance: Double, multAltitude: Double) {
         val gauchosDefenseFinal =
-                ceil((gauchos * multAltitude * this.multDefense() - attacker.gauchos * multDistance) / (multAltitude * this.multDefense())).toInt()
+                ceil((gauchos * multAltitude * this.multDefense() - attackerQty * multDistance) / (multAltitude * this.multDefense())).toInt()
         if(gauchosDefenseFinal <= 0)
-            this.owner = attacker.owner
+            this.owner = attackerOwner
         this.gauchos = max(gauchosDefenseFinal, 0)
     }
 }
