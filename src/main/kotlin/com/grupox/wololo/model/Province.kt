@@ -22,13 +22,13 @@ class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageU
     private val distances =
             towns.map { town1 -> towns.map { town2 -> distanceBetween(town1, town2) } }.flatten().toSet().filter { it != 0.0 }
 
-    val maxAltitude = altitudes.max()!!
+    val maxAltitude = altitudes.max()
 
-    val minAltitude = altitudes.min()!!
+    val minAltitude = altitudes.min()
 
-    val maxDistance = distances.max()!!
+    val maxDistance = distances.max()
 
-    val minDistance = distances.min()!!
+    val minDistance = distances.min()
 
     // implementation of the Haversine method which also takes into account elevation differences between two towns
     fun distanceBetween(town1: Town, town2: Town): Double {
@@ -51,21 +51,21 @@ class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageU
     }
 
     private fun multDistance(attacker: Town, defender: Town): Double =
-            1 - ((distanceBetween(attacker, defender) - minDistance) / (2 * (maxDistance - minDistance)))
+            1 - ((distanceBetween(attacker, defender) - minDistance!!) / (2 * (maxDistance!! - minDistance)))
 
     private fun multAltitude(defender: Town): Double =
-            1 + ((defender.elevation - minAltitude) / (2 * (maxAltitude - minAltitude)))
+            1 + ((defender.elevation - minAltitude!!) / (2 * (maxAltitude!! - minAltitude)))
 
     private fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
 
     fun allOccupiedTownsAreFrom(user: User): Boolean = towns.filter { it.owner != null }.stream().allMatch { it.owner == user }
 
     fun addGauchosToAllTowns() {
-        towns.forEach { it.addGauchos(maxAltitude, minAltitude) }
+        towns.forEach { it.addGauchos(maxAltitude!!, minAltitude!!) }
     }
 
     fun addGauchosToAllTownsFrom(user: User) {
-        townsFrom(user).forEach { it.addGauchos(maxAltitude, minAltitude) }
+        townsFrom(user).forEach { it.addGauchos(maxAltitude!!, minAltitude!!) }
     }
 
     fun unlockAllTownsFrom(user: User) {

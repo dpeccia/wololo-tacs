@@ -185,13 +185,13 @@ class ProvinceTests {
         @Test
         fun `maxDistance in Jujuy is the distance between Yavi and Abra Pampa`() { // checked with Google Maps manually
             assertThat(jujuy.maxDistance).isEqualTo(jujuy.distanceBetween(yavi, abraPampa))
-            assertThat(round(jujuy.maxDistance)).isEqualTo(101158)
+            assertThat(round(jujuy.maxDistance!!)).isEqualTo(101158.0)
         }
 
         @Test
         fun `minDistance in Jujuy is the distance between El Condor and Cangrejillos`() { // checked with Google Maps manually
             assertThat(jujuy.minDistance).isEqualTo(jujuy.distanceBetween(elCondor, cangrejillos))
-            assertThat(round(jujuy.minDistance)).isEqualTo(16882)
+            assertThat(round(jujuy.minDistance!!)).isEqualTo(16882.0)
         }
 
         @Test
