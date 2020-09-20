@@ -23,7 +23,7 @@ class GamesControllerService {
     @Autowired
     lateinit var topoData: TopoData
     @Autowired
-    lateinit var provinceImages: ProvincesImages
+    lateinit var provinceImages: ProvincesService
     @Autowired
     lateinit var pixabay: Pixabay
 
@@ -57,7 +57,7 @@ class GamesControllerService {
         game.attackTown(user, attackData)
     }
 
-    fun getProvinces(): List<String> = geoRef.requestAvailableProvinces().getOrThrow()
+    fun getProvinces(): List<String> = provinceImages.availableProvinces().getOrThrow()
 
     fun getTownStats(gameId: Int, townId: Int): TownInfo {
 
@@ -108,7 +108,7 @@ class GamesControllerService {
                 Town(data.id, data.name, data.coordinates, elevation, imageUrl)
             }//.sequence(Either.applicative()).fix().map { it.fix() }
 
-            val provinceImage: String = !provinceImages.getUrl(form.provinceName)
+            val provinceImage: String = provinceImages.getUrl(form.provinceName)
             Game(0,users,  Province(0, form.provinceName, ArrayList(towns), provinceImage))
         }.getOrThrow()
 
