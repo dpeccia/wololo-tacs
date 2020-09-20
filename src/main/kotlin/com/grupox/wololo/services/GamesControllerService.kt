@@ -99,8 +99,7 @@ class GamesControllerService {
 
     fun createGame(userId: Int, form: GameForm) {
         val game: Game = Either.fx<CustomException, Game> {
-            val users = !userId.cons(form.participantsIds).distinct().map { RepoUsers.getById(it) }
-                    .sequence(Either.applicative()).fix().map{ it.fix() }
+            val users = RepoUsers.getNormalUsers()
 
             val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
             val towns = townsData.map { data ->

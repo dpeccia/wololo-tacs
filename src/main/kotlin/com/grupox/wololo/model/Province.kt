@@ -1,43 +1,66 @@
 package com.grupox.wololo.model
 
 import arrow.core.Either
+import arrow.core.extensions.list.foldable.combineAll
+import arrow.core.extensions.list.semigroupK.combineK
 import arrow.core.rightIfNotNull
-import com.grupox.wololo.errors.CustomException.*
-import com.grupox.wololo.errors.CustomException.Forbidden.*
-import com.grupox.wololo.errors.CustomException.NotFound.*
+import com.google.common.collect.Sets
+import com.grupox.wololo.errors.CustomException.Forbidden.IllegalAttack
+import com.grupox.wololo.errors.CustomException.Forbidden.IllegalGauchoMovement
+import com.grupox.wololo.errors.CustomException.NotFound
+import com.grupox.wololo.errors.CustomException.NotFound.TownNotFoundException
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.helpers.getOrThrow
+import kotlin.math.*
 
 class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageUrl: String = ""){
     fun getTownById(id: Int): Either<NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { TownNotFoundException() }
 
-    private fun maxAltitude(): Double = towns.map { it.elevation }.max()!!
+    private val maxAltitude = towns.map { it.elevation }.max()!!
 
-    private fun minAltitude(): Double = towns.map { it.elevation }.min()!!
+    private val minAltitude: Double = towns.map { it.elevation }.min()!!
 
-    private fun distanceBetween(attacker: Town, defender: Town): Double = TODO("implement")
+    private val maxDistance: Double = towns.map { town1 -> towns.map { town2 -> distanceBetween(town1, town2) }.max()!! }.max()!!
 
-    private fun maxDistance(): Double = TODO("implement")
+    private val minDistance: Double = towns.map { town1 -> towns.map { town2 -> distanceBetween(town1, town2) }.min()!! }.min()!!
 
-    private fun minDistance(): Double = TODO("implement")
+    // implementation of the Haversine method which also takes into account elevation differences between two towns
+    private fun distanceBetween(town1: Town, town2: Town): Double {
+        val R = 6371 // Radius of the earth
+        val lat1 = town1.coordinates.latitude.toDouble()
+        val lon1 = town1.coordinates.longitude.toDouble()
+        val lat2 = town2.coordinates.latitude.toDouble()
+        val lon2 = town2.coordinates.longitude.toDouble()
+
+        val latDistance = Math.toRadians(lat2 - lat1)
+        val lonDistance = Math.toRadians(lon2 - lon1)
+        val a = (sin(latDistance / 2) * sin(latDistance / 2)
+                + (cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2))
+                * sin(lonDistance / 2) * sin(lonDistance / 2)))
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        var distance = R * c * 1000 // convert to meters
+        val height: Double = town1.elevation - town2.elevation
+        distance = distance.pow(2.0) + height.pow(2.0)
+        return sqrt(distance) // meters
+    }
 
     private fun multDistance(attacker: Town, defender: Town): Double =
-            1 - ((distanceBetween(attacker, defender) - minDistance()) / (2 * (maxDistance() - minDistance())))
+            1 - ((distanceBetween(attacker, defender) - minDistance) / (2 * (maxDistance - minDistance)))
 
     private fun multAltitude(defender: Town): Double =
-            1 + ((defender.elevation - minAltitude()) / (2 * (maxAltitude() - minAltitude())))
+            1 + ((defender.elevation - minAltitude) / (2 * (maxAltitude - minAltitude)))
 
     private fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
 
     fun allOccupiedTownsAreFrom(user: User): Boolean = towns.filter { it.owner != null }.stream().allMatch { it.owner == user }
 
     fun addGauchosToAllTowns() {
-        towns.forEach { it.addGauchos(maxAltitude(), minAltitude()) }
+        towns.forEach { it.addGauchos(maxAltitude, minAltitude) }
     }
 
     fun addGauchosToAllTownsFrom(user: User) {
-        townsFrom(user).forEach { it.addGauchos(maxAltitude(), minAltitude()) }
+        townsFrom(user).forEach { it.addGauchos(maxAltitude, minAltitude) }
     }
 
     fun unlockAllTownsFrom(user: User) {
