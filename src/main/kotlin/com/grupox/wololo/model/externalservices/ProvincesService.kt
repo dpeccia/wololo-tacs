@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 @PropertySource("classpath:provinces.properties")
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 class ProvincesService {
     @Autowired
     private lateinit var pixabayProperties: PixabayProperties
