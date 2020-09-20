@@ -8,12 +8,13 @@ import com.grupox.wololo.model.repos.RepoUsers
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.function.Executable
+import kotlin.math.round
 
 class ProvinceTests {
     val user1: User = User(1, "", "a_mail", "a_password", false)
@@ -113,6 +114,24 @@ class ProvinceTests {
     // TODO Tests de ataque de municipio
     @Nested
     inner class AttackTown {
+        private lateinit var jujuy: Province
+        private lateinit var yavi: Town
+        private lateinit var elCondor: Town
+        private lateinit var cangrejillos: Town
+        private lateinit var abraPampa: Town
+
+        @BeforeEach
+        fun fixture() {
+            yavi = Town(10, "Yavi", Coordinates((-65.3412864273208).toFloat(), (-22.1949119799291).toFloat()), 3485.0263671875)
+            elCondor = Town(11, "El Cóndor", Coordinates((-65.3795310298623).toFloat(), (-22.414030404424).toFloat()), 3609.618408203125)
+            cangrejillos = Town(12, "Cangrejillos", Coordinates((-65.5405751330491).toFloat(), (-22.4438999595476).toFloat()), 3617.323974609375)
+            abraPampa = Town(13, "Abra Pampa", Coordinates((-66.0322682108588).toFloat(), (-22.8431449411788).toFloat()), 3519.69287109375)
+            yavi.owner = user1
+            elCondor.owner = user1
+            cangrejillos.owner = user2
+            jujuy = Province(10, "Jujuy", arrayListOf(yavi, elCondor, cangrejillos, abraPampa))
+        }
+
         @Test
         fun `trying to attack from a Town that doesnt exist throws TownNotFoundException`() {
             assertThrows<CustomException.NotFound.TownNotFoundException> { province.attackTown(user1, AttackForm(3, 1)) }
@@ -151,6 +170,41 @@ class ProvinceTests {
         fun `user1 cannot attack from a town that doesnt belong to someone`() {
             assertThrows<CustomException.Forbidden.IllegalAttack>
             { province.attackTown(user1, AttackForm(1, 2)) }
+        }
+
+        @Test
+        fun `maxAltitude of Jujuy is the elevation of Cangrejillos`() {
+            assertThat(jujuy.maxAltitude).isEqualTo(cangrejillos.elevation)
+        }
+
+        @Test
+        fun `minAltitude of Jujuy is the elevation of Yavi`() {
+            assertThat(jujuy.minAltitude).isEqualTo(yavi.elevation)
+        }
+
+        @Test
+        fun `maxDistance in Jujuy is the distance between Yavi and Abra Pampa`() { // checked with Google Maps manually
+            assertThat(jujuy.maxDistance).isEqualTo(jujuy.distanceBetween(yavi, abraPampa))
+            assertThat(round(jujuy.maxDistance)).isEqualTo(101158)
+        }
+
+        @Test
+        fun `minDistance in Jujuy is the distance between El Condor and Cangrejillos`() { // checked with Google Maps manually
+            assertThat(jujuy.minDistance).isEqualTo(jujuy.distanceBetween(elCondor, cangrejillos))
+            assertThat(round(jujuy.minDistance)).isEqualTo(16882)
+        }
+
+        @Test
+        fun `attack from Yavi to Abra Pampa (rebel town) with 5 vs 4 gauchos leaves Yavi with 0 gauchos and Abra Pampa with 2`() {
+            yavi.gauchos = 5
+            abraPampa.gauchos = 4
+            jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id))
+            assertAll(
+                    Executable { assertThat(yavi.owner).isEqualTo(user1) },
+                    Executable { assertThat(abraPampa.owner).isNull() },
+                    Executable { assertThat(yavi.gauchos).isEqualTo(0) },
+                    Executable { assertThat(abraPampa.gauchos).isEqualTo(2) }
+            )
         }
     }
 
