@@ -81,7 +81,8 @@ class GamesControllerTest {
 
         @Test
         fun `trying to move gauchos with a user that exists and a game that exists doesnt throw an Exception`() {
-            assertDoesNotThrow { gamesControllerService.moveGauchosBetweenTowns(user1.id, singlePlayerGame.id, MovementForm(1,2,2)) }
+            assertThrows<CustomException.BadRequest.NotEnoughGauchosException>
+            { gamesControllerService.moveGauchosBetweenTowns(user1.id, singlePlayerGame.id, MovementForm(1,2,2)) }
         }
     }
 
