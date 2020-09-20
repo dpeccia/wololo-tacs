@@ -24,11 +24,11 @@ class ProvincesService {
     @Autowired
     private lateinit var env: Environment
 
-    @Cacheable(cacheNames = ["withTimeToLive"])
+    //@Cacheable("withTimeToLive") No se por qué rompe cuando lo uso
     fun getUrl(provinceName: String): String =
         env.getProperty("${provinceName.toUpperCase().replace(' ', '_')}.url") ?: pixabayProperties.defaultImage
 
-    @Cacheable(cacheNames = ["withTimeToLive"])
+    @Cacheable("withTimeToLive")
     fun availableProvinces(): Either<CustomException, List<String>> {
         val eitherFile = runCatching { File("src/main/resources/provinces.properties") }
                     .fold({ it.right() }, { CustomException.Service.ProvincePropertiesNotAvailableException().left() })
