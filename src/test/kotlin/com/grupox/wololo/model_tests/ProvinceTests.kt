@@ -2,6 +2,7 @@ package com.grupox.wololo.model_tests
 
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
+import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.repos.RepoUsers
 import io.mockk.every
@@ -18,7 +19,7 @@ class ProvinceTests {
     val user1: User = User(1, "", "a_mail", "a_password", false)
     val user2: User = User(2, "", "other_mail", "other_password", false)
 
-    val town1: Town = Town(id = 1, name = "town1", elevation = 10.0)
+    val town1: Town = Town(id = 1, name = "town1", elevation = 20.0)
     val town2: Town = Town(id = 2, name = "town2", elevation = 10.0)
     private val towns: List<Town> = listOf(town1, town2)
     private val province = Province(0, "a_province", ArrayList(towns))
@@ -113,8 +114,43 @@ class ProvinceTests {
     @Nested
     inner class AttackTown {
         @Test
-        fun `b`() {
+        fun `trying to attack from a Town that doesnt exist throws TownNotFoundException`() {
+            assertThrows<CustomException.NotFound.TownNotFoundException> { province.attackTown(user1, AttackForm(3, 1)) }
+        }
 
+        @Test
+        fun `trying to attack a Town that doesnt exist throws TownNotFoundException`() {
+            assertThrows<CustomException.NotFound.TownNotFoundException>
+            { province.attackTown(user1, AttackForm(1, 3)) }
+        }
+
+        @Test
+        fun `user1 cannot attack from a town to itself`() {
+            town1.owner = user1
+            assertThrows<CustomException.Forbidden.IllegalAttack>
+            { province.attackTown(user1, AttackForm(1, 1)) }
+        }
+
+        @Test
+        fun `user1 cannot attack from a town that doesnt belong to him`() {
+            town1.owner = user2
+            town2.owner = user2
+            assertThrows<CustomException.Forbidden.IllegalAttack>
+            { province.attackTown(user1, AttackForm(1, 2)) }
+        }
+
+        @Test
+        fun `user1 cannot attack to a town that belongs to him`() {
+            town1.owner = user1
+            town2.owner = user1
+            assertThrows<CustomException.Forbidden.IllegalAttack>
+            { province.attackTown(user1, AttackForm(1, 2)) }
+        }
+
+        @Test
+        fun `user1 cannot attack from a town that doesnt belong to someone`() {
+            assertThrows<CustomException.Forbidden.IllegalAttack>
+            { province.attackTown(user1, AttackForm(1, 2)) }
         }
     }
 
