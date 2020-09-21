@@ -5,7 +5,7 @@ import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.GameForm
 import com.grupox.wololo.model.helpers.MovementForm
-import com.grupox.wololo.model.helpers.*
+import com.grupox.wololo.model.helpers.TownInfo
 import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,10 +33,10 @@ class GamesController : BaseController() {
 
     @PostMapping
     @ApiOperation(value = "Creates a new game")
-    fun createGame(@RequestBody form: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
+    fun createGame(@RequestBody form: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         val token = checkAndGetToken(authCookie)
         val userId = token.body.subject.toInt()
-        gamesControllerService.createGame(userId, form)
+        return gamesControllerService.createGame(userId, form)
     }
 
     @GetMapping("/{id}")
@@ -50,17 +50,17 @@ class GamesController : BaseController() {
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Surrenders in a game (it becomes CANCELED)")
-    fun surrender(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
+    fun surrender(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         val token = checkAndGetToken(authCookie)
         val userId: Int = token.body.subject.toInt()
-        gamesControllerService.surrender(id, userId)
+        return gamesControllerService.surrender(id, userId)
     }
 
     @PutMapping("/{id}/actions/turn")
     @ApiOperation(value = "Finishes the current Turn")
-    fun finishTurn(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
+    fun finishTurn(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         val userId = checkAndGetToken(authCookie).body.subject.toInt()
-        gamesControllerService.finishTurn(userId, id)
+        return gamesControllerService.finishTurn(userId, id)
     }
 
     @PostMapping("/{id}/actions/movement")
@@ -68,9 +68,9 @@ class GamesController : BaseController() {
     fun moveGauchosBetweenTowns(
             @PathVariable("id") id: Int,
             @RequestBody movementData: MovementForm,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
+            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         val userId = checkAndGetToken(authCookie).body.subject.toInt()
-        gamesControllerService.moveGauchosBetweenTowns(userId, id, movementData)
+        return gamesControllerService.moveGauchosBetweenTowns(userId, id, movementData)
     }
 
     @PostMapping("/{id}/actions/attack")
@@ -78,9 +78,9 @@ class GamesController : BaseController() {
     fun attackTown(
             @PathVariable("id") id: Int,
             @RequestBody attackData: AttackForm,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
+            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         val userId = checkAndGetToken(authCookie).body.subject.toInt()
-        gamesControllerService.attackTown(userId, id, attackData)
+        return gamesControllerService.attackTown(userId, id, attackData)
     }
 
     @PutMapping("/{id}/towns/{idTown}")
@@ -89,10 +89,10 @@ class GamesController : BaseController() {
             @PathVariable("id") id: Int,
             @PathVariable("idTown") townId: Int,
             @RequestBody newSpecialization: String,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?) {
+            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
         val token = checkAndGetToken(authCookie)
         val userId = token.body.subject.toInt()
-        gamesControllerService.updateTownSpecialization(userId, id, townId, newSpecialization)
+        return gamesControllerService.updateTownSpecialization(userId, id, townId, newSpecialization)
     }
 
     @GetMapping("/{id}/towns/{idTown}")
