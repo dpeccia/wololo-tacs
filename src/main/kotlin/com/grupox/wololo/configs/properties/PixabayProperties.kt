@@ -12,6 +12,6 @@ class PixabayProperties {
     @Value("\${pixabay.apiKey}")
     lateinit var apiKey: String
 
-    @Value("\${pixabay.default_image")
+    @Value("\${pixabay.defaultImage}")
     lateinit var defaultImage: String
 }

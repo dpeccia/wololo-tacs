@@ -80,8 +80,9 @@ jacoco {
 
 tasks.jacocoTestReport {
     reports {
-        xml.isEnabled = false
+        xml.isEnabled = true
+        html.isEnabled = false
         csv.isEnabled = false
-        html.destination = file("${buildDir}/reports/jacoco")
+        xml.destination = file("${buildDir}/reports/jacoco.xml")
     }
 }
