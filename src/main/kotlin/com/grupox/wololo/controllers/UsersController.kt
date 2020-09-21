@@ -1,5 +1,6 @@
 package com.grupox.wololo.controllers
 
+import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.UserForm
@@ -20,8 +21,8 @@ class UsersController : BaseController() {
 
     @PostMapping
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
-    fun createUser(@RequestBody newUser: UserForm) {
-        usersControllerService.createUser(newUser)
+    fun createUser(@RequestBody newUser: UserForm): User {
+        return usersControllerService.createUser(newUser)
     }
 
     @PostMapping("/tokens")
