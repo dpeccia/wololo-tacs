@@ -183,6 +183,17 @@ class ProvinceTests {
         }
 
         @Test
+        fun `distanceBetween|2 is commutative`() {
+            assertThat(jujuy.distanceBetween(yavi, cangrejillos)).isEqualTo(jujuy.distanceBetween(cangrejillos, yavi))
+        }
+
+        @Test
+        fun `the distance between to towns changes if one elevation changes`() {
+            val elCondorWithFakeElevation = Town(11, "El Cóndor", Coordinates((-65.3795310298623).toFloat(), (-22.414030404424).toFloat()), 100.0)
+            assertThat(jujuy.distanceBetween(yavi, elCondor)).isNotEqualTo(jujuy.distanceBetween(yavi, elCondorWithFakeElevation))
+        }
+
+        @Test
         fun `maxDistance in Jujuy is the distance between Yavi and Abra Pampa`() { // checked with Google Maps manually
             assertThat(jujuy.maxDistance).isEqualTo(jujuy.distanceBetween(yavi, abraPampa))
             assertThat(round(jujuy.maxDistance!!)).isEqualTo(101158.0)
@@ -195,7 +206,7 @@ class ProvinceTests {
         }
 
         @Test
-        fun `attack from Yavi to Abra Pampa (rebel town) with 5 vs 4 gauchos leaves Yavi with 0 gauchos and Abra Pampa with 2`() {
+        fun `Attack from Yavi (user1 town, 5 gauchos, Production) to AbraPampa (rebel town, 4 gauchos, Production) = Yavi (0 gauchos, user1), AbraPampa (2 gauchos, rebel)`() {
             yavi.gauchos = 5
             abraPampa.gauchos = 4
             jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id))
@@ -204,6 +215,47 @@ class ProvinceTests {
                     Executable { assertThat(abraPampa.owner).isNull() },
                     Executable { assertThat(yavi.gauchos).isEqualTo(0) },
                     Executable { assertThat(abraPampa.gauchos).isEqualTo(2) }
+            )
+        }
+
+        @Test
+        fun `Attack from Yavi (user1 town, 10 gauchos, Production) to AbraPampa (rebel town, 4 gauchos, Production) = Yavi (0 gauchos, user1), AbraPampa (0 gauchos, user1)`() {
+            yavi.gauchos = 10
+            abraPampa.gauchos = 4
+            jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id))
+            assertAll(
+                    Executable { assertThat(yavi.owner).isEqualTo(user1) },
+                    Executable { assertThat(abraPampa.owner).isEqualTo(user1) },
+                    Executable { assertThat(yavi.gauchos).isEqualTo(0) },
+                    Executable { assertThat(abraPampa.gauchos).isEqualTo(0) }
+            )
+        }
+
+        @Test
+        fun `Attack from Yavi (user1 town, 10 gauchos, Production) to AbraPampa (rebel town, 4 gauchos, Defense) = Yavi (0 gauchos, user1), AbraPampa (1 gaucho, rebel)`() {
+            yavi.gauchos = 10
+            abraPampa.gauchos = 4
+            abraPampa.specialization = Defense()
+            jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id))
+            assertAll(
+                    Executable { assertThat(yavi.owner).isEqualTo(user1) },
+                    Executable { assertThat(abraPampa.owner).isNull() },
+                    Executable { assertThat(yavi.gauchos).isEqualTo(0) },
+                    Executable { assertThat(abraPampa.gauchos).isEqualTo(1) }
+            )
+        }
+
+        @Test
+        fun `Attack from Yavi (user1 town, 153 gauchos, Defense) to Cangrejillos (user2 town, 201 gauchos, Production) = Yavi (0 gauchos, user1), Cangrejillos (110 gauchos, user2)`() {
+            yavi.gauchos = 153
+            cangrejillos.gauchos = 201
+            yavi.specialization = Defense()
+            jujuy.attackTown(user1, AttackForm(yavi.id, cangrejillos.id))
+            assertAll(
+                    Executable { assertThat(yavi.owner).isEqualTo(user1) },
+                    Executable { assertThat(cangrejillos.owner).isEqualTo(user2) },
+                    Executable { assertThat(yavi.gauchos).isEqualTo(0) },
+                    Executable { assertThat(cangrejillos.gauchos).isEqualTo(110) }
             )
         }
     }
