@@ -24,9 +24,7 @@ class UsersControllerService {
         if(RepoUsers.getUserByName(newUser.mail).isRight())
             throw CustomException.BadRequest.IllegalUserException("There is already an user under that email")
 
-        val hashedPassword : String= sha512.getSHA512(newUser.password)
-
-        val user = User(3, newUser.username, newUser.mail, hashedPassword, false, Stats(0,0)) // TODO el id se tiene que autoincrementar
+        val user = User(3, newUser.username, newUser.mail, sha512.getSHA512(newUser.password), false, Stats(0,0)) // TODO el id se tiene que autoincrementar
 
         RepoUsers.insert(user)
     }
@@ -40,5 +38,14 @@ class UsersControllerService {
         val user = ArrayList<UserPublicInfoWithoutStats>()
         user.add(RepoUsers.getUserByName(username).getOrThrow().publicInfoWithoutStats())
         return user
+    }
+/*
+    fun getHash(password: String): String {
+        SHA512Hash().getSHA512()
+        return sha512.getSHA512(password)
+    }
+  */
+    fun hashPassword(password: String): String {
+        return sha512.getSHA512(password)
     }
 }

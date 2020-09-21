@@ -4,11 +4,9 @@ import arrow.core.Some
 import arrow.core.getOrHandle
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
-import com.grupox.wololo.model.helpers.JwtSigner
-import com.grupox.wololo.model.helpers.LoginForm
-import com.grupox.wololo.model.helpers.UserForm
-import com.grupox.wololo.model.helpers.getOrThrow
+import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoUsers
+import com.grupox.wololo.services.UsersControllerService
 import io.mockk.every
 import io.mockk.mockkObject
 import org.junit.jupiter.api.Test
@@ -16,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.http.HttpStatus
 import org.springframework.util.LinkedMultiValueMap
@@ -34,19 +33,33 @@ class UserControllerIntegrationTest {
 
     var webClient: WebClient? = null
 
-    private val users: ArrayList<User> = arrayListOf(User(1, "", "example_admin", "example_admin", true, Stats(0, 0)))
+    @Autowired
+    val sha512: SHA512Hash = SHA512Hash()
+
+    lateinit var users: ArrayList<User>
+
 
     @BeforeEach
     fun fixture() {
+
+        users = arrayListOf(User(1, "", "example_admin",sha512.getSHA512("example_admin"), true, Stats(0, 0)))
         webClient = WebClient.builder().baseUrl("http://localhost:${serverPort}").build()
         mockkObject(RepoUsers)
         every { RepoUsers.getAll() } returns users
     }
-
+/*
+    @BeforeAll
+    fun initUsers() {
+        user1 = User(1, "", "example_admin",usersControllerService.hashPassword("example_admin"), true, Stats(0, 0))
+        users = arrayListOf(user1)
+        //     users= arrayListOf(User(1, "", "example_admin", usersControllerService.hashPassword("example_admin"), true, Stats(0, 0)))
+    }
+*/
     @Test
     fun `login with wrong username returns UNAUTHORIZED`() {
+   //     RepoUsers.getById(1).getOrThrow().changePassword(usersControllerService.hashPassword("example_admin"))
         val response = webClient!!.post().uri("/users/tokens")
-                .bodyValue(LoginForm("wrong_username", "example_admin")).exchange().block()
+                .bodyValue(LoginForm("wrong_username", "wrong_password")).exchange().block()
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
 

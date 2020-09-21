@@ -14,6 +14,10 @@ class User(val id: Int, val username: String, mail: String, private var password
 
     fun publicInfoWithoutStats(): UserPublicInfoWithoutStats = UserPublicInfoWithoutStats(this.id, this.mail)
 
+    fun changePassword(newPass: String) {
+        this.password = newPass
+    }
+
     fun publicInfo(): UserPublicInfo = UserPublicInfo(this.mail,this.stats.gamesWon,this.stats.gamesLost)
 
     fun updateGamesWonStats(){

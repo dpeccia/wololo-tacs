@@ -5,25 +5,30 @@ import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.LoginForm
-import com.grupox.wololo.model.helpers.UserForm
+import com.grupox.wololo.model.helpers.SHA512Hash
 import com.grupox.wololo.services.UsersControllerService
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import java.util.ArrayList
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class UserControllerTest {
+
+    @Autowired
+    val sha512: SHA512Hash = SHA512Hash()
+
+    @Autowired
     val usersControllerService: UsersControllerService = UsersControllerService()
 
-    private val users: ArrayList<User> = arrayListOf(
-            User(1, "", "example_admin", "example_admin", true, Stats(0, 0)),
-            User(2, "", "example_normal_user", "example_normal_user", false, Stats(1, 1)),
-            User(3, "", "example_normal_user2", "example_normal_user2", false, Stats(1, 1))
-    )
+    lateinit var users: ArrayList<User>
 
     @BeforeEach
     fun fixture() {
+        users = arrayListOf(User(1, "", "example_admin", sha512.getSHA512("example_admin"), true, Stats(0, 0)), User(2, "", "example_normal_user",sha512.getSHA512("example_admin"), false, Stats(1, 1)), User(3, "", "example_normal_user2",sha512.getSHA512("example_admin"), false, Stats(1, 1)))
         mockkObject(RepoUsers)
         every { RepoUsers.getAll() } returns users
     }
