@@ -11,10 +11,14 @@ import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import java.util.*
 
+@SpringBootTest
 class GamesControllerTest {
-    val gamesControllerService: GamesControllerService = GamesControllerService()
+    @Autowired
+    lateinit var gamesControllerService: GamesControllerService
 
     val user1: User = User(1, "", "a_mail", "a_password", false)
     val user2: User = User(2, "", "a_mail2", "a_password2", false)

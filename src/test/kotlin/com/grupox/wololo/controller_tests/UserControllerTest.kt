@@ -1,20 +1,23 @@
 package com.grupox.wololo.controller_tests
 
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.LoginForm
-import com.grupox.wololo.model.helpers.UserForm
+import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.UsersControllerService
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
-import java.util.ArrayList
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import java.util.*
 
+@SpringBootTest
 class UserControllerTest {
-    val usersControllerService: UsersControllerService = UsersControllerService()
+    @Autowired
+    lateinit var usersControllerService: UsersControllerService
 
     private val users: ArrayList<User> = arrayListOf(
             User(1, "", "example_admin", "example_admin", true, Stats(0, 0)),
