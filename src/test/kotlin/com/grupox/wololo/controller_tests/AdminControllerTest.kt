@@ -1,5 +1,6 @@
 package com.grupox.wololo
 
+import com.grupox.wololo.configs.properties.SHA512Properties
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.repos.RepoGames
@@ -16,6 +17,8 @@ import java.time.Instant
 import java.util.*
 
 class AdminControllerTest {
+
+
     val adminControllerService: AdminControllerService = AdminControllerService()
 
     val user1: User = User(1, "", "a_mail", "a_password", false)
@@ -39,6 +42,8 @@ class AdminControllerTest {
     fun `get scoreboard (user stats)`() {
         assertThat(adminService.getScoreBoard()).isNotEmpty
     }*/
+
+
 
     @Test
     fun `get on going games by date from 5 days before to 20 days after actual date returns 2 when there are 2 games that are being played`() {

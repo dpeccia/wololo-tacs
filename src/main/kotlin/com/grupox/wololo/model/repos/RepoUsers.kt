@@ -27,7 +27,7 @@ object RepoUsers : Repository<User> {
 
     fun getUserByName(mail: String): Either<CustomException.NotFound, User> = getNormalUsers().find { it.mail == mail }.rightIfNotNull { CustomException.NotFound.UserNotFoundException() }
 
-    fun getUserByLogin(loginData: LoginForm): Either<CustomException.Unauthorized, User> = getAll().find {it.isUserByLoginData(loginData)}.rightIfNotNull { CustomException.Unauthorized.BadLoginException() }
+    fun getUserByLogin(loginData: LoginForm, hashedPassword: String): Either<CustomException.Unauthorized, User> = getAll().find {it.isUserByLoginData(loginData, hashedPassword)}.rightIfNotNull { CustomException.Unauthorized.BadLoginException() }
 
     fun getUsersWithoutStats(): List<UserPublicInfoWithoutStats> = getNormalUsers().map { it.publicInfoWithoutStats() }
     // TODO: ENCRYPT USER PASSWORD BEFORE SAVING
