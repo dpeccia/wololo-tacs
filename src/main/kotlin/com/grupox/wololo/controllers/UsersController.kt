@@ -1,10 +1,6 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.model.User
-import com.grupox.wololo.model.helpers.JwtSigner
-import com.grupox.wololo.model.helpers.LoginForm
-import com.grupox.wololo.model.helpers.UserForm
-import com.grupox.wololo.model.helpers.UserPublicInfoWithoutStats
+import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.services.UsersControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,7 +17,7 @@ class UsersController : BaseController() {
 
     @PostMapping
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
-    fun createUser(@RequestBody newUser: UserForm): User {
+    fun createUser(@RequestBody newUser: UserForm): UserPublicInfo {
         return usersControllerService.createUser(newUser)
     }
 
