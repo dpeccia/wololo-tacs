@@ -1,11 +1,11 @@
 package com.grupox.wololo.controller_tests
 
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.SHA512Hash
+import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.UsersControllerService
 import io.mockk.every
 import io.mockk.mockkObject
@@ -13,16 +13,16 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+
 import java.util.ArrayList
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 class UserControllerTest {
+    @Autowired
+    lateinit var usersControllerService: UsersControllerService
 
     @Autowired
     val sha512: SHA512Hash = SHA512Hash()
-
-    @Autowired
-    val usersControllerService: UsersControllerService = UsersControllerService()
 
     lateinit var users: ArrayList<User>
 

@@ -2,7 +2,10 @@ package com.grupox.wololo
 
 import com.grupox.wololo.configs.properties.SHA512Properties
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.*
+import com.grupox.wololo.model.Game
+import com.grupox.wololo.model.Province
+import com.grupox.wololo.model.Town
+import com.grupox.wololo.model.User
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.AdminControllerService
@@ -12,14 +15,17 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import java.time.Duration
 import java.time.Instant
 import java.util.*
 
+@SpringBootTest
 class AdminControllerTest {
 
-
-    val adminControllerService: AdminControllerService = AdminControllerService()
+    @Autowired
+    lateinit var adminControllerService: AdminControllerService
 
     val user1: User = User(1, "", "a_mail", "a_password", false)
     val users: List<User> = listOf(user1)

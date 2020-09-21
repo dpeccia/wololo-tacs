@@ -1,26 +1,30 @@
 package com.grupox.wololo.integration_tests
 
 import arrow.core.Some
-import arrow.core.getOrHandle
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
+
 import com.grupox.wololo.model.helpers.*
+
+import com.grupox.wololo.model.helpers.JwtSigner
+import com.grupox.wololo.model.helpers.LoginForm
+import com.grupox.wololo.model.helpers.getOrThrow
+
 import com.grupox.wololo.model.repos.RepoUsers
-import com.grupox.wololo.services.UsersControllerService
 import io.mockk.every
 import io.mockk.mockkObject
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
+
 import org.springframework.http.HttpStatus
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.Duration
-import java.util.ArrayList
+import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class UserControllerIntegrationTest {
@@ -31,7 +35,7 @@ class UserControllerIntegrationTest {
     @Autowired
     lateinit var jwtSigner: JwtSigner
 
-    var webClient: WebClient? = null
+    lateinit var webClient: WebClient
 
     @Autowired
     val sha512: SHA512Hash = SHA512Hash()
@@ -57,29 +61,28 @@ class UserControllerIntegrationTest {
 */
     @Test
     fun `login with wrong username returns UNAUTHORIZED`() {
-   //     RepoUsers.getById(1).getOrThrow().changePassword(usersControllerService.hashPassword("example_admin"))
-        val response = webClient!!.post().uri("/users/tokens")
-                .bodyValue(LoginForm("wrong_username", "wrong_password")).exchange().block()
+        val response = webClient.post().uri("/users/tokens")
+                .bodyValue(LoginForm("wrong_username", "example_admin")).exchange().block()
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
 
     @Test
     fun `login with wrong password returns UNAUTHORIZED`() {
-        val response = webClient!!.post().uri("/users/tokens")
+        val response = webClient.post().uri("/users/tokens")
                 .bodyValue(LoginForm("example_admin", "wrong_password")).exchange().block()
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
 
     @Test
     fun `successful login returns OK`() {
-        val response = webClient!!.post().uri("/users/tokens")
+        val response = webClient.post().uri("/users/tokens")
                 .bodyValue(LoginForm("example_admin", "example_admin")).exchange().block()
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
     }
 
     @Test
     fun `successful login returns JWT cookie`() {
-        val response = webClient!!.post().uri("/users/tokens")
+        val response = webClient.post().uri("/users/tokens")
                 .bodyValue(LoginForm("example_admin", "example_admin")).exchange().block()
         val jwtToken = response?.cookies()?.get("X-Auth")?.get(0)?.value ?: throw RuntimeException("No JWT Token in response")
         val validation = jwtSigner.validateJwt(Some(jwtToken))
@@ -88,7 +91,7 @@ class UserControllerIntegrationTest {
 
     @Test
     fun `successful logout erases JWT cookie`() {
-        val response = webClient!!.post().uri("/users/tokens")
+        val response = webClient.post().uri("/users/tokens")
                 .bodyValue(LoginForm("example_admin", "example_admin")).exchange().block()
         val jwtToken = response?.cookies()?.get("X-Auth")?.get(0)?.value ?: throw RuntimeException("No JWT Token in response")
         val validation = jwtSigner.validateJwt(Some(jwtToken))
@@ -97,7 +100,7 @@ class UserControllerIntegrationTest {
         val responseCookies = response.cookies()
                 .map { it.key to it.value.map { cookie -> cookie.value } }
                 .toMap()
-        val logoutResponse = webClient!!.delete().uri("/users/tokens").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
+        val logoutResponse = webClient.delete().uri("/users/tokens").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
                 .exchange().block()
         assertThat(logoutResponse?.statusCode()).isEqualTo(HttpStatus.OK)
         assertThat(logoutResponse?.cookies()?.get("X-Auth")?.get(0)?.maxAge).isEqualTo(Duration.ZERO)
@@ -117,19 +120,19 @@ class UserControllerIntegrationTest {
 
     @Test
     fun `cannot obtain users details if not logged in`() {
-        val response = webClient!!.get().uri("/users").exchange().block()
+        val response = webClient.get().uri("/users").exchange().block()
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
 
     @Test
     fun `can obtain users details when logged in`() {
-        val loginResponse = webClient!!.post().uri("/users/tokens")
+        val loginResponse = webClient.post().uri("/users/tokens")
                 .bodyValue(LoginForm("example_admin", "example_admin")).exchange()
                 .block() ?: throw RuntimeException("Should have gotten a response")
         val responseCookies = loginResponse.cookies()
                 .map { it.key to it.value.map { cookie -> cookie.value } }
                 .toMap()
-        val response = webClient!!.get().uri("/users").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
+        val response = webClient.get().uri("/users").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
                 .exchange().block()
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
     }
