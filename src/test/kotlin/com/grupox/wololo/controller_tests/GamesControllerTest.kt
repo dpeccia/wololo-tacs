@@ -27,11 +27,11 @@ class GamesControllerTest {
     val users: List<User> = listOf(user1, user2, user3)
 
     val town1: Town = Town(id = 1, name = "town1", elevation = 10.0)
-    val town2: Town = Town(id = 2, name = "town2", elevation = 10.0)
-    val town3: Town = Town(id = 3, name = "town3", elevation = 10.0)
-    val town4: Town = Town(id = 4, name = "town4", elevation = 10.0)
-    val town5: Town = Town(id = 5, name = "town5", elevation = 10.0)
-    val town6: Town = Town(id = 6, name = "town6", elevation = 10.0)
+    val town2: Town = Town(id = 2, name = "town2", elevation = 11.0)
+    val town3: Town = Town(id = 3, name = "town3", elevation = 12.0)
+    val town4: Town = Town(id = 4, name = "town4", elevation = 13.0)
+    val town5: Town = Town(id = 5, name = "town5", elevation = 14.0)
+    val town6: Town = Town(id = 6, name = "town6", elevation = 15.0)
     val towns: List<Town> = listOf(town1, town2, town3, town4, town5, town6)
 
     val singlePlayerGame: Game = Game(1, listOf(user1), Province(0, "a_province", ArrayList(listOf(town1, town2))))
@@ -85,8 +85,7 @@ class GamesControllerTest {
 
         @Test
         fun `trying to move gauchos with a user that exists and a game that exists doesnt throw an Exception`() {
-            assertThrows<CustomException.BadRequest.NotEnoughGauchosException>
-            { gamesControllerService.moveGauchosBetweenTowns(user1.id, singlePlayerGame.id, MovementForm(1,2,2)) }
+            assertDoesNotThrow { gamesControllerService.moveGauchosBetweenTowns(user1.id, singlePlayerGame.id, MovementForm(1,2,2)) }
         }
     }
 

@@ -30,7 +30,8 @@ class AdminControllerTest {
     val user1: User = User(1, "", "a_mail", "a_password", false)
     val users: List<User> = listOf(user1)
     val town1: Town = Town(id = 1, name = "town1", elevation = 10.0)
-    val towns: List<Town> = listOf(town1)
+    val town2: Town = Town(id = 2, name = "town2", elevation = 11.0)
+    val towns: List<Town> = listOf(town1, town2)
 
     val game1: Game = Game(1, listOf(user1), Province(0, "a_province", ArrayList(towns)))
     val game2: Game = Game(2, listOf(user1), Province(1, "a_province", ArrayList(towns)))

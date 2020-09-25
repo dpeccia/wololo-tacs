@@ -28,6 +28,7 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
         startGame()
     }
 
+    // TODO falta chequear que nunca se cree un juego con un (MaxAltitude - MinAltitude) = 0 || (MaxDist - MinDist) = 0
     private fun assignTowns() {  // Este metodo puede modificarse para hacer algun algoritmo mas copado.
         if (townsAmount < playerAmount) throw CustomException.BadRequest.IllegalGameException("There is not enough towns for the given players")
         else if (players.isEmpty()) throw CustomException.BadRequest.IllegalGameException("There is not enough players")
@@ -59,6 +60,12 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
 
     private fun userWon(user: User): Boolean = province.allOccupiedTownsAreFrom(user)
 
+    private fun updateStats(winner: User) {
+        status = Status.FINISHED
+        winner.updateGamesWonStats()
+        players.filter { it != winner }.forEach { it.updateGamesLostStats() }
+    }
+
     fun getMember(userId: Int): Either<CustomException.NotFound, User> = players.find { it.id == userId }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
 
     fun isParticipating(user: User): Boolean = players.contains(user)
@@ -66,12 +73,7 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     fun finishTurn(user: User) {
         checkForbiddenAction(user)
         province.unlockAllTownsFrom(user)
-        if(userWon(user)) {
-            status = Status.FINISHED
-            // TODO update user and game stats
-        }
-        else
-            changeTurn()
+        if(userWon(user)) updateStats(user) else changeTurn()
     }
 
     fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {

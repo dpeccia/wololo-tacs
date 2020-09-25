@@ -1,10 +1,11 @@
 package com.grupox.wololo.model
 
-import kotlin.math.round
+import com.google.common.math.DoubleMath.roundToInt
+import java.math.RoundingMode
 
 class Production : Specialization {
     override fun gauchos(townAltitude: Double, maxAltitude: Double, minAltitude: Double): Int =
-            round(15 * this.gauchosBaseFormula(townAltitude, maxAltitude, minAltitude)).toInt()
+            roundToInt(15 * this.gauchosBaseFormula(townAltitude, maxAltitude, minAltitude), RoundingMode.HALF_EVEN)
 
     override fun multDefense(): Double = 1.0
 
