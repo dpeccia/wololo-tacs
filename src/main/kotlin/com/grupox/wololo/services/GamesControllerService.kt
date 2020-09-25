@@ -28,7 +28,7 @@ class GamesControllerService {
     @Autowired
     lateinit var pixabay: Pixabay
 
-    fun surrender(gameId: Int, userId: Int) {
+    fun surrender(gameId: Int, userId: Int): Game {
         val game: Game = RepoGames.getById(gameId).getOrThrow()
         val user: User = game.getMember(userId).getOrThrow()
 
@@ -38,24 +38,29 @@ class GamesControllerService {
             game.players.filter { it.id != user.id }.map { it.updateGamesWonStats() }  // Update stats ganadores
             game.status = Status.CANCELED
         }
+
+        return game
     }
 
-    fun finishTurn(userId: Int, gameId: Int) {
+    fun finishTurn(userId: Int, gameId: Int): Game {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         game.finishTurn(user)
+        return game
     }
 
-    fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm) {
+    fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm): Game {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         game.moveGauchosBetweenTowns(user, movementData)
+        return game
     }
 
-    fun attackTown(userId: Int, gameId: Int, attackData: AttackForm) {
+    fun attackTown(userId: Int, gameId: Int, attackData: AttackForm): Game {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         game.attackTown(user, attackData)
+        return game
     }
 
     fun getProvinces(): List<String> = provinceImages.availableProvinces().getOrThrow()
@@ -98,7 +103,7 @@ class GamesControllerService {
         return games
     }
 
-    fun createGame(userId: Int, form: GameForm) {
+    fun createGame(userId: Int, form: GameForm): Game {
         val game: Game = Either.fx<CustomException, Game> {
             val users = !userId.cons(form.participantsIds).distinct().map { RepoUsers.getById(it) }
                     .sequence(Either.applicative()).fix().map { it.fix() }
@@ -115,14 +120,17 @@ class GamesControllerService {
         }.getOrThrow()
 
         RepoGames.insert(game)
+        return game
     }
 
-    fun updateTownSpecialization(userId: Int, gameId: Int, townId: Int, newSpecialization: String){
+    fun updateTownSpecialization(userId: Int, gameId: Int, townId: Int, newSpecialization: String): Game {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         when (newSpecialization.toUpperCase()) {
             "PRODUCTION" -> game.changeTownSpecialization(user, townId, Production())
             "DEFENSE"    -> game.changeTownSpecialization(user, townId, Defense())
         }
+
+        return game
     }
 }
