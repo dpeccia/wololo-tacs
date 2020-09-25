@@ -1,6 +1,5 @@
 package com.grupox.wololo.controllers
 
-import arrow.core.getOrHandle
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.JwtSigner
@@ -14,23 +13,23 @@ import org.springframework.web.bind.annotation.ResponseStatus
 abstract class BaseController {
     @ExceptionHandler(CustomException.NotFound::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundException(exception: CustomException) = exception.getJSON()
+    fun handleNotFoundException(exception: CustomException) = exception.dto()
 
     @ExceptionHandler(CustomException.Forbidden::class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    fun handleForbiddenException(exception: CustomException) = exception.getJSON()
+    fun handleForbiddenException(exception: CustomException) = exception.dto()
 
     @ExceptionHandler(CustomException.BadRequest::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleBadRequestException(exception: CustomException) = exception.getJSON()
+    fun handleBadRequestException(exception: CustomException) = exception.dto()
 
     @ExceptionHandler(CustomException.Unauthorized::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    fun handleUnauthorizedException(exception: CustomException) = exception.getJSON()
+    fun handleUnauthorizedException(exception: CustomException) = exception.dto()
 
     @ExceptionHandler(CustomException.Service::class)
     @ResponseStatus(HttpStatus.FAILED_DEPENDENCY) // Revisar si es correcto esta http status
-    fun handleServiceException(exception: CustomException) = exception.getJSON()
+    fun handleServiceException(exception: CustomException) = exception.dto()
 
     fun checkAndGetToken(authCookie: String?): Jws<Claims> = JwtSigner.validateJwt(authCookie.toOption()).getOrThrow()
 }
