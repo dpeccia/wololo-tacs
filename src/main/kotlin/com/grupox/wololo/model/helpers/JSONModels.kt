@@ -11,7 +11,6 @@ data class GamePublicInfo @JsonCreator constructor(val gamesNew: Int, val gamesO
 data class TownInfo @JsonCreator constructor(val gauchosGeneratedByDefense: Int, val gauchosGeneratedByProduction: Int, val image: String)
 
 data class GameForm(val provinceName: String, val townAmount: Int, val participantsIds: List<Int>)
-data class TownForm @JsonCreator constructor(val specialization: String)
 data class MovementForm @JsonCreator constructor(val from: Int, val to: Int, val gauchosQty: Int)
 data class AttackForm @JsonCreator constructor(val from: Int, val to: Int)
 
