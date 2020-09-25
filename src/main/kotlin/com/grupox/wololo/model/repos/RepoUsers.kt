@@ -5,7 +5,7 @@ import arrow.core.rightIfNotNull
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
-import com.grupox.wololo.model.helpers.*
+import com.grupox.wololo.model.helpers.LoginForm
 import java.util.*
 
 object RepoUsers : Repository<User> {
@@ -26,16 +26,11 @@ object RepoUsers : Repository<User> {
 
     fun getUserByLogin(loginData: LoginForm, hashedPassword: String): Either<CustomException.Unauthorized, User> = getAll().find {it.isUserByLoginData(loginData, hashedPassword)}.rightIfNotNull { CustomException.Unauthorized.BadLoginException() }
 
-    fun getUsersWithoutStats(): List<UserPublicInfoWithoutStats> = getNormalUsers().map { it.publicInfoWithoutStats() }
-    // TODO: ENCRYPT USER PASSWORD BEFORE SAVING
-
-    fun getUsersStats(): List<UserPublicInfo> = getNormalUsers().map { it.publicInfo() }
-
     override fun getAll(): List<User> = usersInDB
 
     override fun getById(id: Int): Either<CustomException.NotFound, User> = getNormalUsers().find { it.id == id }.rightIfNotNull { CustomException.NotFound.UserNotFoundException() }
 
-    override fun filter(predicate: (obj: User) -> Boolean): List<User> = usersInDB.filter { predicate(it) }
+    override fun filter(predicate: (obj: User) -> Boolean): List<User> = getAll().filter { predicate(it) }
 
     override fun insert(obj: User) {
         usersInDB.add(obj)

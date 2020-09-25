@@ -1,16 +1,14 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.model.Game
 import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.helpers.AttackForm
+import com.grupox.wololo.model.helpers.DTO
 import com.grupox.wololo.model.helpers.GameForm
 import com.grupox.wololo.model.helpers.MovementForm
-import com.grupox.wololo.model.helpers.TownInfo
 import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import springfox.documentation.annotations.ApiIgnore
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 
@@ -25,7 +23,7 @@ class GamesController : BaseController() {
     fun getGames(@RequestParam("sort", required = false) sort: String?, // TODO query params
                  @RequestParam("status", required = false) status: Status?,
                  @RequestParam("date", required = false) date: Date?,
-                 request: HttpServletRequest): List<Game> {
+                 request: HttpServletRequest): List<DTO.GameDTO> {
         val token = checkAndGetToken(request)
         val userId = token.body.subject.toInt()
         return gamesControllerService.getGames(userId, sort, status, date)
@@ -33,7 +31,7 @@ class GamesController : BaseController() {
 
     @PostMapping
     @ApiOperation(value = "Creates a new game")
-    fun createGame(@RequestBody form: GameForm, request: HttpServletRequest): Game {
+    fun createGame(@RequestBody form: GameForm, request: HttpServletRequest): DTO.GameDTO {
         val token = checkAndGetToken(request)
         val userId = token.body.subject.toInt()
         return gamesControllerService.createGame(userId, form)
@@ -41,7 +39,7 @@ class GamesController : BaseController() {
 
     @GetMapping("/{id}")
     @ApiOperation(value = "Gets a game")
-    fun getGameById(@PathVariable("id") id: Int, request: HttpServletRequest): Game {
+    fun getGameById(@PathVariable("id") id: Int, request: HttpServletRequest): DTO.GameDTO {
         val token = checkAndGetToken(request)
         val userId = token.body.subject.toInt()
         return gamesControllerService.getGame(userId, id)
@@ -49,7 +47,7 @@ class GamesController : BaseController() {
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Surrenders in a game (it becomes CANCELED)")
-    fun surrender(@PathVariable("id") id: Int, request: HttpServletRequest): Game {
+    fun surrender(@PathVariable("id") id: Int, request: HttpServletRequest): DTO.GameDTO {
         val token = checkAndGetToken(request)
         val userId: Int = token.body.subject.toInt()
         return gamesControllerService.surrender(id, userId)
@@ -57,28 +55,38 @@ class GamesController : BaseController() {
 
     @PutMapping("/{id}/actions/turn")
     @ApiOperation(value = "Finishes the current Turn")
-    fun finishTurn(@PathVariable("id") id: Int, request: HttpServletRequest): Game {
+    fun finishTurn(@PathVariable("id") id: Int, request: HttpServletRequest): DTO.GameDTO {
         val userId = checkAndGetToken(request).body.subject.toInt()
         return gamesControllerService.finishTurn(userId, id)
     }
 
     @PostMapping("/{id}/actions/movement")
     @ApiOperation(value = "Moves the gauchos between towns")
-    fun moveGauchosBetweenTowns(@PathVariable("id") id: Int, @RequestBody movementData: MovementForm, request: HttpServletRequest): Game {
+    fun moveGauchosBetweenTowns(
+            @PathVariable("id") id: Int,
+            @RequestBody movementData: MovementForm,
+            request: HttpServletRequest): DTO.GameDTO {
         val userId = checkAndGetToken(request).body.subject.toInt()
         return gamesControllerService.moveGauchosBetweenTowns(userId, id, movementData)
     }
 
     @PostMapping("/{id}/actions/attack")
     @ApiOperation(value = "Attacks a town")
-    fun attackTown(@PathVariable("id") id: Int, @RequestBody attackData: AttackForm, request: HttpServletRequest): Game {
+    fun attackTown(
+            @PathVariable("id") id: Int,
+            @RequestBody attackData: AttackForm,
+            request: HttpServletRequest): DTO.GameDTO {
         val userId = checkAndGetToken(request).body.subject.toInt()
         return gamesControllerService.attackTown(userId, id, attackData)
     }
 
     @PutMapping("/{id}/towns/{idTown}")
     @ApiOperation(value = "Updates the town specialization")
-    fun updateTownSpecialization(@PathVariable("id") id: Int, @PathVariable("idTown") townId: Int, @RequestBody newSpecialization: String, request: HttpServletRequest): Game {
+    fun updateTownSpecialization(
+            @PathVariable("id") id: Int,
+            @PathVariable("idTown") townId: Int,
+            @RequestBody newSpecialization: String,
+            request: HttpServletRequest): DTO.GameDTO {
         val token = checkAndGetToken(request)
         val userId = token.body.subject.toInt()
         return gamesControllerService.updateTownSpecialization(userId, id, townId, newSpecialization)
@@ -86,7 +94,10 @@ class GamesController : BaseController() {
 
     @GetMapping("/{id}/towns/{idTown}")
     @ApiOperation(value = "Gets the town stats and an image")
-    fun getTownData(@PathVariable("id") id: Int, @PathVariable("idTown") idTown: Int, request: HttpServletRequest) : TownInfo {
+    fun getTownData(
+            @PathVariable("id") id: Int,
+            @PathVariable("idTown") idTown: Int,
+            request: HttpServletRequest) : DTO.TownDTO {
         checkAndGetToken(request)
         return gamesControllerService.getTownStats(id, idTown)
     }
