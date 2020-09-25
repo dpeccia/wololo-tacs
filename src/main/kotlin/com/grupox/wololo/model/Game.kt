@@ -1,15 +1,14 @@
 package com.grupox.wololo.model
 
-import arrow.core.*
-import java.util.Date
+import arrow.core.Either
+import arrow.core.rightIfNotNull
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.helpers.AttackForm
-import com.grupox.wololo.model.helpers.MovementForm
-import com.grupox.wololo.model.helpers.getOrThrow
+import com.grupox.wololo.model.helpers.*
 import java.time.Instant
+import java.util.*
 
 
-class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) {
+class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) : Requestable {
 
     //val id: Int = 0 // TODO: Autogenerada
 
@@ -92,4 +91,14 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
         checkForbiddenAction(user)
         province.attackTown(user, attackForm)
     }
+
+    override fun dto(): DTO.GameDTO =
+        DTO.GameDTO(
+            id = id,
+            status = status,
+            date = date,
+            turnId = turn.id,
+            playerIds = players.map { it.id },
+            province = province.dto()
+        )
 }

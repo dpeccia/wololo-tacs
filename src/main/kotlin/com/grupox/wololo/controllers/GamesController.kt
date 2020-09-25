@@ -1,6 +1,5 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.model.Game
 import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.DTO
@@ -25,7 +24,7 @@ class GamesController : BaseController() {
     fun getGames(@RequestParam("sort", required = false) sort: String?, // TODO query params
                  @RequestParam("status", required = false) status: Status?,
                  @RequestParam("date", required = false) date: Date?,
-                 @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<Game> {
+                 @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<DTO.GameDTO> {
         val token = checkAndGetToken(authCookie)
         val userId = token.body.subject.toInt()
         return gamesControllerService.getGames(userId, sort, status, date)
@@ -33,7 +32,7 @@ class GamesController : BaseController() {
 
     @PostMapping
     @ApiOperation(value = "Creates a new game")
-    fun createGame(@RequestBody form: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
+    fun createGame(@RequestBody form: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): DTO.GameDTO {
         val token = checkAndGetToken(authCookie)
         val userId = token.body.subject.toInt()
         return gamesControllerService.createGame(userId, form)
@@ -42,7 +41,7 @@ class GamesController : BaseController() {
     @GetMapping("/{id}")
     @ApiOperation(value = "Gets a game")
     fun getGameById(@PathVariable("id") id: Int,
-                    @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
+                    @ApiIgnore @CookieValue("X-Auth") authCookie : String?): DTO.GameDTO {
         val token = checkAndGetToken(authCookie)
         val userId = token.body.subject.toInt()
         return gamesControllerService.getGame(userId, id)
@@ -50,7 +49,7 @@ class GamesController : BaseController() {
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Surrenders in a game (it becomes CANCELED)")
-    fun surrender(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
+    fun surrender(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): DTO.GameDTO {
         val token = checkAndGetToken(authCookie)
         val userId: Int = token.body.subject.toInt()
         return gamesControllerService.surrender(id, userId)
@@ -58,7 +57,7 @@ class GamesController : BaseController() {
 
     @PutMapping("/{id}/actions/turn")
     @ApiOperation(value = "Finishes the current Turn")
-    fun finishTurn(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
+    fun finishTurn(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): DTO.GameDTO {
         val userId = checkAndGetToken(authCookie).body.subject.toInt()
         return gamesControllerService.finishTurn(userId, id)
     }
@@ -68,7 +67,7 @@ class GamesController : BaseController() {
     fun moveGauchosBetweenTowns(
             @PathVariable("id") id: Int,
             @RequestBody movementData: MovementForm,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
+            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): DTO.GameDTO {
         val userId = checkAndGetToken(authCookie).body.subject.toInt()
         return gamesControllerService.moveGauchosBetweenTowns(userId, id, movementData)
     }
@@ -78,7 +77,7 @@ class GamesController : BaseController() {
     fun attackTown(
             @PathVariable("id") id: Int,
             @RequestBody attackData: AttackForm,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
+            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): DTO.GameDTO {
         val userId = checkAndGetToken(authCookie).body.subject.toInt()
         return gamesControllerService.attackTown(userId, id, attackData)
     }
@@ -89,7 +88,7 @@ class GamesController : BaseController() {
             @PathVariable("id") id: Int,
             @PathVariable("idTown") townId: Int,
             @RequestBody newSpecialization: String,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
+            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): DTO.GameDTO {
         val token = checkAndGetToken(authCookie)
         val userId = token.body.subject.toInt()
         return gamesControllerService.updateTownSpecialization(userId, id, townId, newSpecialization)
