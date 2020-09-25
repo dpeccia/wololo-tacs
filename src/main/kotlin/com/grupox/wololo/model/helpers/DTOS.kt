@@ -21,7 +21,6 @@ sealed class DTO {
     ) : DTO()
 
     data class ProvinceDTO(
-        val id: Int,
         val name: String,
         val imageUrl: String,
         val towns: List<TownDTO>
