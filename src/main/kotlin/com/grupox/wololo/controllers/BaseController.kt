@@ -9,6 +9,9 @@ import io.jsonwebtoken.Jws
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.util.WebUtils
+import javax.servlet.http.Cookie
+import javax.servlet.http.HttpServletRequest
 
 abstract class BaseController {
     @ExceptionHandler(CustomException.NotFound::class)
@@ -31,5 +34,9 @@ abstract class BaseController {
     @ResponseStatus(HttpStatus.FAILED_DEPENDENCY) // Revisar si es correcto esta http status
     fun handleServiceException(exception: CustomException) = exception.dto()
 
-    fun checkAndGetToken(authCookie: String?): Jws<Claims> = JwtSigner.validateJwt(authCookie.toOption()).getOrThrow()
+    fun checkAndGetToken(request: HttpServletRequest): Jws<Claims> {
+        val cookie: Cookie? = WebUtils.getCookie(request, "X-Auth")
+        val jwt = cookie?.value
+        return JwtSigner.validateJwt(jwt.toOption()).getOrThrow()
+    }
 }

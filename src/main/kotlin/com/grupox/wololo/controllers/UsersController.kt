@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import springfox.documentation.annotations.ApiIgnore
+import org.springframework.web.util.WebUtils
+import javax.servlet.http.HttpServletRequest
 
 @RequestMapping("/users")
 @RestController
@@ -42,9 +43,9 @@ class UsersController : BaseController() {
 
     @DeleteMapping("/tokens")
     @ApiOperation(value = "Log Out")
-    fun logout(@ApiIgnore @CookieValue("X-Auth") _authCookie : String?): ResponseEntity<Void> {
-        checkAndGetToken(_authCookie)
-        val authCookie = ResponseCookie.fromClientResponse("X-Auth", _authCookie.toString())
+    fun logout(request: HttpServletRequest): ResponseEntity<Void> {
+        checkAndGetToken(request)
+        val authCookie = ResponseCookie.fromClientResponse("X-Auth", WebUtils.getCookie(request, "X-Auth")!!.value)
                 .maxAge(0)
                 .httpOnly(true)
                 .path("/")
@@ -57,8 +58,8 @@ class UsersController : BaseController() {
     @GetMapping
     @ApiOperation(value = "Gets the users without stats")
     fun getUsers(@RequestParam("username", required = false) _username: String?,
-                 @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<DTO.UserDTO> {
-        checkAndGetToken(authCookie)
+                 request: HttpServletRequest): List<DTO.UserDTO> {
+        checkAndGetToken(request)
         return usersControllerService.getUsers(_username)
     }
 }
