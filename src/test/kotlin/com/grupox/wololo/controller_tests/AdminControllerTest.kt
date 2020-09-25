@@ -1,5 +1,6 @@
 package com.grupox.wololo
 
+import com.grupox.wololo.configs.properties.SHA512Properties
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Game
 import com.grupox.wololo.model.Province
@@ -22,6 +23,7 @@ import java.util.*
 
 @SpringBootTest
 class AdminControllerTest {
+
     @Autowired
     lateinit var adminControllerService: AdminControllerService
 
@@ -46,6 +48,8 @@ class AdminControllerTest {
     fun `get scoreboard (user stats)`() {
         assertThat(adminService.getScoreBoard()).isNotEmpty
     }*/
+
+
 
     @Test
     fun `get on going games by date from 5 days before to 20 days after actual date returns 2 when there are 2 games that are being played`() {
