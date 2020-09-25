@@ -1,6 +1,9 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.model.helpers.*
+import com.grupox.wololo.model.helpers.DTO
+import com.grupox.wololo.model.helpers.JwtSigner
+import com.grupox.wololo.model.helpers.LoginForm
+import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.services.UsersControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +20,7 @@ class UsersController : BaseController() {
 
     @PostMapping
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
-    fun createUser(@RequestBody newUser: UserForm): UserPublicInfo {
+    fun createUser(@RequestBody newUser: UserForm): DTO.UserDTO {
         return usersControllerService.createUser(newUser)
     }
 
@@ -54,7 +57,7 @@ class UsersController : BaseController() {
     @GetMapping
     @ApiOperation(value = "Gets the users without stats")
     fun getUsers(@RequestParam("username", required = false) _username: String?,
-                 @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserPublicInfoWithoutStats> {
+                 @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<DTO.UserDTO> {
         checkAndGetToken(authCookie)
         return usersControllerService.getUsers(_username)
     }

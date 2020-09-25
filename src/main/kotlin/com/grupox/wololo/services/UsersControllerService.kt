@@ -14,25 +14,23 @@ class UsersControllerService {
     @Autowired
     private lateinit var sha512: SHA512Hash
 
-    fun createUser(newUser: UserForm) : UserPublicInfo {
+    fun createUser(newUser: UserForm) : DTO.UserDTO {
         if(RepoUsers.getUserByName(newUser.mail).isRight())
             throw CustomException.BadRequest.IllegalUserException("There is already an user under that email")
 
         val user = User(3, newUser.username, newUser.mail, sha512.getSHA512(newUser.password), false, Stats(0,0)) // TODO el id se tiene que autoincrementar
 
         RepoUsers.insert(user)
-        return user.publicInfo()
+        return user.dto()
     }
 
-    fun checkUserCredentials(user: LoginForm): User {
-        return RepoUsers.getUserByLogin(user, sha512.getSHA512(user.password)).getOrThrow()
+    fun checkUserCredentials(user: LoginForm): DTO.UserDTO {
+        return RepoUsers.getUserByLogin(user, sha512.getSHA512(user.password)).getOrThrow().dto()
     }
 
-    fun getUsers(_username: String?): List<UserPublicInfoWithoutStats> {
-        val username = _username ?: return RepoUsers.getUsersWithoutStats()
-        val user = ArrayList<UserPublicInfoWithoutStats>()
-        user.add(RepoUsers.getUserByName(username).getOrThrow().publicInfoWithoutStats())
-        return user
+    fun getUsers(_username: String?): List<DTO.UserDTO> {
+        val username = _username ?: return RepoUsers.filter { !it.esAdmin }.map { it.dto() }
+        return RepoUsers.filter { !it.esAdmin && it.username.startsWith(username) }.map { it.dto() }
     }
 /*
     fun getHash(password: String): String {
