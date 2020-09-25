@@ -14,7 +14,7 @@ sealed class DTO {
         val coordinates: Coordinates,
         val elevation: Double,
         val imageUrl: String,
-        val ownerId: Int,
+        val ownerId: Int?,
         val specialization: String,
         val gauchos: Int,
         val isLocked: Boolean

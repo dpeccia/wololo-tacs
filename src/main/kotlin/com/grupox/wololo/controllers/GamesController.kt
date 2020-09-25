@@ -3,9 +3,9 @@ package com.grupox.wololo.controllers
 import com.grupox.wololo.model.Game
 import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.helpers.AttackForm
+import com.grupox.wololo.model.helpers.DTO
 import com.grupox.wololo.model.helpers.GameForm
 import com.grupox.wololo.model.helpers.MovementForm
-import com.grupox.wololo.model.helpers.TownInfo
 import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -100,7 +100,7 @@ class GamesController : BaseController() {
     fun getTownData(
             @PathVariable("id") id: Int,
             @PathVariable("idTown") idTown: Int,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?) : TownInfo {
+            @ApiIgnore @CookieValue("X-Auth") authCookie : String?) : DTO.TownDTO {
         checkAndGetToken(authCookie)
         return gamesControllerService.getTownStats(id, idTown)
     }

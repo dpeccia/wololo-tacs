@@ -9,4 +9,6 @@ interface Specialization {
 
     fun gauchosBaseFormula(townAltitude: Double, maxAltitude: Double, minAltitude: Double): Double =
             (1 - ((townAltitude - minAltitude) / (2 * (maxAltitude - minAltitude))))
+
+    override fun toString(): String
 }

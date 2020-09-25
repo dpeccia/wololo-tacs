@@ -6,7 +6,6 @@ import arrow.core.extensions.fx
 import arrow.core.extensions.list.traverse.sequence
 import arrow.core.fix
 import arrow.optics.extensions.list.cons.cons
-import com.grupox.wololo.configs.properties.SHA512Properties
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.externalservices.*
@@ -65,13 +64,11 @@ class GamesControllerService {
 
     fun getProvinces(): List<String> = provinceImages.availableProvinces().getOrThrow()
 
-    fun getTownStats(gameId: Int, townId: Int): TownInfo {
-
+    fun getTownStats(gameId: Int, townId: Int): DTO.TownDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val town = game.province.getTownById(townId).getOrThrow()
-        val image: String = game.province.imageUrl
 
-        return TownInfo(town.gauchosGeneratedByDefense, town.gauchosGeneratedByProduction, image)
+        return town.dto()
     }
 
     fun getGame(userId: Int, gameId: Int): Game {
@@ -113,7 +110,7 @@ class GamesControllerService {
                 val elevation = !topoData.requestElevation(data.coordinates)
                 val imageUrl = !pixabay.requestTownImage(data.name)
                 Town(data.id, data.name, data.coordinates, elevation, imageUrl)
-            }//.sequence(Either.applicative()).fix().map { it.fix() }
+            }
 
             val provinceImage: String = provinceImages.getUrl(form.provinceName)
             Game(0,users,  Province(0, form.provinceName, ArrayList(towns), provinceImage))
