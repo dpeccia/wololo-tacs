@@ -5,15 +5,12 @@ import arrow.core.rightIfNotNull
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
-import com.grupox.wololo.model.helpers.LoginForm
-import com.grupox.wololo.model.helpers.UserForm
-import com.grupox.wololo.model.helpers.UserPublicInfo
-import com.grupox.wololo.model.helpers.UserPublicInfoWithoutStats
+import com.grupox.wololo.model.helpers.*
 import java.util.*
 
 object RepoUsers : Repository<User> {
     private val usersInDB: ArrayList<User> = arrayListOf(
-            User(1, "", "admin", "admin", true, Stats(0, 0)),
+            User(1, "", "admin", "44d13d15f9c969364437fe776b41d9a330952a17d644d652173355dba2db130bf723af585c02987cf614c583b579868337fb52c5eaafc59b3e4e5a277784f92f", true, Stats(0, 0)),
             User(2, "", "unmail@gmail.com", "1234", false, Stats(1, 1)),
             User(3, "", "otromail@gmail.com", "1234", false, Stats(1, 2)),
             User(4, "", "mail", "password", false, Stats(1,1)),

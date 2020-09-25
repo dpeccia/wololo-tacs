@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
 import java.util.*
-
+import javax.servlet.http.HttpServletRequest
 
 @RequestMapping("/games")
 @RestController
@@ -25,91 +25,76 @@ class GamesController : BaseController() {
     fun getGames(@RequestParam("sort", required = false) sort: String?, // TODO query params
                  @RequestParam("status", required = false) status: Status?,
                  @RequestParam("date", required = false) date: Date?,
-                 @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<Game> {
-        val token = checkAndGetToken(authCookie)
+                 request: HttpServletRequest): List<Game> {
+        val token = checkAndGetToken(request)
         val userId = token.body.subject.toInt()
         return gamesControllerService.getGames(userId, sort, status, date)
     }
 
     @PostMapping
     @ApiOperation(value = "Creates a new game")
-    fun createGame(@RequestBody form: GameForm, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
-        val token = checkAndGetToken(authCookie)
+    fun createGame(@RequestBody form: GameForm, request: HttpServletRequest): Game {
+        val token = checkAndGetToken(request)
         val userId = token.body.subject.toInt()
         return gamesControllerService.createGame(userId, form)
     }
 
     @GetMapping("/{id}")
     @ApiOperation(value = "Gets a game")
-    fun getGameById(@PathVariable("id") id: Int,
-                    @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
-        val token = checkAndGetToken(authCookie)
+    fun getGameById(@PathVariable("id") id: Int, request: HttpServletRequest): Game {
+        val token = checkAndGetToken(request)
         val userId = token.body.subject.toInt()
         return gamesControllerService.getGame(userId, id)
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Surrenders in a game (it becomes CANCELED)")
-    fun surrender(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
-        val token = checkAndGetToken(authCookie)
+    fun surrender(@PathVariable("id") id: Int, request: HttpServletRequest): Game {
+        val token = checkAndGetToken(request)
         val userId: Int = token.body.subject.toInt()
         return gamesControllerService.surrender(id, userId)
     }
 
     @PutMapping("/{id}/actions/turn")
     @ApiOperation(value = "Finishes the current Turn")
-    fun finishTurn(@PathVariable("id") id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
-        val userId = checkAndGetToken(authCookie).body.subject.toInt()
+    fun finishTurn(@PathVariable("id") id: Int, request: HttpServletRequest): Game {
+        val userId = checkAndGetToken(request).body.subject.toInt()
         return gamesControllerService.finishTurn(userId, id)
     }
 
     @PostMapping("/{id}/actions/movement")
     @ApiOperation(value = "Moves the gauchos between towns")
-    fun moveGauchosBetweenTowns(
-            @PathVariable("id") id: Int,
-            @RequestBody movementData: MovementForm,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
-        val userId = checkAndGetToken(authCookie).body.subject.toInt()
+    fun moveGauchosBetweenTowns(@PathVariable("id") id: Int, @RequestBody movementData: MovementForm, request: HttpServletRequest): Game {
+        val userId = checkAndGetToken(request).body.subject.toInt()
         return gamesControllerService.moveGauchosBetweenTowns(userId, id, movementData)
     }
 
     @PostMapping("/{id}/actions/attack")
     @ApiOperation(value = "Attacks a town")
-    fun attackTown(
-            @PathVariable("id") id: Int,
-            @RequestBody attackData: AttackForm,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
-        val userId = checkAndGetToken(authCookie).body.subject.toInt()
+    fun attackTown(@PathVariable("id") id: Int, @RequestBody attackData: AttackForm, request: HttpServletRequest): Game {
+        val userId = checkAndGetToken(request).body.subject.toInt()
         return gamesControllerService.attackTown(userId, id, attackData)
     }
 
     @PutMapping("/{id}/towns/{idTown}")
     @ApiOperation(value = "Updates the town specialization")
-    fun updateTownSpecialization(
-            @PathVariable("id") id: Int,
-            @PathVariable("idTown") townId: Int,
-            @RequestBody newSpecialization: String,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?): Game {
-        val token = checkAndGetToken(authCookie)
+    fun updateTownSpecialization(@PathVariable("id") id: Int, @PathVariable("idTown") townId: Int, @RequestBody newSpecialization: String, request: HttpServletRequest): Game {
+        val token = checkAndGetToken(request)
         val userId = token.body.subject.toInt()
         return gamesControllerService.updateTownSpecialization(userId, id, townId, newSpecialization)
     }
 
     @GetMapping("/{id}/towns/{idTown}")
     @ApiOperation(value = "Gets the town stats and an image")
-    fun getTownData(
-            @PathVariable("id") id: Int,
-            @PathVariable("idTown") idTown: Int,
-            @ApiIgnore @CookieValue("X-Auth") authCookie : String?) : TownInfo {
-        checkAndGetToken(authCookie)
+    fun getTownData(@PathVariable("id") id: Int, @PathVariable("idTown") idTown: Int, request: HttpServletRequest) : TownInfo {
+        checkAndGetToken(request)
         return gamesControllerService.getTownStats(id, idTown)
     }
 
-
     @GetMapping("/provinces")
     @ApiOperation(value = "Gets all provinces")
-    fun getProvinces(@ApiIgnore @CookieValue("X-Auth") authCookie : String?) : List<String> {
-        checkAndGetToken(authCookie)
+    fun getProvinces(request: HttpServletRequest) : List<String> {
+        checkAndGetToken(request)
         return gamesControllerService.getProvinces()
     }
 }

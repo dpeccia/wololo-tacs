@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
 import java.util.*
+import javax.servlet.http.HttpServletRequest
 
 @RequestMapping("/admin")
 @RestController
@@ -25,7 +26,7 @@ class AdminController : BaseController() {
     @ApiOperation(value = "Gets the games stats")
     fun getGamesStats(@RequestParam("from", required = false) from: Date,
                       @RequestParam("to", required = false) to: Date,
-                      @ApiIgnore @CookieValue("X-Auth") authCookie : String?): GamePublicInfo {
+                      request: HttpServletRequest): GamePublicInfo {
 
         val games: List<Game> = RepoGames.getAll().filter { it.date >= from && it.date <= to  }
 
@@ -33,7 +34,7 @@ class AdminController : BaseController() {
             return games.map { it.status }.filter { it.toString() == status }.count()
         }
 
-        checkAndGetToken(authCookie)
+        checkAndGetToken(request)
 
         return GamePublicInfo(numberOfGames("NEW"), numberOfGames("ONGOING"), numberOfGames("FINISHED"), numberOfGames("CANCELED"), games)
 
@@ -42,23 +43,22 @@ class AdminController : BaseController() {
     //Esto creo que conviene separarlo en dos requests, porque o devuelvo una lista, o devuelvo uno solo
     @GetMapping("/scoreboard")
     @ApiOperation(value = "Gets the scoreboard")
-    fun getScoreBoard(@ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserPublicInfo> {
-        checkAndGetToken(authCookie)
+    fun getScoreBoard(request: HttpServletRequest): List<UserPublicInfo> {
+        checkAndGetToken(request)
         return adminControllerService.getScoreBoard()
     }
 
     @GetMapping("/scoreboard/{id}")
     @ApiOperation(value = "Gets the scoreboard")
-    fun getScoreBoardById(@RequestParam("username", required = false) id: Int, @ApiIgnore @CookieValue("X-Auth") authCookie : String?): UserPublicInfo {
-        checkAndGetToken(authCookie)
+    fun getScoreBoardById(@RequestParam("username", required = false) id: Int, request: HttpServletRequest): UserPublicInfo {
+        checkAndGetToken(request)
         return adminControllerService.getScoreBoardById(id)
     }
 
     @GetMapping("/users")
     @ApiOperation(value = "Gets the users stats")
-    fun getUsersStats(@RequestParam("username", required = false) username: String?,
-                      @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<User> {
-        checkAndGetToken(authCookie)
+    fun getUsersStats(@RequestParam("username", required = false) username: String?, request: HttpServletRequest): List<User> {
+        checkAndGetToken(request)
         // Seguramente no devuelva una lista de users sino algo como lista de UserStats (a confirmar)
 
         TODO("proveer estadísticas de los usuarios permitiendo seleccionar un usuario particular")
