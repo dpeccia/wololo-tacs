@@ -70,7 +70,9 @@ class GamesController : BaseController() {
 
                       @ApiIgnore @CookieValue("X-Auth") authCookie : String?,
                       request: HttpServletRequest): List<DTO.GameDTO> {
-
+        val token = checkAndGetToken(request)
+        val userId = token.body.subject.toInt()
+        throwIfNotAllowed(userId)
         return gamesControllerService.getGamesInADateRange(from, to)
 
     }
