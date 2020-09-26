@@ -29,8 +29,7 @@ class UsersControllerService {
     }
 
     fun getUsers(_username: String?): List<DTO.UserDTO> {
-        val username = _username ?: return RepoUsers.filter { !it.isAdmin }.map { it.dto() }
-        return RepoUsers.filter { !it.isAdmin && it.username.startsWith(username) }.map { it.dto() }
-
+        val username = _username ?: return RepoUsers.getNormalUsers().map { it.dto() }
+        return RepoUsers.getNormalUsers().filter { it.username.startsWith(username) }.map { it.dto() }
     }
 }
