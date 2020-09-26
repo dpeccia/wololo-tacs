@@ -27,10 +27,10 @@ class UsersController : BaseController() {
 
     @PostMapping("/tokens")
     @ApiOperation(value = "Log In")
-    fun login(@RequestBody _user: LoginForm): ResponseEntity<Void> {
-        val user = usersControllerService.checkUserCredentials(_user)
+    fun login(@RequestBody _user: LoginForm): ResponseEntity<DTO.UserDTO> {
+        val userDTO = usersControllerService.checkUserCredentials(_user)
 
-        val jwt = JwtSigner.createJwt(user.id)
+        val jwt = JwtSigner.createJwt(userDTO.id)
         val authCookie = ResponseCookie.fromClientResponse("X-Auth", jwt)
                 .maxAge(3600)
                 .httpOnly(true)
@@ -38,7 +38,7 @@ class UsersController : BaseController() {
                 .secure(false) // Setear a true si tenemos https
                 .build()
 
-        return ResponseEntity.ok().header("Set-Cookie", authCookie.toString()).build<Void>()
+        return ResponseEntity.ok().header("Set-Cookie", authCookie.toString()).body(userDTO)
     }
 
     @DeleteMapping("/tokens")
