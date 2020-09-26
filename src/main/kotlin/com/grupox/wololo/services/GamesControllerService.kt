@@ -3,6 +3,7 @@ package com.grupox.wololo.services
 import arrow.core.Either
 import arrow.core.extensions.either.applicative.applicative
 import arrow.core.extensions.fx
+import arrow.core.extensions.list.functorFilter.filter
 import arrow.core.extensions.list.traverse.sequence
 import arrow.core.fix
 import arrow.optics.extensions.list.cons.cons
@@ -99,6 +100,22 @@ class GamesControllerService {
 
         return games.map { it.dto() }
     }
+
+    fun getGamesInADateRange(from: Date, to: Date): List<DTO.GameDTO> {
+        return RepoGames.filter { it.date in from..to }.map { it.dto()}
+        }
+
+    fun getGamesStats(from: Date, to: Date): GamePublicInfo {
+
+        fun numberOfGames(status : String) : Int {
+            return getGamesInADateRange(from, to).map { it.status }.filter { it.toString() == status }.count()
+        }
+
+        return GamePublicInfo(numberOfGames("NEW"), numberOfGames("ONGOING"), numberOfGames("FINISHED"), numberOfGames("CANCELED"))
+    }
+
+
+
 
     fun createGame(userId: Int, form: GameForm): DTO.GameDTO {
         val game: Game = Either.fx<CustomException, Game> {

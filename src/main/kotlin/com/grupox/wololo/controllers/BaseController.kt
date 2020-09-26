@@ -2,8 +2,10 @@ package com.grupox.wololo.controllers
 
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.getOrThrow
+import com.grupox.wololo.model.repos.RepoUsers
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jws
 import org.springframework.http.HttpStatus
@@ -39,4 +41,9 @@ abstract class BaseController {
         val jwt = cookie?.value
         return JwtSigner.validateJwt(jwt.toOption()).getOrThrow()
     }
+
+    fun throwIfNotAllowed(id: Int) {
+        val admin: User = RepoUsers.getAdminById(id).getOrThrow()
+    }
+
 }

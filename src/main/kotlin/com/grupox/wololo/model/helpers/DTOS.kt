@@ -17,7 +17,9 @@ sealed class DTO {
         val ownerId: Int?,
         val specialization: String,
         val gauchos: Int,
-        val isLocked: Boolean
+        val isLocked: Boolean,
+        val gauchosGeneratedByDefense : Int,
+        val gauchosGeneratedByProduction : Int
     ) : DTO()
 
     data class ProvinceDTO(

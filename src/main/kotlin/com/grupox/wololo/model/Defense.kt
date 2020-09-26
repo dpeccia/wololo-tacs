@@ -11,7 +11,7 @@ class Defense : Specialization {
     override fun multDefense(): Double = 1.25
 
     override fun updateStats(townAltitude: Double, maxAltitude: Double, minAltitude: Double, town: Town) {
-        town.updateGauchosByDefense(gauchos(townAltitude, maxAltitude, minAltitude))
+        town.stats.increaseGauchosGeneratedByDefense(gauchos(townAltitude, maxAltitude, minAltitude))
     }
 
     override fun toString(): String = "DEFENSE"

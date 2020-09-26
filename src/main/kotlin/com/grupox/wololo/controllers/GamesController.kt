@@ -1,14 +1,15 @@
 package com.grupox.wololo.controllers
 
 import com.grupox.wololo.model.Status
-import com.grupox.wololo.model.helpers.AttackForm
-import com.grupox.wololo.model.helpers.DTO
-import com.grupox.wololo.model.helpers.GameForm
-import com.grupox.wololo.model.helpers.MovementForm
+import com.grupox.wololo.model.User
+import com.grupox.wololo.model.helpers.*
+import com.grupox.wololo.model.repos.RepoGames
+import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import springfox.documentation.annotations.ApiIgnore
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 
@@ -43,6 +44,35 @@ class GamesController : BaseController() {
         val token = checkAndGetToken(request)
         val userId = token.body.subject.toInt()
         return gamesControllerService.getGame(userId, id)
+    }
+
+    @GetMapping("/stats")
+    @ApiOperation(value = "Gets games stats from a date range")
+    fun getGamesStats(@RequestParam("from", required = false) from: Date,
+                      @RequestParam("to", required = false) to: Date,
+
+                      @ApiIgnore @CookieValue("X-Auth") authCookie : String?,
+                      request: HttpServletRequest): GamePublicInfo {
+
+        val token = checkAndGetToken(request)
+        val userId = token.body.subject.toInt()
+
+        throwIfNotAllowed(userId)
+
+        return gamesControllerService.getGamesStats(from, to)
+
+    }
+
+    @GetMapping("/date")
+    @ApiOperation(value = "Gets games from a date range")
+    fun getGamesByDateRange(@RequestParam("from", required = false) from: Date,
+                      @RequestParam("to", required = false) to: Date,
+
+                      @ApiIgnore @CookieValue("X-Auth") authCookie : String?,
+                      request: HttpServletRequest): List<DTO.GameDTO> {
+
+        return gamesControllerService.getGamesInADateRange(from, to)
+
     }
 
     @PutMapping("/{id}")

@@ -9,7 +9,7 @@ data class GameForm(val provinceName: String, val townAmount: Int, val participa
 data class MovementForm @JsonCreator constructor(val from: Int, val to: Int, val gauchosQty: Int)
 data class AttackForm @JsonCreator constructor(val from: Int, val to: Int)
 
-data class GamePublicInfo @JsonCreator constructor(val gamesNew: Int, val gamesOnGoing: Int, val gamesFinished: Int, val gamesCanceled: Int, val games: List<Game>)
+data class GamePublicInfo @JsonCreator constructor(val gamesNew: Int, val gamesOnGoing: Int, val gamesFinished: Int, val gamesCanceled: Int)
 
 
 

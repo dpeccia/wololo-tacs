@@ -15,6 +15,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -42,12 +43,9 @@ class UserControllerIntegrationTest {
 
     lateinit var users: ArrayList<User>
 
-    lateinit var notAdminUser: User
-
     @BeforeEach
     fun fixture() {
-        notAdminUser = User(1, "", "example_not_admin",sha512.getSHA512("example_not_admin"), false, Stats(0, 0))
-        users = arrayListOf(User(1, "", "example_admin",sha512.getSHA512("example_admin"), true, Stats(0, 0)), notAdminUser)
+        users = arrayListOf(User(1, "", "example_admin",sha512.getSHA512("example_admin"), true, Stats(0, 0)))
         webClient = WebClient.builder().baseUrl("http://localhost:${serverPort}").build()
         mockkObject(RepoUsers)
         every { RepoUsers.getAll() } returns users
@@ -64,6 +62,7 @@ class UserControllerIntegrationTest {
     fun `login with wrong username returns UNAUTHORIZED`() {
         val response = webClient.post().uri("/users/tokens")
                 .bodyValue(LoginForm("wrong_username", "example_admin")).exchange().block()
+    println(sha512.getSHA512("admin"))
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
 
@@ -128,7 +127,7 @@ class UserControllerIntegrationTest {
     @Test
     fun `can obtain users details when logged in`() {
         val loginResponse = webClient.post().uri("/users/tokens")
-                .bodyValue(LoginForm("example_not_admin", "example_not_admin")).exchange()
+                .bodyValue(LoginForm("example_admin", "example_admin")).exchange()
                 .block() ?: throw RuntimeException("Should have gotten a response")
         val responseCookies = loginResponse.cookies()
                 .map { it.key to it.value.map { cookie -> cookie.value } }
@@ -137,4 +136,5 @@ class UserControllerIntegrationTest {
                 .exchange().block()
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
     }
+
 }

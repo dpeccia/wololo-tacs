@@ -7,15 +7,12 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, val townImage: String = "") : Requestable {
+class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, val townImage: String = "", val stats: TownStats = TownStats(0,0)) : Requestable {
     var owner: User? = null
 
     var isLocked: Boolean = false
     var specialization : Specialization = Production()
     var gauchos = 0
-    //Esto podría ir en Town Stats si queremos hacerlo similar a User Stats, por ahora lo dejo acá para ir testeando al menos
-    var gauchosGeneratedByDefense = 0
-    var gauchosGeneratedByProduction = 0
 
     fun isFrom(user: User) = owner == user
 
@@ -24,14 +21,6 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordin
     }
 
     fun multDefense(): Double = specialization.multDefense()
-
-    fun updateGauchosByDefense(gauchosAmount: Int){
-        this.gauchosGeneratedByDefense = gauchosAmount + gauchosGeneratedByDefense
-        }
-
-    fun updateGauchosByProduction(gauchosAmount: Int){
-        this.gauchosGeneratedByProduction = gauchosAmount + gauchosGeneratedByProduction
-    }
 
     fun addGauchos(maxAltitude: Double, minAltitude: Double) {
         val gauchosAmount: Int = specialization.gauchos(elevation, maxAltitude, minAltitude)
@@ -74,7 +63,9 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordin
             ownerId = owner?.id,
             specialization = specialization.toString(),
             gauchos = gauchos,
-            isLocked = isLocked
+            isLocked = isLocked,
+            gauchosGeneratedByDefense =  stats.gauchosGeneratedByDefense,
+            gauchosGeneratedByProduction =  stats.gauchosGeneratedByProduction
         )
 }
 

@@ -3,6 +3,7 @@ package com.grupox.wololo.controller_tests
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.AttackForm
+import com.grupox.wololo.model.helpers.DTO
 import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
@@ -13,6 +14,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import java.time.Duration
+import java.time.Instant
 import java.util.*
 
 @SpringBootTest
@@ -175,6 +178,14 @@ class GamesControllerTest {
             val sortedGames = gamesControllerService.getGames(user.id, "date", null, null)
             val dates = sortedGames.map { it.date }
             assertThat(dates).isSorted   //isEqualTo(listOf(singlePlayerGame, game2, game3))
+        }
+
+        @Test
+        fun `Get game's dto can be filtered by a range of dates`() {
+            val gamesDTO: List<DTO.GameDTO> = gamesControllerService.getGamesInADateRange(Date.from(Instant.now().minus(Duration.ofDays(5))), Date.from(Instant.now().plus(Duration.ofDays(20))))
+
+            assertThat(gamesDTO).isEqualTo(games.map { it.dto() })
+
         }
 
         @Test

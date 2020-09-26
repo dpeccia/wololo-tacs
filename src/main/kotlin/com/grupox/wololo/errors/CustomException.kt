@@ -14,7 +14,6 @@ sealed class CustomException(message: String) : Exception(message), Requestable 
     sealed class Unauthorized(message: String) : CustomException("Unauthorized: $message") {
         class TokenException(message: String) : Unauthorized(message)
         class BadLoginException : Unauthorized("wrong username or password")
-        class OperationNotAuthorized : Unauthorized("operation not authorized")
     }
 
     sealed class Service(message: String) : CustomException("Service exception: $message") {
@@ -40,6 +39,7 @@ sealed class CustomException(message: String) : Exception(message), Requestable 
         class IllegalAttack(message: String) : Forbidden(message)
         class NotYourTownException : Forbidden("this is not one of your towns")
         class FinishedGameException : Forbidden("this game is already Finished, you cannot play anymore")
+        class OperationNotAuthorized : Forbidden("operation not allowed")
     }
 
     override fun dto(): DTO.ExceptionDTO = DTO.ExceptionDTO(message) // Default

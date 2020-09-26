@@ -10,7 +10,7 @@ class Production : Specialization {
     override fun multDefense(): Double = 1.0
 
     override fun updateStats(townAltitude: Double, maxAltitude: Double, minAltitude: Double, town: Town) {
-        town.updateGauchosByProduction(gauchos(townAltitude, maxAltitude, minAltitude))
+        town.stats.increaseGauchosGeneratedByProduction(gauchos(townAltitude, maxAltitude, minAltitude))
     }
 
     override fun toString(): String = "PRODUCTION"
