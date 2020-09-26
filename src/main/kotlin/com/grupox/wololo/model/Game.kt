@@ -98,7 +98,7 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
             status = status,
             date = date,
             turnId = turn.id,
-            playerIds = players.map { it.id },
+            playerIds = players.map { it.dto() },
             province = province.dto()
         )
 }

@@ -33,7 +33,7 @@ sealed class DTO {
         val status: Status,
         val date: Date,
         val turnId: Int,
-        val playerIds: List<Int>,
+        val playerIds: List<UserDTO>,
         val province: ProvinceDTO
     ) : DTO()
 
