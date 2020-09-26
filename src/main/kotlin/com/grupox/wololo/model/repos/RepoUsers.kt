@@ -20,7 +20,7 @@ object RepoUsers : Repository<User> {
             User(5, "", "mail2", "password2", false, Stats(0,0))
     )
 
-    fun getNormalUsers(): List<User> = getAll().filter { !it.esAdmin }
+    fun getNormalUsers(): List<User> = getAll().filter { !it.isAdmin }
 
     // TODO FILTER AND SORT
     fun find(filters: List<String>, orderBys: List<String>): ArrayList<User> = usersInDB
@@ -28,6 +28,8 @@ object RepoUsers : Repository<User> {
     fun getUserByName(mail: String): Either<CustomException.NotFound, User> = getNormalUsers().find { it.mail == mail }.rightIfNotNull { CustomException.NotFound.UserNotFoundException() }
 
     fun getUserByLogin(loginData: LoginForm, hashedPassword: String): Either<CustomException.Unauthorized, User> = getAll().find {it.isUserByLoginData(loginData, hashedPassword)}.rightIfNotNull { CustomException.Unauthorized.BadLoginException() }
+
+    fun getAdminById(id: Int): Either<CustomException.Unauthorized, User> = getAll().find { it.id == id && it.isAdmin}.rightIfNotNull { CustomException.Unauthorized.OperationNotAuthorized() }
 
     fun getUsersWithoutStats(): List<UserPublicInfoWithoutStats> = getNormalUsers().map { it.publicInfoWithoutStats() }
     // TODO: ENCRYPT USER PASSWORD BEFORE SAVING

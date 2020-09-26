@@ -13,6 +13,7 @@ sealed class CustomException(message: String) : Exception(message){
     sealed class Unauthorized(message: String) : CustomException("Unauthorized: $message") {
         class TokenException(message: String) : Unauthorized(message)
         class BadLoginException : Unauthorized("wrong username or password")
+        class OperationNotAuthorized : Unauthorized("operation not authorized")
     }
 
     sealed class Service(message: String) : CustomException("Service exception: $message") {

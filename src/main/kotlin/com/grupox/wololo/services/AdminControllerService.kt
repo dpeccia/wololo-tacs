@@ -13,6 +13,8 @@ import java.util.*
 @Service
 class AdminControllerService {
 
+
+
     fun getScoreBoard(): List<UserPublicInfo> {
         return RepoUsers.getUsersStats()
     }
@@ -22,7 +24,7 @@ class AdminControllerService {
     }
 
     fun getGamesStats(from: Date, to: Date): GamePublicInfo {
-        val games: List<Game> = RepoGames.getAll().filter { it.date >= from && it.date <= to }
+        val games: List<Game> = RepoGames.getAll().filter { it.date in from..to }
 
         fun numberOfGames(status : String) : Int {
             return games.map { it.status }.filter { it.toString() == status }.count()

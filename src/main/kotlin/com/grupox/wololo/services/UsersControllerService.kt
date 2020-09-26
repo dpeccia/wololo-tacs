@@ -28,6 +28,10 @@ class UsersControllerService {
         return RepoUsers.getUserByLogin(user, sha512.getSHA512(user.password)).getOrThrow()
     }
 
+    fun checkIfIsAdmin(id: Int): Boolean {
+        return RepoUsers.getById(id).getOrThrow().isAdmin
+    }
+
     fun getUsers(_username: String?): List<UserPublicInfoWithoutStats> {
         val username = _username ?: return RepoUsers.getUsersWithoutStats()
         val user = ArrayList<UserPublicInfoWithoutStats>()

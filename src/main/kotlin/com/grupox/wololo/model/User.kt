@@ -1,11 +1,14 @@
 package com.grupox.wololo.model
 
+import arrow.core.Either
+import arrow.core.rightIor
+import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.model.helpers.UserPublicInfo
 import com.grupox.wololo.model.helpers.UserPublicInfoWithoutStats
 
-class User(val id: Int, val username: String, mail: String, private var password: String, val esAdmin: Boolean, val stats: Stats = Stats(0,0)) {
+class User(val id: Int, val username: String, mail: String, private var password: String, val isAdmin: Boolean, val stats: Stats = Stats(0,0)) {
     var mail: String = mail
         private set
 
@@ -13,10 +16,6 @@ class User(val id: Int, val username: String, mail: String, private var password
     fun isUserByLoginData(loginData: LoginForm, hashedPassword: String): Boolean = this.mail == loginData.mail && this.password == hashedPassword
 
     fun publicInfoWithoutStats(): UserPublicInfoWithoutStats = UserPublicInfoWithoutStats(this.id, this.mail)
-
-    fun changePassword(newPass: String) {
-        this.password = newPass
-    }
 
     fun publicInfo(): UserPublicInfo = UserPublicInfo(this.mail,this.stats.gamesWon,this.stats.gamesLost)
 
