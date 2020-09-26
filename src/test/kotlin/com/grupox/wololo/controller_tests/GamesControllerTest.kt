@@ -158,7 +158,7 @@ class GamesControllerTest {
         fun `Attempting get games returns all the games in the DB where the player is participating`() {
             val user = user1
             val playerGames = gamesControllerService.getGames(user.id, null, null, null).toSet()
-            assertThat(playerGames).isEqualTo(setOf(singlePlayerGame, game2, game3))
+            assertThat(playerGames).isEqualTo(listOf(singlePlayerGame, game2, game3).map { it.dto() }.toSet())
         }
 
         @Test
@@ -181,14 +181,14 @@ class GamesControllerTest {
         fun `Get game's result can be sorted by the number of towns`() {
             val user = user1
             val sortedGames = gamesControllerService.getGames(user.id, "numberOfTowns", null, null)
-            assertThat(sortedGames).isEqualTo(listOf(singlePlayerGame, game2, game3))
+            assertThat(sortedGames).isEqualTo(listOf(singlePlayerGame, game2, game3).map { it.dto() })
         }
 
         @Test
         fun `Get game's result can be sorted by the number of players`() {
             val user = user1
             val sortedGames = gamesControllerService.getGames(user.id, "numberOfPlayers", null, null)
-            assertThat(sortedGames).isEqualTo(listOf(singlePlayerGame, game3, game2))
+            assertThat(sortedGames).isEqualTo(listOf(singlePlayerGame, game3, game2).map { it.dto() })
         }
 
         @Test
@@ -229,7 +229,7 @@ class GamesControllerTest {
         fun `An user can get one of its games by id`(){
             val user = user1
             val userGame = gamesControllerService.getGame(user.id, 2)
-            assertThat(userGame).isEqualTo(game2)
+            assertThat(userGame).isEqualTo(game2.dto())
         }
 
         @Test

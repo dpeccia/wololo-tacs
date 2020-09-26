@@ -31,7 +31,6 @@ class ProvinceTests {
         town2.gauchos = 20
     }
 
-    // TODO Tests de movimiento de gauchos
     @Nested
     inner class MoveGauchos {
         @Test
@@ -111,7 +110,6 @@ class ProvinceTests {
         }
     }
 
-    // TODO Tests de ataque de municipio
     @Nested
     inner class AttackTown {
         private lateinit var jujuy: Province

@@ -1,20 +1,15 @@
 package com.grupox.wololo.model
 
 import arrow.core.Either
-import arrow.core.extensions.list.foldable.combineAll
-import arrow.core.extensions.list.semigroupK.combineK
 import arrow.core.rightIfNotNull
-import com.google.common.collect.Sets
 import com.grupox.wololo.errors.CustomException.Forbidden.IllegalAttack
 import com.grupox.wololo.errors.CustomException.Forbidden.IllegalGauchoMovement
 import com.grupox.wololo.errors.CustomException.NotFound
 import com.grupox.wololo.errors.CustomException.NotFound.TownNotFoundException
-import com.grupox.wololo.model.helpers.AttackForm
-import com.grupox.wololo.model.helpers.MovementForm
-import com.grupox.wololo.model.helpers.getOrThrow
+import com.grupox.wololo.model.helpers.*
 import kotlin.math.*
 
-class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageUrl: String = ""){
+class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageUrl: String = "") : Requestable {
     fun getTownById(id: Int): Either<NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { TownNotFoundException() }
 
     private val altitudes = towns.map { it.elevation }
@@ -99,4 +94,11 @@ class Province(id: Int, val name: String, val towns: ArrayList<Town>, val imageU
         attacker.attack(defender.gauchos, multDist, multAlt)
         defender.defend(attacker.owner!!, attackerQtyBeforeAttack, multDist, multAlt)
     }
+
+    override fun dto(): DTO.ProvinceDTO =
+        DTO.ProvinceDTO(
+            name = name,
+            imageUrl = imageUrl,
+            towns = towns.map { it.dto() }
+        )
 }

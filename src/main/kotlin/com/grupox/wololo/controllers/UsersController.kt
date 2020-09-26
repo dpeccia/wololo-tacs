@@ -1,13 +1,17 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.model.helpers.*
+import com.grupox.wololo.model.helpers.DTO
+import com.grupox.wololo.model.helpers.JwtSigner
+import com.grupox.wololo.model.helpers.LoginForm
+import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.services.UsersControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import springfox.documentation.annotations.ApiIgnore
+import org.springframework.web.util.WebUtils
+import javax.servlet.http.HttpServletRequest
 
 @RequestMapping("/users")
 @RestController
@@ -17,7 +21,7 @@ class UsersController : BaseController() {
 
     @PostMapping
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
-    fun createUser(@RequestBody newUser: UserForm): UserPublicInfo {
+    fun createUser(@RequestBody newUser: UserForm): DTO.UserDTO {
         return usersControllerService.createUser(newUser)
     }
 
@@ -39,9 +43,9 @@ class UsersController : BaseController() {
 
     @DeleteMapping("/tokens")
     @ApiOperation(value = "Log Out")
-    fun logout(@ApiIgnore @CookieValue("X-Auth") _authCookie : String?): ResponseEntity<Void> {
-        checkAndGetToken(_authCookie)
-        val authCookie = ResponseCookie.fromClientResponse("X-Auth", _authCookie.toString())
+    fun logout(request: HttpServletRequest): ResponseEntity<Void> {
+        checkAndGetToken(request)
+        val authCookie = ResponseCookie.fromClientResponse("X-Auth", WebUtils.getCookie(request, "X-Auth")!!.value)
                 .maxAge(0)
                 .httpOnly(true)
                 .path("/")
@@ -54,8 +58,8 @@ class UsersController : BaseController() {
     @GetMapping
     @ApiOperation(value = "Gets the users without stats")
     fun getUsers(@RequestParam("username", required = false) _username: String?,
-                 @ApiIgnore @CookieValue("X-Auth") authCookie : String?): List<UserPublicInfoWithoutStats> {
-        checkAndGetToken(authCookie)
+                 request: HttpServletRequest): List<DTO.UserDTO> {
+        checkAndGetToken(request)
         return usersControllerService.getUsers(_username)
     }
 }

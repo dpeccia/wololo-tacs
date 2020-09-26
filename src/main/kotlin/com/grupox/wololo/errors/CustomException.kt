@@ -1,8 +1,9 @@
 package com.grupox.wololo.errors
 
-data class ExceptionJSON(val message: String?)
+import com.grupox.wololo.model.helpers.DTO
+import com.grupox.wololo.model.helpers.Requestable
 
-sealed class CustomException(message: String) : Exception(message){
+sealed class CustomException(message: String) : Exception(message), Requestable {
     sealed class NotFound(message: String) : CustomException("Not found: $message") {
         class UserNotFoundException : NotFound("user not found in database")
         class GameNotFoundException : NotFound("game not found in database")
@@ -41,6 +42,6 @@ sealed class CustomException(message: String) : Exception(message){
         class FinishedGameException : Forbidden("this game is already Finished, you cannot play anymore")
     }
 
-    fun getJSON(): ExceptionJSON = ExceptionJSON(message) // Default
+    override fun dto(): DTO.ExceptionDTO = DTO.ExceptionDTO(message) // Default
 }
 

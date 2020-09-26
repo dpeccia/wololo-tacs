@@ -1,11 +1,13 @@
 package com.grupox.wololo.model
 
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.DTO
+import com.grupox.wololo.model.helpers.Requestable
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, val townImage: String = ""){
+class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, val townImage: String = "") : Requestable {
     var owner: User? = null
 
     var isLocked: Boolean = false
@@ -61,5 +63,18 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordin
             this.owner = attackerOwner
         this.gauchos = max(gauchosDefenseFinal, 0)
     }
+
+    override fun dto(): DTO.TownDTO =
+        DTO.TownDTO(
+            id = id,
+            name = name,
+            coordinates = coordinates,
+            elevation = elevation,
+            imageUrl = townImage,
+            ownerId = owner?.id,
+            specialization = specialization.toString(),
+            gauchos = gauchos,
+            isLocked = isLocked
+        )
 }
 

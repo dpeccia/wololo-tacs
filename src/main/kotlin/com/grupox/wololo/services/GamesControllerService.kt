@@ -6,7 +6,6 @@ import arrow.core.extensions.fx
 import arrow.core.extensions.list.traverse.sequence
 import arrow.core.fix
 import arrow.optics.extensions.list.cons.cons
-import com.grupox.wololo.configs.properties.SHA512Properties
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.externalservices.*
@@ -28,7 +27,7 @@ class GamesControllerService {
     @Autowired
     lateinit var pixabay: Pixabay
 
-    fun surrender(gameId: Int, userId: Int): Game {
+    fun surrender(gameId: Int, userId: Int): DTO.GameDTO {
         val game: Game = RepoGames.getById(gameId).getOrThrow()
         val user: User = game.getMember(userId).getOrThrow()
 
@@ -39,50 +38,48 @@ class GamesControllerService {
             game.status = Status.CANCELED
         }
 
-        return game
+        return game.dto()
     }
 
-    fun finishTurn(userId: Int, gameId: Int): Game {
+    fun finishTurn(userId: Int, gameId: Int): DTO.GameDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         game.finishTurn(user)
-        return game
+        return game.dto()
     }
 
-    fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm): Game {
+    fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm): DTO.GameDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         game.moveGauchosBetweenTowns(user, movementData)
-        return game
+        return game.dto()
     }
 
-    fun attackTown(userId: Int, gameId: Int, attackData: AttackForm): Game {
+    fun attackTown(userId: Int, gameId: Int, attackData: AttackForm): DTO.GameDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         game.attackTown(user, attackData)
-        return game
+        return game.dto()
     }
 
     fun getProvinces(): List<String> = provinceImages.availableProvinces().getOrThrow()
 
-    fun getTownStats(gameId: Int, townId: Int): TownInfo {
-
+    fun getTownStats(gameId: Int, townId: Int): DTO.TownDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val town = game.province.getTownById(townId).getOrThrow()
-        val image: String = game.province.imageUrl
 
-        return TownInfo(town.gauchosGeneratedByDefense, town.gauchosGeneratedByProduction, image)
+        return town.dto()
     }
 
-    fun getGame(userId: Int, gameId: Int): Game {
+    fun getGame(userId: Int, gameId: Int): DTO.GameDTO {
         val user = RepoUsers.getById(userId).getOrThrow()
         val game = RepoGames.getById(gameId).getOrThrow()
         if(!game.isParticipating(user)) throw CustomException.Unauthorized.TokenException("User not participating in this game") // Por ahi no corresponde esta excepcion
 
-        return game
+        return game.dto()
     }
 
-    fun getGames(userId: Int, sort: String?, status: Status?, date: Date?): List<Game> {
+    fun getGames(userId: Int, sort: String?, status: Status?, date: Date?): List<DTO.GameDTO> {
         val user = RepoUsers.getById(userId).getOrThrow()
         var games: List<Game> = RepoGames.filter { it.isParticipating(user) }
 
@@ -100,10 +97,10 @@ class GamesControllerService {
             else              -> games
         }
 
-        return games
+        return games.map { it.dto() }
     }
 
-    fun createGame(userId: Int, form: GameForm): Game {
+    fun createGame(userId: Int, form: GameForm): DTO.GameDTO {
         val game: Game = Either.fx<CustomException, Game> {
             val users = !userId.cons(form.participantsIds).distinct().map { RepoUsers.getById(it) }
                     .sequence(Either.applicative()).fix().map { it.fix() }
@@ -113,17 +110,17 @@ class GamesControllerService {
                 val elevation = !topoData.requestElevation(data.coordinates)
                 val imageUrl = !pixabay.requestTownImage(data.name)
                 Town(data.id, data.name, data.coordinates, elevation, imageUrl)
-            }//.sequence(Either.applicative()).fix().map { it.fix() }
+            }
 
             val provinceImage: String = provinceImages.getUrl(form.provinceName)
             Game(0,users,  Province(0, form.provinceName, ArrayList(towns), provinceImage))
         }.getOrThrow()
 
         RepoGames.insert(game)
-        return game
+        return game.dto()
     }
 
-    fun updateTownSpecialization(userId: Int, gameId: Int, townId: Int, newSpecialization: String): Game {
+    fun updateTownSpecialization(userId: Int, gameId: Int, townId: Int, newSpecialization: String): DTO.GameDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         when (newSpecialization.toUpperCase()) {
@@ -131,6 +128,6 @@ class GamesControllerService {
             "DEFENSE"    -> game.changeTownSpecialization(user, townId, Defense())
         }
 
-        return game
+        return game.dto()
     }
 }
