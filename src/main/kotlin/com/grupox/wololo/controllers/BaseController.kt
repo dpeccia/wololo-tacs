@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.util.WebUtils
+import java.util.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
@@ -42,7 +43,7 @@ abstract class BaseController {
         return JwtSigner.validateJwt(jwt.toOption()).getOrThrow()
     }
 
-    fun throwIfNotAllowed(id: Int) {
+    fun throwIfNotAllowed(id: UUID) {
         val admin: User = RepoUsers.getAdminById(id).getOrThrow()
     }
 

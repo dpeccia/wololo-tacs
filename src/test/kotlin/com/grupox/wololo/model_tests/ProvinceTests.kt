@@ -4,9 +4,6 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
-import com.grupox.wololo.model.repos.RepoUsers
-import io.mockk.every
-import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -17,8 +14,8 @@ import org.junit.jupiter.api.function.Executable
 import kotlin.math.round
 
 class ProvinceTests {
-    val user1: User = User(1, "", "a_mail", "a_password", false)
-    val user2: User = User(2, "", "other_mail", "other_password", false)
+    val user1: User = User("a_user", "a_mail", "a_password")
+    val user2: User = User("other_user", "other_mail", "other_password")
 
     val town1: Town = Town(id = 1, name = "town1", elevation = 20.0)
     val town2: Town = Town(id = 2, name = "town2", elevation = 10.0)

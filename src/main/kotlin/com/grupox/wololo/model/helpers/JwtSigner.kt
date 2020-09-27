@@ -14,7 +14,7 @@ import java.util.*
 object JwtSigner {
     private val keyPair: KeyPair = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
-    fun createJwt(userId: Int): String {
+    fun createJwt(userId: UUID): String {
         return Jwts.builder()
                 .signWith(keyPair.private, SignatureAlgorithm.RS256)
                 .setSubject(userId.toString())

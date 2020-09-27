@@ -8,9 +8,8 @@ import java.time.Instant
 import java.util.*
 
 
-class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) : Requestable {
-
-    //val id: Int = 0 // TODO: Autogenerada
+class Game(val players: List<User>, val province: Province, var status: Status = Status.NEW) : Requestable {
+    val id: UUID = UUID.randomUUID()
 
     val townsAmount: Int
         get() = province.towns.size
@@ -65,7 +64,7 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
         players.filter { it != winner }.forEach { it.updateGamesLostStats() }
     }
 
-    fun getMember(userId: Int): Either<CustomException.NotFound, User> = players.find { it.id == userId }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
+    fun getMember(userId: UUID): Either<CustomException.NotFound, User> = players.find { it.id == userId }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
 
     fun isParticipating(user: User): Boolean = players.contains(user)
 
