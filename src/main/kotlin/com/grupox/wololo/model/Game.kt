@@ -6,10 +6,11 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.*
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 
 class Game(val players: List<User>, val province: Province, var status: Status = Status.NEW) : Requestable {
-    val id: UUID = UUID.randomUUID()
+    val id: Int = generateId()
 
     val townsAmount: Int
         get() = province.towns.size
@@ -20,6 +21,11 @@ class Game(val players: List<User>, val province: Province, var status: Status =
     lateinit var turn: User
 
     var date: Date = Date.from(Instant.now())
+
+    companion object {
+        private val idGenerator: AtomicInteger = AtomicInteger(1000)
+        fun generateId(): Int = idGenerator.incrementAndGet()
+    }
 
     init {
         assignTowns()
@@ -64,7 +70,7 @@ class Game(val players: List<User>, val province: Province, var status: Status =
         players.filter { it != winner }.forEach { it.updateGamesLostStats() }
     }
 
-    fun getMember(userId: UUID): Either<CustomException.NotFound, User> = players.find { it.id == userId }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
+    fun getMember(userId: Int): Either<CustomException.NotFound, User> = players.find { it.id == userId }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
 
     fun isParticipating(user: User): Boolean = players.contains(user)
 
@@ -74,7 +80,7 @@ class Game(val players: List<User>, val province: Province, var status: Status =
         if(userWon(user)) updateStats(user) else changeTurn()
     }
 
-    fun changeTownSpecialization(user: User, townId: UUID, specialization: Specialization) {
+    fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {
         checkForbiddenAction(user)
         val town = province.getTownById(townId).getOrThrow()
         if(town.owner != user) throw CustomException.Forbidden.NotYourTownException()

@@ -28,7 +28,7 @@ class GamesControllerService {
     @Autowired
     lateinit var pixabay: Pixabay
 
-    fun surrender(gameId: UUID, userId: UUID): DTO.GameDTO {
+    fun surrender(gameId: Int, userId: Int): DTO.GameDTO {
         val game: Game = RepoGames.getById(gameId).getOrThrow()
         val user: User = game.getMember(userId).getOrThrow()
 
@@ -42,21 +42,21 @@ class GamesControllerService {
         return game.dto()
     }
 
-    fun finishTurn(userId: UUID, gameId: UUID): DTO.GameDTO {
+    fun finishTurn(userId: Int, gameId: Int): DTO.GameDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         game.finishTurn(user)
         return game.dto()
     }
 
-    fun moveGauchosBetweenTowns(userId: UUID, gameId: UUID, movementData: MovementForm): DTO.GameDTO {
+    fun moveGauchosBetweenTowns(userId: Int, gameId: Int, movementData: MovementForm): DTO.GameDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         game.moveGauchosBetweenTowns(user, movementData)
         return game.dto()
     }
 
-    fun attackTown(userId: UUID, gameId: UUID, attackData: AttackForm): DTO.GameDTO {
+    fun attackTown(userId: Int, gameId: Int, attackData: AttackForm): DTO.GameDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         game.attackTown(user, attackData)
@@ -65,14 +65,14 @@ class GamesControllerService {
 
     fun getProvinces(): List<String> = provinceImages.availableProvinces().getOrThrow()
 
-    fun getTownStats(gameId: UUID, townId: UUID): DTO.TownDTO {
+    fun getTownStats(gameId: Int, townId: Int): DTO.TownDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val town = game.province.getTownById(townId).getOrThrow()
 
         return town.dto()
     }
 
-    fun getGame(userId: UUID, gameId: UUID): DTO.GameDTO {
+    fun getGame(userId: Int, gameId: Int): DTO.GameDTO {
         val user = RepoUsers.getById(userId).getOrThrow()
         val game = RepoGames.getById(gameId).getOrThrow()
         if(!game.isParticipating(user)) throw CustomException.Unauthorized.TokenException("User not participating in this game") // Por ahi no corresponde esta excepcion
@@ -80,7 +80,7 @@ class GamesControllerService {
         return game.dto()
     }
 
-    fun getGames(userId: UUID, sort: String?, status: Status?, date: Date?): List<DTO.GameDTO> {
+    fun getGames(userId: Int, sort: String?, status: Status?, date: Date?): List<DTO.GameDTO> {
         val user = RepoUsers.getById(userId).getOrThrow()
         var games: List<Game> = RepoGames.filter { it.isParticipating(user) }
 
@@ -114,7 +114,7 @@ class GamesControllerService {
         return GamePublicInfo(numberOfGames("NEW"), numberOfGames("ONGOING"), numberOfGames("FINISHED"), numberOfGames("CANCELED"))
     }
 
-    fun createGame(userId: UUID, form: GameForm): DTO.GameDTO {
+    fun createGame(userId: Int, form: GameForm): DTO.GameDTO {
         val game: Game = Either.fx<CustomException, Game> {
             val users = !userId.cons(form.participantsIds).distinct().map { RepoUsers.getById(it) }
                     .sequence(Either.applicative()).fix().map { it.fix() }
@@ -134,7 +134,7 @@ class GamesControllerService {
         return game.dto()
     }
 
-    fun updateTownSpecialization(userId: UUID, gameId: UUID, townId: UUID, newSpecialization: String): DTO.GameDTO {
+    fun updateTownSpecialization(userId: Int, gameId: Int, townId: Int, newSpecialization: String): DTO.GameDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         when (newSpecialization.toUpperCase()) {

@@ -82,7 +82,7 @@ class UserControllerIntegrationTest {
                 .bodyValue(LoginForm("example_admin", "example_admin")).exchange().block()
         val jwtToken = response?.cookies()?.get("X-Auth")?.get(0)?.value ?: throw RuntimeException("No JWT Token in response")
         val validation = jwtSigner.validateJwt(Some(jwtToken))
-        val id = UUID.fromString(validation.getOrThrow().body.subject)
+        val id = validation.getOrThrow().body.subject.toInt()
         assertThat(id).isEqualTo(user.id)
     }
 
@@ -92,7 +92,7 @@ class UserControllerIntegrationTest {
                 .bodyValue(LoginForm("example_admin", "example_admin")).exchange().block()
         val jwtToken = response?.cookies()?.get("X-Auth")?.get(0)?.value ?: throw RuntimeException("No JWT Token in response")
         val validation = jwtSigner.validateJwt(Some(jwtToken))
-        val id = UUID.fromString(validation.getOrThrow().body.subject)
+        val id = validation.getOrThrow().body.subject.toInt()
         assertThat(id).isEqualTo(user.id)
 
         val responseCookies = response.cookies()

@@ -9,12 +9,12 @@ sealed class DTO {
     data class ExceptionDTO(val message: String?) : DTO()
 
     data class TownDTO(
-        val id: UUID,
+        val id: Int,
         val name: String,
         val coordinates: Coordinates,
         val elevation: Double,
         val imageUrl: String,
-        val ownerId: UUID?,
+        val ownerId: Int?,
         val specialization: String,
         val gauchos: Int,
         val isLocked: Boolean,
@@ -29,16 +29,16 @@ sealed class DTO {
     ) : DTO()
 
     data class GameDTO(
-        val id: UUID,
+        val id: Int,
         val status: Status,
         val date: Date,
-        val turnId: UUID,
+        val turnId: Int,
         val playerIds: List<UserDTO>,
         val province: ProvinceDTO
     ) : DTO()
 
     data class UserDTO(
-        val id: UUID,
+        val id: Int,
         val username: String,
         val stats: Stats
     ) : DTO()

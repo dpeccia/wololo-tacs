@@ -40,7 +40,7 @@ object RepoGames : Repository<Game> {
 
     override fun getAll(): List<Game> = gamesInDB
 
-    override fun getById(id: UUID): Either<CustomException.NotFound, Game> = getAll().find { it.id == id }.rightIfNotNull { CustomException.NotFound.GameNotFoundException() }
+    override fun getById(id: Int): Either<CustomException.NotFound, Game> = getAll().find { it.id == id }.rightIfNotNull { CustomException.NotFound.GameNotFoundException() }
 
     override fun filter(predicate: (game: Game) -> Boolean) = getAll().filter { predicate(it) }
 

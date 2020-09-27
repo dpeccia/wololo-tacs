@@ -26,11 +26,11 @@ object RepoUsers : Repository<User> {
 
     fun getUserByLogin(loginData: LoginForm, hashedPassword: String): Either<CustomException.Unauthorized, User> = getAll().find {it.isUserByLoginData(loginData, hashedPassword)}.rightIfNotNull { CustomException.Unauthorized.BadLoginException() }
 
-    fun getAdminById(id: UUID): Either<CustomException.Forbidden, User> =  getAll().find { it.id == id && it.isAdmin}.rightIfNotNull { CustomException.Forbidden.OperationNotAuthorized() }
+    fun getAdminById(id: Int): Either<CustomException.Forbidden, User> =  getAll().find { it.id == id && it.isAdmin}.rightIfNotNull { CustomException.Forbidden.OperationNotAuthorized() }
 
     override fun getAll(): List<User> = usersInDB
 
-    override fun getById(id: UUID): Either<CustomException.NotFound, User> = getNormalUsers().find { it.id == id }.rightIfNotNull { CustomException.NotFound.UserNotFoundException() }
+    override fun getById(id: Int): Either<CustomException.NotFound, User> = getNormalUsers().find { it.id == id }.rightIfNotNull { CustomException.NotFound.UserNotFoundException() }
 
     override fun filter(predicate: (obj: User) -> Boolean): List<User> = getAll().filter { predicate(it) }
 
