@@ -21,8 +21,20 @@ class UsersController : BaseController() {
 
     @PostMapping
     @ApiOperation(value = "Creates a new user (Sign Up / Register)")
-    fun createUser(@RequestBody newUser: UserForm): DTO.UserDTO {
-        return usersControllerService.createUser(newUser)
+    fun createUser(@RequestBody newUser: UserForm): ResponseEntity<DTO.UserDTO> {
+
+        val userDTO : DTO.UserDTO = usersControllerService.createUser(newUser)
+        val jwt = JwtSigner.createJwt(userDTO.id)
+
+        val authCookie = ResponseCookie.fromClientResponse("X-Auth", jwt)
+                .maxAge(3600)
+                .httpOnly(true)
+                .path("/")
+                .secure(false) // Setear a true si tenemos https
+                .build()
+
+        return ResponseEntity.ok().header("Set-Cookie", authCookie.toString()).body(userDTO)
+
     }
 
     @PostMapping("/tokens")
