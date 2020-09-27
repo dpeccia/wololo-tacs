@@ -1,21 +1,20 @@
 package com.grupox.wololo.model_tests
 
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.Province
 import com.grupox.wololo.model.Town
-import com.grupox.wololo.model.User
-import com.grupox.wololo.model.helpers.MovementForm
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.TestInstance.*
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class TownTests {
     lateinit var town: Town
 
     @BeforeEach
     fun fixture() {
-        town = Town(id = 1, name = "town", elevation = 10.0)
+        town = Town(name = "town", elevation = 10.0)
         town.gauchos = 10
     }
 

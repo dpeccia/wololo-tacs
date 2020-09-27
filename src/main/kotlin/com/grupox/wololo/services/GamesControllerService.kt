@@ -65,7 +65,7 @@ class GamesControllerService {
 
     fun getProvinces(): List<String> = provinceImages.availableProvinces().getOrThrow()
 
-    fun getTownStats(gameId: UUID, townId: Int): DTO.TownDTO {
+    fun getTownStats(gameId: UUID, townId: UUID): DTO.TownDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val town = game.province.getTownById(townId).getOrThrow()
 
@@ -123,18 +123,18 @@ class GamesControllerService {
             val towns = townsData.map { data ->
                 val elevation = !topoData.requestElevation(data.coordinates)
                 val imageUrl = !pixabay.requestTownImage(data.name)
-                Town(data.id, data.name, data.coordinates, elevation, imageUrl)
+                Town(data.name, data.coordinates, elevation, imageUrl)
             }
 
             val provinceImage: String = provinceImages.getUrl(form.provinceName)
-            Game(users,  Province(0, form.provinceName, ArrayList(towns), provinceImage))
+            Game(users,  Province(form.provinceName, ArrayList(towns), provinceImage))
         }.getOrThrow()
 
         RepoGames.insert(game)
         return game.dto()
     }
 
-    fun updateTownSpecialization(userId: UUID, gameId: UUID, townId: Int, newSpecialization: String): DTO.GameDTO {
+    fun updateTownSpecialization(userId: UUID, gameId: UUID, townId: UUID, newSpecialization: String): DTO.GameDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
         val user = RepoUsers.getById(userId).getOrThrow()
         when (newSpecialization.toUpperCase()) {

@@ -116,7 +116,7 @@ class GamesController : BaseController() {
     @ApiOperation(value = "Updates the town specialization")
     fun updateTownSpecialization(
             @PathVariable("id") id: UUID,
-            @PathVariable("idTown") townId: Int,
+            @PathVariable("idTown") townId: UUID,
             @RequestBody newSpecialization: String,
             request: HttpServletRequest): DTO.GameDTO {
         val token = checkAndGetToken(request)
@@ -128,7 +128,7 @@ class GamesController : BaseController() {
     @ApiOperation(value = "Gets the town stats and an image")
     fun getTownData(
             @PathVariable("id") id: UUID,
-            @PathVariable("idTown") idTown: Int,
+            @PathVariable("idTown") idTown: UUID,
             request: HttpServletRequest) : DTO.TownDTO {
         checkAndGetToken(request)
         return gamesControllerService.getTownStats(id, idTown)

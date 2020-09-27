@@ -74,7 +74,7 @@ class Game(val players: List<User>, val province: Province, var status: Status =
         if(userWon(user)) updateStats(user) else changeTurn()
     }
 
-    fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {
+    fun changeTownSpecialization(user: User, townId: UUID, specialization: Specialization) {
         checkForbiddenAction(user)
         val town = province.getTownById(townId).getOrThrow()
         if(town.owner != user) throw CustomException.Forbidden.NotYourTownException()

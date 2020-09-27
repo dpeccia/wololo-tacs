@@ -3,11 +3,13 @@ package com.grupox.wololo.model
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.DTO
 import com.grupox.wololo.model.helpers.Requestable
+import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, val townImage: String = "", val stats: TownStats = TownStats(0,0)) : Requestable {
+class Town(val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, val townImage: String = "", val stats: TownStats = TownStats(0,0)) : Requestable {
+    val id: UUID = UUID.randomUUID()
     var owner: User? = null
 
     var isLocked: Boolean = false

@@ -9,7 +9,7 @@ sealed class DTO {
     data class ExceptionDTO(val message: String?) : DTO()
 
     data class TownDTO(
-        val id: Int,
+        val id: UUID,
         val name: String,
         val coordinates: Coordinates,
         val elevation: Double,
