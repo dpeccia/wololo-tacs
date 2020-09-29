@@ -6,11 +6,11 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.*
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 
-class Game(val id: Int , val players: List<User>, val province: Province, var status: Status = Status.NEW) : Requestable {
-
-    //val id: Int = 0 // TODO: Autogenerada
+class Game(val players: List<User>, val province: Province, var status: Status = Status.NEW) : Requestable {
+    val id: Int = generateId()
 
     val townsAmount: Int
         get() = province.towns.size
@@ -21,6 +21,11 @@ class Game(val id: Int , val players: List<User>, val province: Province, var st
     lateinit var turn: User
 
     var date: Date = Date.from(Instant.now())
+
+    companion object {
+        private val idGenerator: AtomicInteger = AtomicInteger(1000)
+        fun generateId(): Int = idGenerator.incrementAndGet()
+    }
 
     init {
         assignTowns()
