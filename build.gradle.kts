@@ -44,6 +44,7 @@ dependencies {
     implementation("io.springfox:springfox-swagger-ui:2.7.0")
     implementation("io.jsonwebtoken:jjwt-api:0.11.1")
     implementation("com.github.ben-manes.caffeine:caffeine")
+    implementation ("io.github.microutils:kotlin-logging:1.6.26")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.1")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
@@ -51,6 +52,7 @@ dependencies {
     }
     testImplementation("org.mockito:mockito-inline:2.8.47")
     testImplementation("io.mockk:mockk:1.10.0")
+
 
 }
 
