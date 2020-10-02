@@ -2,6 +2,7 @@ package com.grupox.wololo.controllers
 
 import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.helpers.*
+import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired

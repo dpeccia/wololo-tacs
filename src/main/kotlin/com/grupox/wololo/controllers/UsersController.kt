@@ -4,6 +4,7 @@ import com.grupox.wololo.model.helpers.DTO
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.UserForm
+import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.UsersControllerService
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired

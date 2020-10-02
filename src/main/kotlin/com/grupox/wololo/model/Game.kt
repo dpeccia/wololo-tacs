@@ -4,6 +4,7 @@ import arrow.core.Either
 import arrow.core.rightIfNotNull
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.*
+import org.bson.types.ObjectId
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -70,7 +71,7 @@ class Game(val players: List<User>, val province: Province, var status: Status =
         players.filter { it != winner }.forEach { it.updateGamesLostStats() }
     }
 
-    fun getMember(userId: Int): Either<CustomException.NotFound, User> = players.find { it.id == userId }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
+    fun getMember(userId: ObjectId): Either<CustomException.NotFound, User> = players.find { it.id.equals(userId) }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
 
     fun isParticipating(user: User): Boolean = players.contains(user)
 

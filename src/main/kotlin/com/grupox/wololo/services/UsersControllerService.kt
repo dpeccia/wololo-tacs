@@ -12,18 +12,18 @@ import org.springframework.web.util.WebUtils
 import javax.servlet.http.HttpServletRequest
 
 @Service
-class UsersControllerService {
+class UsersControllerService(@Autowired val repoUsers: RepoUsers) {
 
     @Autowired
     private lateinit var sha512: SHA512Hash
 
     fun createUser(newUser: UserForm) : DTO.UserDTO {
-        if(RepoUsers.getUserByName(newUser.mail).isRight())
+        if(repoUsers.findByIsAdminFalseAndMail(newUser.mail).isPresent)
             throw CustomException.BadRequest.IllegalUserException("There is already an user under that email")
 
         val user = User(newUser.username, newUser.mail, sha512.getSHA512(newUser.password))
 
-        RepoUsers.insert(user)
+        repoUsers.save(user)
         return user.dto()
     }
 
@@ -53,14 +53,13 @@ class UsersControllerService {
         return ResponseEntity.ok().header("Set-Cookie", authCookie.toString()).build<Void>()
     }
 
-
-
     fun checkUserCredentials(user: LoginForm): DTO.UserDTO {
-        return RepoUsers.getUserByLogin(user, sha512.getSHA512(user.password)).getOrThrow().dto()
+        val userFound = repoUsers.findAll().find {it.isUserByLoginData(user, sha512.getSHA512(user.password))} ?: throw CustomException.Unauthorized.BadLoginException()
+        return userFound.dto()
     }
 
     fun getUsers(_username: String?): List<DTO.UserDTO> {
-        val username = _username ?: return RepoUsers.getNormalUsers().map { it.dto() }
-        return RepoUsers.getNormalUsers().filter { it.username.startsWith(username) }.map { it.dto() }
+        val username = _username ?: return repoUsers.findAllByIsAdminFalse().map { it.dto() }
+        return repoUsers.findAllByIsAdminFalse().filter { it.username.startsWith(username) }.map { it.dto() }
     }
 }

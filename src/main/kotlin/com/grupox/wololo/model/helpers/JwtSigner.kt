@@ -2,8 +2,13 @@ package com.grupox.wololo.model.helpers
 
 import arrow.core.*
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.User
 import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
+import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Service
 import java.security.KeyPair
 import java.time.Duration
@@ -14,7 +19,7 @@ import java.util.*
 object JwtSigner {
     private val keyPair: KeyPair = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
-    fun createJwt(userId: Int): String {
+    fun createJwt(userId: ObjectId): String {
         return Jwts.builder()
                 .signWith(keyPair.private, SignatureAlgorithm.RS256)
                 .setSubject(userId.toString())
