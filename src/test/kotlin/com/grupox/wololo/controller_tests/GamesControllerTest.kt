@@ -23,25 +23,26 @@ class GamesControllerTest {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
 
-    val user1: User = User(1, "", "a_mail", "a_password", false)
-    val user2: User = User(2, "", "a_mail2", "a_password2", false)
-    val user3: User = User(3, "", "a_mail3", "a_password3", false)
-    val userNotInRepo: User = User(4, "", "other_mail", "other_password", false)
+    val user1: User = User("a_username", "a_mail", "a_password")
+    val user2: User = User("a_username2", "a_mail2", "a_password2")
+    val user3: User = User("a_username3", "a_mail3", "a_password3")
+    val userNotInRepo: User = User("other_username", "other_mail", "other_password")
     val users: List<User> = listOf(user1, user2, user3)
 
-    val town1: Town = Town(id = 1, name = "town1", elevation = 10.0)
-    val town2: Town = Town(id = 2, name = "town2", elevation = 11.0)
-    val town3: Town = Town(id = 3, name = "town3", elevation = 12.0)
-    val town4: Town = Town(id = 4, name = "town4", elevation = 13.0)
-    val town5: Town = Town(id = 5, name = "town5", elevation = 14.0)
-    val town6: Town = Town(id = 6, name = "town6", elevation = 15.0)
+    val town1: Town = Town(name = "town1", elevation = 10.0)
+    val town2: Town = Town(name = "town2", elevation = 11.0)
+    val town3: Town = Town(name = "town3", elevation = 12.0)
+    val town4: Town = Town(name = "town4", elevation = 13.0)
+    val town5: Town = Town(name = "town5", elevation = 14.0)
+    val town6: Town = Town(name = "town6", elevation = 15.0)
+    val townNotInRepo = Town(name = "not in repo", elevation = 15.0)
     val towns: List<Town> = listOf(town1, town2, town3, town4, town5, town6)
 
-    val singlePlayerGame: Game = Game(1, listOf(user1), Province(0, "a_province", ArrayList(listOf(town1, town2))))
-    val game2: Game = Game(2, users, Province(0, "a_province", ArrayList(listOf(town1, town2, town3, town4))))
-    val game3: Game = Game(3, listOf(user1, user2), Province(0, "a_province", ArrayList(listOf(town1, town2, town3, town4))))
-    val game4: Game = Game(4, listOf(user2, user3), Province(0, "a_province", ArrayList(towns)))
-    val gameNotInRepo: Game = Game(5, listOf(user1), Province(1, "another_province", ArrayList(towns)))
+    val singlePlayerGame: Game = Game(listOf(user1), Province("a_province", ArrayList(listOf(town1, town2))))
+    val game2: Game = Game(users, Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
+    val game3: Game = Game(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
+    val game4: Game = Game(listOf(user2, user3), Province("a_province", ArrayList(towns)))
+    val gameNotInRepo: Game = Game(listOf(user1), Province("another_province", ArrayList(towns)))
     val games: List<Game> = listOf(game2, game3, singlePlayerGame, game4)
 
     @BeforeEach
@@ -77,18 +78,18 @@ class GamesControllerTest {
         @Test
         fun `trying to move gauchos in a game that doesnt exist throws GameNotFoundException`() {
             assertThrows<CustomException.NotFound.GameNotFoundException>
-            { gamesControllerService.moveGauchosBetweenTowns(user1.id, gameNotInRepo.id, MovementForm(1,2,2)) }
+            { gamesControllerService.moveGauchosBetweenTowns(user1.id, gameNotInRepo.id, MovementForm(town1.id,town2.id,2)) }
         }
 
         @Test
         fun `trying to move gauchos with a user that doesnt exist throws UserNotFoundException`() {
             assertThrows<CustomException.NotFound.UserNotFoundException>
-            { gamesControllerService.moveGauchosBetweenTowns(userNotInRepo.id, singlePlayerGame.id, MovementForm(1,2,2)) }
+            { gamesControllerService.moveGauchosBetweenTowns(userNotInRepo.id, singlePlayerGame.id, MovementForm(town1.id,town2.id,2)) }
         }
 
         @Test
         fun `trying to move gauchos with a user that exists and a game that exists doesnt throw an Exception`() {
-            assertDoesNotThrow { gamesControllerService.moveGauchosBetweenTowns(user1.id, singlePlayerGame.id, MovementForm(1,2,2)) }
+            assertDoesNotThrow { gamesControllerService.moveGauchosBetweenTowns(user1.id, singlePlayerGame.id, MovementForm(town1.id,town2.id,2)) }
         }
     }
 
@@ -97,19 +98,19 @@ class GamesControllerTest {
         @Test
         fun `trying to attack town in a game that doesnt exist throws GameNotFoundException`() {
             assertThrows<CustomException.NotFound.GameNotFoundException>
-            { gamesControllerService.attackTown(user1.id, gameNotInRepo.id, AttackForm(1,2)) }
+            { gamesControllerService.attackTown(user1.id, gameNotInRepo.id, AttackForm(town1.id, town2.id)) }
         }
 
         @Test
         fun `trying to attack town with a user that doesnt exist throws UserNotFoundException`() {
             assertThrows<CustomException.NotFound.UserNotFoundException>
-            { gamesControllerService.attackTown(userNotInRepo.id, singlePlayerGame.id, AttackForm(1,2)) }
+            { gamesControllerService.attackTown(userNotInRepo.id, singlePlayerGame.id, AttackForm(town1.id, town2.id)) }
         }
 
         @Test
         fun `trying to attack town with a user that exists and a game that exists doesnt throw UserNotFound or GameNotFound`() {
             assertThrows<CustomException.Forbidden.IllegalAttack>
-            { gamesControllerService.attackTown(user1.id, singlePlayerGame.id, AttackForm(1,2)) }
+            { gamesControllerService.attackTown(user1.id, singlePlayerGame.id, AttackForm(town1.id, town2.id)) }
         }
     }
 
@@ -118,19 +119,19 @@ class GamesControllerTest {
         @Test
         fun `surrender in a game with a user that doesnt belongs to the game throws MemberNotFoundException`() {
             assertThrows<CustomException.NotFound.MemberNotFoundException>
-            { assertThat(gamesControllerService.surrender(1, 11)) }
+            { assertThat(gamesControllerService.surrender(game4.id, user1.id)) }
         }
 
         @Test
         fun `surrender in a game that doesn't exists throws GameNotFoundException `() {
             assertThrows<CustomException.NotFound.GameNotFoundException>
-            { assertThat(gamesControllerService.surrender(9, 1)) }
+            { assertThat(gamesControllerService.surrender(gameNotInRepo.id, user1.id)) }
 
         }
 
         @Test
         fun `surrender in a game that exists sums one in games lost quantity `() {
-            gamesControllerService.surrender(1, 1)
+            gamesControllerService.surrender(game2.id, user1.id)
             assertThat(user1.stats.gamesLost > 0)
 
         }
@@ -141,17 +142,17 @@ class GamesControllerTest {
 
         @Test
         fun `Getting gauchos amount generated by production should be more than zero when gauchos are added after a game starts`(){
-            assert(gamesControllerService.getTownStats(3,1).gauchosGeneratedByProduction > 0)
+            assert(gamesControllerService.getTownStats(game3.id,town1.id).gauchosGeneratedByProduction > 0)
         }
 
         @Test
         fun `Getting town stats from a game that doesn't exists returns GameNotFound exception `(){
-            assertThrows<CustomException.NotFound.GameNotFoundException>{gamesControllerService.getTownStats(20,1)}
+            assertThrows<CustomException.NotFound.GameNotFoundException>{gamesControllerService.getTownStats(gameNotInRepo.id,town1.id)}
         }
 
         @Test
         fun `Getting town stats from a town that doesn't exists returns TownNotFound exception `(){
-            assertThrows<CustomException.NotFound.TownNotFoundException>{gamesControllerService.getTownStats(2,20)}
+            assertThrows<CustomException.NotFound.TownNotFoundException>{gamesControllerService.getTownStats(game2.id, townNotInRepo.id)}
         }
     }
 
@@ -239,7 +240,7 @@ class GamesControllerTest {
         @Test
         fun `An user can get one of its games by id`(){
             val user = user1
-            val userGame = gamesControllerService.getGame(user.id, 2)
+            val userGame = gamesControllerService.getGame(user.id, game2.id)
             assertThat(userGame).isEqualTo(game2.dto())
         }
 

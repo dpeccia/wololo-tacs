@@ -27,7 +27,11 @@ class UserControllerTest {
 
     @BeforeEach
     fun fixture() {
-        users = arrayListOf(User(1, "example_admin", "example_admin", sha512.getSHA512("example_admin"), true, Stats(0, 0)), User(2, "example_normal_user", "example_normal_user",sha512.getSHA512("example_admin"), false, Stats(1, 1)), User(3, "example_normal_user2", "example_normal_user2",sha512.getSHA512("example_admin"), false, Stats(1, 1)))
+        users = arrayListOf(
+            User("example_admin", "example_admin", sha512.getSHA512("example_admin"), isAdmin = true),
+            User("example_normal_user", "example_normal_user", sha512.getSHA512("example_admin"), stats = Stats(1, 1)),
+            User("example_normal_user2", "example_normal_user2", sha512.getSHA512("example_admin"), stats = Stats(1, 1))
+        )
         mockkObject(RepoUsers)
         every { RepoUsers.getAll() } returns users
     }

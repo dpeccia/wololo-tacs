@@ -1,13 +1,11 @@
 package com.grupox.wololo.integration_tests
 
-import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.SHA512Hash
 import com.grupox.wololo.model.repos.RepoUsers
 import io.mockk.every
 import io.mockk.mockkObject
-
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -18,7 +16,7 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
-import java.util.ArrayList
+import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GamesControllerIntegrationTest {
@@ -33,8 +31,10 @@ class GamesControllerIntegrationTest {
 
     @BeforeEach
     fun beforeEach() {
-        users = arrayListOf(User(1, "", "example_admin",sha512.getSHA512("example_admin"), true, Stats(0, 0)),
-                User(2, "", "example_not_admin",sha512.getSHA512("example_not_admin"), false, Stats(0, 0)))
+        users = arrayListOf(
+            User("example_admin", "example_admin",sha512.getSHA512("example_admin"), isAdmin = true),
+            User("example_not_admin", "example_not_admin",sha512.getSHA512("example_not_admin"))
+        )
         webClient = WebClient.builder().baseUrl("http://localhost:${port}").build()
         mockkObject(RepoUsers)
         every { RepoUsers.getAll() } returns users

@@ -114,9 +114,6 @@ class GamesControllerService {
         return GamePublicInfo(numberOfGames("NEW"), numberOfGames("ONGOING"), numberOfGames("FINISHED"), numberOfGames("CANCELED"))
     }
 
-
-
-
     fun createGame(userId: Int, form: GameForm): DTO.GameDTO {
         val game: Game = Either.fx<CustomException, Game> {
             val users = !userId.cons(form.participantsIds).distinct().map { RepoUsers.getById(it) }
@@ -126,11 +123,11 @@ class GamesControllerService {
             val towns = townsData.map { data ->
                 val elevation = !topoData.requestElevation(data.coordinates)
                 val imageUrl = !pixabay.requestTownImage(data.name)
-                Town(data.id, data.name, data.coordinates, elevation, imageUrl)
+                Town(data.name, data.coordinates, elevation, imageUrl)
             }
 
             val provinceImage: String = provinceImages.getUrl(form.provinceName)
-            Game(0,users,  Province(0, form.provinceName, ArrayList(towns), provinceImage))
+            Game(users,  Province(form.provinceName, ArrayList(towns), provinceImage))
         }.getOrThrow()
 
         RepoGames.insert(game)

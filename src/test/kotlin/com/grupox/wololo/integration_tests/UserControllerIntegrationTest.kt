@@ -1,26 +1,20 @@
 package com.grupox.wololo.integration_tests
 
 import arrow.core.Some
-import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
-
-import com.grupox.wololo.model.helpers.*
-
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.LoginForm
+import com.grupox.wololo.model.helpers.SHA512Hash
 import com.grupox.wololo.model.helpers.getOrThrow
-
 import com.grupox.wololo.model.repos.RepoUsers
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
-
 import org.springframework.http.HttpStatus
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
@@ -41,11 +35,13 @@ class UserControllerIntegrationTest {
     @Autowired
     val sha512: SHA512Hash = SHA512Hash()
 
+    lateinit var user: User
     lateinit var users: ArrayList<User>
 
     @BeforeEach
     fun fixture() {
-        users = arrayListOf(User(1, "", "example_admin",sha512.getSHA512("example_admin"), true, Stats(0, 0)))
+        user = User("example_admin", "example_admin", sha512.getSHA512("example_admin"), isAdmin = true)
+        users = arrayListOf(user)
         webClient = WebClient.builder().baseUrl("http://localhost:${serverPort}").build()
         mockkObject(RepoUsers)
         every { RepoUsers.getAll() } returns users
@@ -86,7 +82,8 @@ class UserControllerIntegrationTest {
                 .bodyValue(LoginForm("example_admin", "example_admin")).exchange().block()
         val jwtToken = response?.cookies()?.get("X-Auth")?.get(0)?.value ?: throw RuntimeException("No JWT Token in response")
         val validation = jwtSigner.validateJwt(Some(jwtToken))
-        assertThat(validation.getOrThrow().body.subject).isEqualTo("1")
+        val id = validation.getOrThrow().body.subject.toInt()
+        assertThat(id).isEqualTo(user.id)
     }
 
     @Test
@@ -95,7 +92,8 @@ class UserControllerIntegrationTest {
                 .bodyValue(LoginForm("example_admin", "example_admin")).exchange().block()
         val jwtToken = response?.cookies()?.get("X-Auth")?.get(0)?.value ?: throw RuntimeException("No JWT Token in response")
         val validation = jwtSigner.validateJwt(Some(jwtToken))
-        assertThat(validation.getOrThrow().body.subject).isEqualTo("1")
+        val id = validation.getOrThrow().body.subject.toInt()
+        assertThat(id).isEqualTo(user.id)
 
         val responseCookies = response.cookies()
                 .map { it.key to it.value.map { cookie -> cookie.value } }

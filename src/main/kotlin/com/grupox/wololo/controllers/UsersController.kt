@@ -27,6 +27,7 @@ class UsersController : BaseController() {
 
         return usersControllerService.login(userDTO)
 
+
     }
 
     @PostMapping("/tokens")
@@ -40,7 +41,7 @@ class UsersController : BaseController() {
     @DeleteMapping("/tokens")
     @ApiOperation(value = "Log Out")
     fun logout(request: HttpServletRequest): ResponseEntity<Void> {
-        checkAndGetToken(request)
+        checkAndGetUserId(request)
         return usersControllerService.logout(request)
 
     }
@@ -49,7 +50,7 @@ class UsersController : BaseController() {
     @ApiOperation(value = "Gets the users without stats")
     fun getUsers(@RequestParam("username", required = false) _username: String?,
                  request: HttpServletRequest): List<DTO.UserDTO> {
-        checkAndGetToken(request)
+        checkAndGetUserId(request)
         return usersControllerService.getUsers(_username)
     }
 }

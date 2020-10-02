@@ -1,7 +1,6 @@
 package com.grupox.wololo.services
 
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoUsers
@@ -22,7 +21,7 @@ class UsersControllerService {
         if(RepoUsers.getUserByName(newUser.mail).isRight())
             throw CustomException.BadRequest.IllegalUserException("There is already an user under that email")
 
-        val user = User(3, newUser.username, newUser.mail, sha512.getSHA512(newUser.password), false, Stats(0,0)) // TODO el id se tiene que autoincrementar
+        val user = User(newUser.username, newUser.mail, sha512.getSHA512(newUser.password))
 
         RepoUsers.insert(user)
         return user.dto()

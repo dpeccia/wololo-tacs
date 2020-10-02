@@ -3,16 +3,23 @@ package com.grupox.wololo.model
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.DTO
 import com.grupox.wololo.model.helpers.Requestable
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-class Town(val id: Int, val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, val townImage: String = "", val stats: TownStats = TownStats(0,0)) : Requestable {
+class Town(val name: String, val coordinates: Coordinates = Coordinates(0f,0f), val elevation: Double, val townImage: String = "", val stats: TownStats = TownStats(0,0)) : Requestable {
+    val id: Int = generateId()
     var owner: User? = null
 
     var isLocked: Boolean = false
     var specialization : Specialization = Production()
     var gauchos = 0
+
+    companion object {
+        private val idGenerator: AtomicInteger = AtomicInteger(1000)
+        fun generateId(): Int = idGenerator.incrementAndGet()
+    }
 
     fun isFrom(user: User) = owner == user
 

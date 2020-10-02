@@ -6,8 +6,6 @@ import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.getOrThrow
 import com.grupox.wololo.model.repos.RepoUsers
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.Jws
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -36,10 +34,10 @@ abstract class BaseController {
     @ResponseStatus(HttpStatus.FAILED_DEPENDENCY) // Revisar si es correcto esta http status
     fun handleServiceException(exception: CustomException) = exception.dto()
 
-    fun checkAndGetToken(request: HttpServletRequest): Jws<Claims> {
+    fun checkAndGetUserId(request: HttpServletRequest): Int {
         val cookie: Cookie? = WebUtils.getCookie(request, "X-Auth")
         val jwt = cookie?.value
-        return JwtSigner.validateJwt(jwt.toOption()).getOrThrow()
+        return JwtSigner.validateJwt(jwt.toOption()).getOrThrow().body.subject.toInt()
     }
 
     fun throwIfNotAllowed(id: Int) {

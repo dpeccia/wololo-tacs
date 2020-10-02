@@ -1,7 +1,6 @@
 package com.grupox.wololo.model.helpers
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.grupox.wololo.model.Game
 
 data class UserForm @JsonCreator constructor(val mail: String, val username: String, val password: String)
 data class LoginForm @JsonCreator constructor(val mail: String, val password: String)
