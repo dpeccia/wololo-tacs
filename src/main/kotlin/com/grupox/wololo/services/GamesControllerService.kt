@@ -121,7 +121,8 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers) {
     fun createGame(userId: ObjectId, form: GameForm): DTO.GameDTO {
         val game: Game = Either.fx<CustomException, Game> {
             // no se si rompi esto
-            val users = userId.cons(form.participantsIds).distinct().map { repoUsers.findByIsAdminFalseAndId(it as ObjectId).get() }
+            val users = userId.toString().cons(form.participantsIds).distinct()
+                    .map { repoUsers.findByIsAdminFalseAndId(ObjectId(it)).orElseThrow { CustomException.NotFound.UserNotFoundException() } }
 
             val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
             val towns = townsData.map { data ->

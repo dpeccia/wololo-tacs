@@ -29,7 +29,7 @@ class User(val username: String, mail: String, private var password: String, val
 
     override fun dto(): DTO.UserDTO =
         DTO.UserDTO(
-            id = id,
+            id = id.toString(),
             username = username,
             stats = stats
         )

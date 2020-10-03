@@ -39,7 +39,7 @@ sealed class DTO {
     ) : DTO()
 
     data class UserDTO(
-            val id: ObjectId,
+            val id: String,
             val username: String,
             val stats: Stats
     ) : DTO()
