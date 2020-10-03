@@ -10,8 +10,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.util.LinkedMultiValueMap
@@ -26,6 +28,9 @@ class GamesControllerIntegrationTest {
 
     lateinit var users: ArrayList<User>
 
+    @SpyBean
+    lateinit var repoUsers: RepoUsers
+
     @Autowired
     val sha512: SHA512Hash = SHA512Hash()
 
@@ -36,8 +41,7 @@ class GamesControllerIntegrationTest {
             User("example_not_admin", "example_not_admin",sha512.getSHA512("example_not_admin"))
         )
         webClient = WebClient.builder().baseUrl("http://localhost:${port}").build()
-        mockkObject(RepoUsers)
-        every { RepoUsers.getAll() } returns users
+        Mockito.doReturn(users).`when`(repoUsers).findAll()
     }
 
     @Nested

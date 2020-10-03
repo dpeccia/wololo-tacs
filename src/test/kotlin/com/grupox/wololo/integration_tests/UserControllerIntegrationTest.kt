@@ -12,8 +12,10 @@ import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.util.LinkedMultiValueMap
@@ -38,13 +40,15 @@ class UserControllerIntegrationTest {
     lateinit var user: User
     lateinit var users: ArrayList<User>
 
+    @SpyBean
+    lateinit var repoUsers: RepoUsers
+
     @BeforeEach
     fun fixture() {
         user = User("example_admin", "example_admin", sha512.getSHA512("example_admin"), isAdmin = true)
         users = arrayListOf(user)
         webClient = WebClient.builder().baseUrl("http://localhost:${serverPort}").build()
-        mockkObject(RepoUsers)
-        every { RepoUsers.getAll() } returns users
+        Mockito.doReturn(users).`when`(repoUsers).findAll()
     }
 /*
     @BeforeAll

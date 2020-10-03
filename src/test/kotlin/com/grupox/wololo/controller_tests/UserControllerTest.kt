@@ -11,8 +11,10 @@ import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.SpyBean
 import java.util.*
 
 @SpringBootTest
@@ -25,6 +27,9 @@ class UserControllerTest {
 
     lateinit var users: ArrayList<User>
 
+    @SpyBean
+    lateinit var repoUsers: RepoUsers
+
     @BeforeEach
     fun fixture() {
         users = arrayListOf(
@@ -32,8 +37,7 @@ class UserControllerTest {
             User("example_normal_user", "example_normal_user", sha512.getSHA512("example_admin"), stats = Stats(1, 1)),
             User("example_normal_user2", "example_normal_user2", sha512.getSHA512("example_admin"), stats = Stats(1, 1))
         )
-        mockkObject(RepoUsers)
-        every { RepoUsers.getAll() } returns users
+        doReturn(users).`when`(repoUsers).findAll()
     }
 
     @Nested

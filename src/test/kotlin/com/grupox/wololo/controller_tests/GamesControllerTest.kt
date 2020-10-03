@@ -12,8 +12,11 @@ import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import org.mockito.Mockito
+import org.mockito.Mockito.spy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.SpyBean
 import java.time.Duration
 import java.time.Instant
 import java.util.*
@@ -22,6 +25,9 @@ import java.util.*
 class GamesControllerTest {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
+
+    @SpyBean
+    lateinit var repoUsers: RepoUsers
 
     val user1: User = User("a_username", "a_mail", "a_password")
     val user2: User = User("a_username2", "a_mail2", "a_password2")
@@ -48,9 +54,8 @@ class GamesControllerTest {
     @BeforeEach
     fun fixture() {
         mockkObject(RepoGames)
-        mockkObject(RepoUsers)
         every { RepoGames.getAll() } returns games
-        every { RepoUsers.getAll() } returns users
+        Mockito.doReturn(users).`when`(repoUsers).findAll()
     }
 
     @Nested
