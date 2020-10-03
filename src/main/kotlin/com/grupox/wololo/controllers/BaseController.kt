@@ -41,9 +41,4 @@ abstract class BaseController {
         val jwt = cookie?.value
         return ObjectId(JwtSigner.validateJwt(jwt.toOption()).getOrThrow().body.subject)
     }
-
-    fun throwIfNotAllowed(id: ObjectId) {
-        //val admin: User = repoUsers.getAdminById(id).getOrThrow()
-    }
-
 }

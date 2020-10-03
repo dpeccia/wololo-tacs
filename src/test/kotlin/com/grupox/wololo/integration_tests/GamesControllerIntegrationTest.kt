@@ -1,5 +1,6 @@
 package com.grupox.wololo.integration_tests
 
+import com.grupox.wololo.controller_tests.MockitoHelper
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.SHA512Hash
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.doReturn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
@@ -41,7 +43,9 @@ class GamesControllerIntegrationTest {
             User("example_not_admin", "example_not_admin",sha512.getSHA512("example_not_admin"))
         )
         webClient = WebClient.builder().baseUrl("http://localhost:${port}").build()
-        Mockito.doReturn(users).`when`(repoUsers).findAll()
+        doReturn(users).`when`(repoUsers).findAll()
+        doReturn(Optional.of(users[0])).`when`(repoUsers).findByIsAdminTrueAndId(users[0].id)
+        doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminTrueAndId(users[1].id)
     }
 
     @Nested

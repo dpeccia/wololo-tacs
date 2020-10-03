@@ -1,5 +1,6 @@
 package com.grupox.wololo.controller_tests
 
+import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.AttackForm
@@ -11,15 +12,26 @@ import com.grupox.wololo.services.GamesControllerService
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.*
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
-import org.mockito.Mockito.spy
+import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
 import java.time.Duration
 import java.time.Instant
 import java.util.*
+
+object MockitoHelper {
+    fun <T> anyObject(): T {
+        Mockito.any<T>()
+        return uninitialized()
+    }
+    @Suppress("UNCHECKED_CAST")
+    fun <T> uninitialized(): T =  null as T
+}
 
 @SpringBootTest
 class GamesControllerTest {
@@ -55,7 +67,9 @@ class GamesControllerTest {
     fun fixture() {
         mockkObject(RepoGames)
         every { RepoGames.getAll() } returns games
-        Mockito.doReturn(users).`when`(repoUsers).findAll()
+        doReturn(users).`when`(repoUsers).findAll()
+        doReturn(Optional.of(user1)).`when`(repoUsers).findByIsAdminFalseAndId(user1.id)
+        doReturn(Optional.of(user2)).`when`(repoUsers).findByIsAdminFalseAndId(user2.id)
     }
 
     @Nested

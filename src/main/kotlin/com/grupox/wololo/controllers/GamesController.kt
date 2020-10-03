@@ -1,10 +1,12 @@
 package com.grupox.wololo.controllers
 
+import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
@@ -13,7 +15,7 @@ import javax.servlet.http.HttpServletRequest
 
 @RequestMapping("/games")
 @RestController
-class GamesController : BaseController() {
+class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
 
@@ -124,5 +126,9 @@ class GamesController : BaseController() {
     fun getProvinces(request: HttpServletRequest) : List<String> {
         checkAndGetUserId(request)
         return gamesControllerService.getProvinces()
+    }
+
+    fun throwIfNotAllowed(id: ObjectId) {
+        repoUsers.findByIsAdminTrueAndId(id).orElseThrow { CustomException.Forbidden.OperationNotAuthorized()}
     }
 }

@@ -38,6 +38,7 @@ class UserControllerTest {
             User("example_normal_user2", "example_normal_user2", sha512.getSHA512("example_admin"), stats = Stats(1, 1))
         )
         doReturn(users).`when`(repoUsers).findAll()
+        doReturn(users.filter { !it.isAdmin } ).`when`(repoUsers).findAllByIsAdminFalse()
     }
 
     @Nested

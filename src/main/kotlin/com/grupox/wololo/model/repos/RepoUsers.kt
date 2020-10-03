@@ -12,4 +12,5 @@ interface RepoUsers : MongoRepository<User, String> {
     fun findAllByIsAdminFalse(): List<User>
     fun findByIsAdminFalseAndMail(mail: String): Optional<User>
     fun findByIsAdminFalseAndId(id: ObjectId): Optional<User>
+    fun findByIsAdminTrueAndId(id: ObjectId): Optional<User>
 }

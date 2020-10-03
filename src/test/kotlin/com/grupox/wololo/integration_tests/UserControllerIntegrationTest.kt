@@ -13,6 +13,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.doReturn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
@@ -48,7 +49,8 @@ class UserControllerIntegrationTest {
         user = User("example_admin", "example_admin", sha512.getSHA512("example_admin"), isAdmin = true)
         users = arrayListOf(user)
         webClient = WebClient.builder().baseUrl("http://localhost:${serverPort}").build()
-        Mockito.doReturn(users).`when`(repoUsers).findAll()
+        doReturn(users).`when`(repoUsers).findAll()
+        doReturn(users.filter { !it.isAdmin }).`when`(repoUsers).findAllByIsAdminFalse()
     }
 /*
     @BeforeAll
@@ -86,8 +88,8 @@ class UserControllerIntegrationTest {
                 .bodyValue(LoginForm("example_admin", "example_admin")).exchange().block()
         val jwtToken = response?.cookies()?.get("X-Auth")?.get(0)?.value ?: throw RuntimeException("No JWT Token in response")
         val validation = jwtSigner.validateJwt(Some(jwtToken))
-        val id = validation.getOrThrow().body.subject.toInt()
-        assertThat(id).isEqualTo(user.id)
+        val id = validation.getOrThrow().body.subject
+        assertThat(id).isEqualTo(user.id.toString())
     }
 
     @Test
@@ -96,8 +98,8 @@ class UserControllerIntegrationTest {
                 .bodyValue(LoginForm("example_admin", "example_admin")).exchange().block()
         val jwtToken = response?.cookies()?.get("X-Auth")?.get(0)?.value ?: throw RuntimeException("No JWT Token in response")
         val validation = jwtSigner.validateJwt(Some(jwtToken))
-        val id = validation.getOrThrow().body.subject.toInt()
-        assertThat(id).isEqualTo(user.id)
+        val id = validation.getOrThrow().body.subject
+        assertThat(id).isEqualTo(user.id.toString())
 
         val responseCookies = response.cookies()
                 .map { it.key to it.value.map { cookie -> cookie.value } }
