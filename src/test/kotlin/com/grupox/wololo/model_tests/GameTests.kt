@@ -6,6 +6,7 @@ import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.function.Executable
 class GameTests {
     val user1: User = User("a_user", "a_mail", "a_password")
     val user2: User = User("other_user", "other_mail", "other_password")
+    val user99: User = User("user", "mail", "pass")
 
     val town1: Town = Town(name = "town1", coordinates = Coordinates((-65.3).toFloat(), (-22.4).toFloat()), elevation = 11.0)
     val town2: Town = Town(name = "town2", coordinates = Coordinates((-66.2).toFloat(), (2.0).toFloat()), elevation = 12.0)
@@ -47,6 +49,11 @@ class GameTests {
         }
 
         @Test
+        fun `Attempting to create a game with one player throws IlegalGameException`() {
+            assertThrows<CustomException.BadRequest.IllegalGameException> { Game(players = listOf(user1), province = Province("a_province", ArrayList(towns))) }
+        }
+
+        @Test
         fun `Can successfully create a game with none empty list of players`() {
             assertDoesNotThrow { Game(players = players, province = Province("a_province", ArrayList(towns))) }
         }
@@ -76,7 +83,7 @@ class GameTests {
             val elCondor = Town("El Cóndor", elevation = 3609.618408203125)
             val abraPampa = Town("Abra Pampa", elevation = 3519.69287109375)
             val jujuy = Province("Jujuy", arrayListOf(yavi, elCondor, abraPampa))
-            val game = Game(players = players, province = jujuy)
+            Game(players = players, province = jujuy)
             assertAll(
                     Executable { assertThat(yavi.gauchos).isEqualTo(15) },
                     Executable { assertThat(elCondor.gauchos).isEqualTo(8) },
@@ -133,7 +140,14 @@ class GameTests {
     @Nested
     inner class MoveGauchos {
         private val towns: List<Town> = listOf(town1, town2)
-        private val game = Game(players = listOf(user1), province = Province("a_province", ArrayList(towns)))
+        private val game = Game(players = listOf(user1, user99), province = Province("a_province", ArrayList(towns)))
+
+        @BeforeEach
+        fun fixtureMoveGauchos() {
+            game.turn = user1
+            town1.owner = user1
+            town2.owner = user1
+        }
 
         @Test
         fun `trying to move gauchos from a finished game throws FinishedGameException`() {
@@ -171,7 +185,14 @@ class GameTests {
     @Nested
     inner class AttackTown {
         private val towns: List<Town> = listOf(town1, town2)
-        private val game = Game(players = listOf(user1), province = Province("a_province", ArrayList(towns)))
+        private val game = Game(players = listOf(user1, user99), province = Province("a_province", ArrayList(towns)))
+
+        @BeforeEach
+        fun fixtureAttackTown() {
+            game.turn = user1
+            town1.owner = user1
+            town2.owner = user1
+        }
 
         @Test
         fun `trying to attack town from a finished game throws FinishedGameException`() {
@@ -211,7 +232,14 @@ class GameTests {
     @Nested
     inner class Turn {
         private val towns: List<Town> = listOf(town1, town2)
-        private val game = Game(players = listOf(user1), province = Province("a_province", ArrayList(towns)))
+        private val game = Game(players = listOf(user1, user99), province = Province("a_province", ArrayList(towns)))
+
+        @BeforeEach
+        fun fixtureTurn() {
+            game.turn = user1
+            town1.owner = user1
+            town2.owner = user1
+        }
 
         @Test
         fun `trying to finished turn from a finished game throws FinishedGameException`() {

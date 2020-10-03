@@ -35,6 +35,7 @@ class Game(val players: List<User>, val province: Province, var status: Status =
     // TODO falta chequear que nunca se cree un juego con un (MaxAltitude - MinAltitude) = 0 || (MaxDist - MinDist) = 0
     private fun assignTowns() {  // Este metodo puede modificarse para hacer algun algoritmo mas copado.
         if (townsAmount < playerAmount) throw CustomException.BadRequest.IllegalGameException("There is not enough towns for the given players")
+        if (players.size < 2) throw CustomException.BadRequest.IllegalGameException("There is not enough players")
 
         val townGroups = province.towns.shuffled().chunked(townsAmount / playerAmount)
         townGroups.zip(players).forEach { (townGroup, player) -> townGroup.forEach { it.owner = player } }

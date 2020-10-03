@@ -133,7 +133,6 @@ class GamesControllerService {
             val provinceImage: String = provinceImages.getUrl(form.provinceName)
             Game(users,  Province(form.provinceName, ArrayList(towns), provinceImage))
         }.getOrThrow()
-         if (game.players.size < 2) throw CustomException.BadRequest.IllegalGameException("There is not enough players")
 
         RepoGames.insert(game)
         return game.dto()
