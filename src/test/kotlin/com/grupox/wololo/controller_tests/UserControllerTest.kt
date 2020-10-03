@@ -43,6 +43,8 @@ class UserControllerTest {
         doReturn(Optional.of(users[0])).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
         doReturn(Optional.of(users[1])).`when`(repoUsers).findByMailAndPassword("example_normal_user", sha512.getSHA512("example_admin"))
         doReturn(Optional.of(users[2])).`when`(repoUsers).findByMailAndPassword("example_normal_user2", sha512.getSHA512("example_admin"))
+        doReturn(listOf(users[2])).`when`(repoUsers).findAllByIsAdminFalseAndUsernameLike("example_normal_user2")
+        doReturn(listOf(users[1])).`when`(repoUsers).findAllByIsAdminFalseAndUsernameLike("example_normal_user")
     }
 
     @Nested

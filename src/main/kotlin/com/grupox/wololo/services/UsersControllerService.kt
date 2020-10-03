@@ -52,6 +52,6 @@ class UsersControllerService(@Autowired val repoUsers: RepoUsers) {
 
     fun getUsers(_username: String?): List<DTO.UserDTO> {
         val username = _username ?: return repoUsers.findAllByIsAdminFalse().map { it.dto() }
-        return repoUsers.findAllByIsAdminFalse().filter { it.username.startsWith(username) }.map { it.dto() }
+        return repoUsers.findAllByIsAdminFalseAndUsernameLike(username).map { it.dto() }
     }
 }

@@ -1,6 +1,6 @@
 package com.grupox.wololo.integration_tests
 
-import com.grupox.wololo.controller_tests.MockitoHelper
+import com.grupox.wololo.MockitoHelper
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.SHA512Hash

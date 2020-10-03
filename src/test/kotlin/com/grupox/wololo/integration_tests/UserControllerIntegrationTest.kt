@@ -53,14 +53,7 @@ class UserControllerIntegrationTest {
         doReturn(users.filter { !it.isAdmin }).`when`(repoUsers).findAllByIsAdminFalse()
         doReturn(Optional.of(user)).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
     }
-/*
-    @BeforeAll
-    fun initUsers() {
-        user1 = User(1, "", "example_admin",usersControllerService.hashPassword("example_admin"), true, Stats(0, 0))
-        users = arrayListOf(user1)
-        //     users= arrayListOf(User(1, "", "example_admin", usersControllerService.hashPassword("example_admin"), true, Stats(0, 0)))
-    }
-*/
+
     @Test
     fun `login with wrong username returns UNAUTHORIZED`() {
         val response = webClient.post().uri("/users/tokens")
