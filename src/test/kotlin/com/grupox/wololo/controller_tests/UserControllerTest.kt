@@ -11,6 +11,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -39,6 +40,9 @@ class UserControllerTest {
         )
         doReturn(users).`when`(repoUsers).findAll()
         doReturn(users.filter { !it.isAdmin } ).`when`(repoUsers).findAllByIsAdminFalse()
+        doReturn(Optional.of(users[0])).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
+        doReturn(Optional.of(users[1])).`when`(repoUsers).findByMailAndPassword("example_normal_user", sha512.getSHA512("example_admin"))
+        doReturn(Optional.of(users[2])).`when`(repoUsers).findByMailAndPassword("example_normal_user2", sha512.getSHA512("example_admin"))
     }
 
     @Nested

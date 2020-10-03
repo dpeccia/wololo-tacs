@@ -20,26 +20,20 @@ class UsersControllerService(@Autowired val repoUsers: RepoUsers) {
     fun createUser(newUser: UserForm) : DTO.UserDTO {
         if(repoUsers.findByIsAdminFalseAndMail(newUser.mail).isPresent)
             throw CustomException.BadRequest.IllegalUserException("There is already an user under that email")
-
         val user = User(newUser.username, newUser.mail, sha512.getSHA512(newUser.password))
-
         repoUsers.save(user)
         return user.dto()
     }
 
     fun login(userDto: DTO.UserDTO) : ResponseEntity<DTO.UserDTO>{
-
         val jwt = JwtSigner.createJwt(userDto.id)
-
         val authCookie = ResponseCookie.fromClientResponse("X-Auth", jwt)
                 .maxAge(3600)
                 .httpOnly(true)
                 .path("/")
                 .secure(false) // Setear a true si tenemos https
                 .build()
-
         return ResponseEntity.ok().header("Set-Cookie", authCookie.toString()).body(userDto)
-
     }
 
     fun logout(request: HttpServletRequest): ResponseEntity<Void> {
@@ -49,14 +43,12 @@ class UsersControllerService(@Autowired val repoUsers: RepoUsers) {
                 .path("/")
                 .secure(false)
                 .build()
-
         return ResponseEntity.ok().header("Set-Cookie", authCookie.toString()).build<Void>()
     }
 
-    fun checkUserCredentials(user: LoginForm): DTO.UserDTO {
-        val userFound = repoUsers.findAll().find {it.isUserByLoginData(user, sha512.getSHA512(user.password))} ?: throw CustomException.Unauthorized.BadLoginException()
-        return userFound.dto()
-    }
+    fun checkUserCredentials(user: LoginForm): DTO.UserDTO =
+        repoUsers.findByMailAndPassword(user.mail, sha512.getSHA512(user.password))
+                .orElseThrow { CustomException.Unauthorized.BadLoginException() }.dto()
 
     fun getUsers(_username: String?): List<DTO.UserDTO> {
         val username = _username ?: return repoUsers.findAllByIsAdminFalse().map { it.dto() }

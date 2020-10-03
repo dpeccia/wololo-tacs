@@ -51,6 +51,7 @@ class UserControllerIntegrationTest {
         webClient = WebClient.builder().baseUrl("http://localhost:${serverPort}").build()
         doReturn(users).`when`(repoUsers).findAll()
         doReturn(users.filter { !it.isAdmin }).`when`(repoUsers).findAllByIsAdminFalse()
+        doReturn(Optional.of(user)).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
     }
 /*
     @BeforeAll
