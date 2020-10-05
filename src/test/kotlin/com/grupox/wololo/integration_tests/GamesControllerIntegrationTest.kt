@@ -1,9 +1,11 @@
 package com.grupox.wololo.integration_tests
 
 import com.grupox.wololo.MockitoHelper
+import com.grupox.wololo.model.Game
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.SHA512Hash
+import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import io.mockk.every
 import io.mockk.mockkObject
@@ -30,8 +32,13 @@ class GamesControllerIntegrationTest {
 
     lateinit var users: ArrayList<User>
 
+    lateinit var games: ArrayList<Game>
+
     @SpyBean
     lateinit var repoUsers: RepoUsers
+
+    @SpyBean
+    lateinit var repoGames: RepoGames
 
     @Autowired
     val sha512: SHA512Hash = SHA512Hash()
@@ -42,8 +49,10 @@ class GamesControllerIntegrationTest {
             User("example_admin", "example_admin",sha512.getSHA512("example_admin"), isAdmin = true),
             User("example_not_admin", "example_not_admin",sha512.getSHA512("example_not_admin"))
         )
+        games = arrayListOf()
         webClient = WebClient.builder().baseUrl("http://localhost:${port}").build()
         doReturn(users).`when`(repoUsers).findAll()
+        doReturn(games).`when`(repoGames).findAll()
         doReturn(Optional.of(users[0])).`when`(repoUsers).findByIsAdminTrueAndId(users[0].id)
         doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminTrueAndId(users[1].id)
         doReturn(Optional.of(users[0])).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))

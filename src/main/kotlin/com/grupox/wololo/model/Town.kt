@@ -19,8 +19,7 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates, val elev
 
     companion object {
         private val idGenerator: AtomicInteger = AtomicInteger(0)
-        fun new(_name: String, _coordinates: Coordinates = Coordinates(0f,0f),
-                _elevation: Double, _townImage: String = "",
+        fun new(_name: String, _elevation: Double, _coordinates: Coordinates = Coordinates(0f,0f), _townImage: String = "",
                 _stats: TownStats = TownStats(0,0)): Town =
                 Town(idGenerator.incrementAndGet(), _name, _coordinates, _elevation, _townImage, _stats)
     }

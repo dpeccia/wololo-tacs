@@ -14,7 +14,7 @@ class TownTests {
 
     @BeforeEach
     fun fixture() {
-        town = Town(name = "town", elevation = 10.0)
+        town = Town.new("town", 10.0)
         town.gauchos = 10
     }
 

@@ -32,35 +32,44 @@ class GamesControllerTest {
     @SpyBean
     lateinit var repoUsers: RepoUsers
 
+    @SpyBean
+    lateinit var repoGames: RepoGames
+
     val user1: User = User("a_username", "a_mail", "a_password")
     val user2: User = User("a_username2", "a_mail2", "a_password2")
     val user3: User = User("a_username3", "a_mail3", "a_password3")
     val userNotInRepo: User = User("other_username", "other_mail", "other_password")
     val users: List<User> = listOf(user1, user2, user3)
 
-    val town1: Town = Town(name = "town1", elevation = 10.0)
-    val town2: Town = Town(name = "town2", elevation = 11.0)
-    val town3: Town = Town(name = "town3", elevation = 12.0)
-    val town4: Town = Town(name = "town4", elevation = 13.0)
-    val town5: Town = Town(name = "town5", elevation = 14.0)
-    val town6: Town = Town(name = "town6", elevation = 15.0)
-    val townNotInRepo = Town(name = "not in repo", elevation = 15.0)
+    val town1: Town = Town.new("town1", 10.0)
+    val town2: Town = Town.new("town2", 11.0)
+    val town3: Town = Town.new("town3", 12.0)
+    val town4: Town = Town.new("town4", 13.0)
+    val town5: Town = Town.new("town5", 14.0)
+    val town6: Town = Town.new("town6", 15.0)
+    val townNotInRepo = Town.new("not in repo", 16.0)
     val towns: List<Town> = listOf(town1, town2, town3, town4, town5, town6)
 
-    val game1: Game = Game(listOf(user1, user3), Province("a_province", ArrayList(listOf(town1, town2))))
-    val game2: Game = Game(users, Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
-    val game3: Game = Game(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
-    val game4: Game = Game(listOf(user2, user3), Province("a_province", ArrayList(towns)))
-    val gameNotInRepo: Game = Game(listOf(user1, user3), Province("another_province", ArrayList(towns)))
+    val game1: Game = Game.new(listOf(user1, user3), Province("a_province", ArrayList(listOf(town1, town2))))
+    val game2: Game = Game.new(users, Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
+    val game3: Game = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
+    val game4: Game = Game.new(listOf(user2, user3), Province("a_province", ArrayList(towns)))
+    val gameNotInRepo: Game = Game.new(listOf(user1, user3), Province("another_province", ArrayList(towns)))
     val games: List<Game> = listOf(game2, game3, game1, game4)
 
     @BeforeEach
     fun fixture() {
-        mockkObject(RepoGames)
-        every { RepoGames.getAll() } returns games
+        doReturn(games).`when`(repoGames).findAll()
         doReturn(users).`when`(repoUsers).findAll()
         doReturn(Optional.of(user1)).`when`(repoUsers).findByIsAdminFalseAndId(user1.id)
         doReturn(Optional.of(user2)).`when`(repoUsers).findByIsAdminFalseAndId(user2.id)
+        doReturn(Optional.of(game1)).`when`(repoGames).findById(game1.id)
+        doReturn(Optional.of(game2)).`when`(repoGames).findById(game2.id)
+        doReturn(Optional.of(game3)).`when`(repoGames).findById(game3.id)
+        doReturn(Optional.of(game4)).`when`(repoGames).findById(game4.id)
+        doReturn(games.filter { it.isParticipating(user1) }).`when`(repoGames).findAllByPlayersContains(user1)
+        doAnswer { throw CustomException.NotFound.GameNotFoundException() }.`when`(repoGames).findById(gameNotInRepo.id)
+        doAnswer { throw CustomException.NotFound.UserNotFoundException() }.`when`(repoUsers).findByIsAdminFalseAndId(userNotInRepo.id)
     }
 
     @Nested

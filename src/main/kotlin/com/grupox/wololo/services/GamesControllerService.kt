@@ -125,7 +125,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
             val townsData: List<TownGeoRef> = !geoRef.requestTownsData(form.provinceName, form.townAmount)
 
             val towns = townsData.map { data ->
-                Town.new(data.name, data.coordinates, !topoData.requestElevation(data.coordinates), !pixabay.requestTownImage(data.name))
+                Town.new(data.name, !topoData.requestElevation(data.coordinates), data.coordinates, !pixabay.requestTownImage(data.name))
             }
             val province = Province(form.provinceName, ArrayList(towns), provinceImages.getUrl(form.provinceName))
             Game.new(users, province)
