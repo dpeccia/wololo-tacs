@@ -30,6 +30,7 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
     companion object {
         fun new(_players: List<User>, _province: Province, _status: Status = Status.NEW): Game {
             val newGame = Game(_players, _province, _status)
+            newGame.checkIfIllegal()
             newGame.assignTowns()
             newGame.startGame()
             return newGame
@@ -37,10 +38,12 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
     }
 
     // TODO falta chequear que nunca se cree un juego con un (MaxAltitude - MinAltitude) = 0 || (MaxDist - MinDist) = 0
-    private fun assignTowns() {  // Este metodo puede modificarse para hacer algun algoritmo mas copado.
+    private fun checkIfIllegal(){
+        if (playerAmount < 2 || playerAmount > 4) throw CustomException.BadRequest.IllegalGameException("There is not enough players. Actual: $playerAmount, but expected an amount between 2 (inclusive) and 4 (inclusive)")
         if (townsAmount < playerAmount) throw CustomException.BadRequest.IllegalGameException("There is not enough towns for the given players")
-        if (players.size < 2) throw CustomException.BadRequest.IllegalGameException("There is not enough players")
-
+    }
+    
+    private fun assignTowns() {  // Este metodo puede modificarse para hacer algun algoritmo mas copado.
         val townGroups = province.towns.shuffled().chunked(townsAmount / playerAmount)
         townGroups.zip(players).forEach { (townGroup, player) -> townGroup.forEach { it.owner = player } }
     }

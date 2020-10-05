@@ -15,6 +15,8 @@ import org.junit.jupiter.api.function.Executable
 class GameTests {
     val user1: User = User("a_user", "a_mail", "a_password")
     val user2: User = User("other_user", "other_mail", "other_password")
+    val user3: User = User("other_user2", "other_mail2", "other_password2")
+    val user4: User = User("other_user3", "other_mail3", "other_password3")
     val user99: User = User("user", "mail", "pass")
 
     val town1: Town = Town.new("town1", 11.0, Coordinates((-65.3).toFloat(), (-22.4).toFloat()))
@@ -24,13 +26,14 @@ class GameTests {
     val town5: Town = Town.new("town5", 15.0)
 
     val towns: List<Town> = listOf(town1, town2, town3, town4, town5)
-    val players: List<User> = listOf(user1, user2)
+    val twoPlayerList: List<User> = listOf(user1, user2)
+    val fourPlayerList: List<User> = listOf(user1, user2, user3, user4)
 
     @Nested
     inner class GameCreation {
         @Test
         fun `creating a game distributes towns with the available players evenly`() {
-            val game = Game.new(players, Province("a_province", ArrayList(towns)))
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
 
             val numberOfTownsAssignedToUser1: Int = game.province.towns.count { it.owner?.id == user1.id }
             val numberOfTownsAssignedToUser2: Int = game.province.towns.count { it.owner?.id == user2.id }
@@ -40,7 +43,7 @@ class GameTests {
 
         @Test
         fun `Attempting to create a game with more players than towns throws IlegalGameException`() {
-            assertThrows<CustomException.BadRequest.IllegalGameException> { Game.new(players, Province("a_province", ArrayList(listOf(town1)))) }
+            assertThrows<CustomException.BadRequest.IllegalGameException> { Game.new(twoPlayerList, Province("a_province", ArrayList(listOf(town1)))) }
         }
 
         @Test
@@ -54,26 +57,42 @@ class GameTests {
         }
 
         @Test
-        fun `Can successfully create a game with none empty list of players`() {
-            assertDoesNotThrow { Game.new(players, Province("a_province", ArrayList(towns))) }
+        fun `Can successfully create a game with 2 players`() {
+            assertDoesNotThrow { Game.new(twoPlayerList, Province("a_province", ArrayList(towns))) }
+        }
+
+        @Test
+        fun `Can successfully create a game with 3 players`() {
+            assertDoesNotThrow { Game.new(listOf(user1, user2, user3), Province("a_province", ArrayList(towns))) }
+        }
+
+        @Test
+        fun `Can successfully create a game with 4 players`() {
+            assertDoesNotThrow { Game.new(fourPlayerList, Province("a_province", ArrayList(towns))) }
+        }
+
+        @Test
+        fun `Attempting to create a game with 5 players throws IllegalGameException`() {
+            val fivePlayerList = listOf(user1, user2, user3, user4, user99)
+            assertThrows<CustomException.BadRequest.IllegalGameException> { Game.new(fivePlayerList, Province("a_province", ArrayList(towns))) }
         }
 
         @Test
         fun `Towns specialization is PRODUCTION by default`() {
-            val game = Game.new(players, Province("a_province", ArrayList(towns)))
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
             val aTown = game.province.towns[0]
             assertThat(aTown.specialization).isInstanceOf(Production::class.java)
         }
 
         @Test
         fun `Game status is OnGoing when creation finish`() {
-            val game = Game.new(players, Province("a_province", ArrayList(towns)))
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
             assertThat(game.status).isEqualTo(Status.ONGOING)
         }
 
         @Test
         fun `Is someone turn when the Game Begins`() {
-            val game = Game.new(players, Province("a_province", ArrayList(towns)))
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
             assertNotNull(game.turn)
         }
 
@@ -83,7 +102,7 @@ class GameTests {
             val elCondor = Town.new("El Cóndor",3609.618408203125)
             val abraPampa = Town.new("Abra Pampa",3519.69287109375)
             val jujuy = Province("Jujuy", arrayListOf(yavi, elCondor, abraPampa))
-            Game.new(players, jujuy)
+            Game.new(twoPlayerList, jujuy)
             assertAll(
                     Executable { assertThat(yavi.gauchos).isEqualTo(15) },
                     Executable { assertThat(elCondor.gauchos).isEqualTo(8) },
@@ -96,7 +115,7 @@ class GameTests {
     inner class ChangeTownSpecialization {
         @Test
         fun `Can change a towns specialization from PRODUCTION to DEFENSE`() {
-            val game = Game.new(players, Province("a_province", ArrayList(towns)))
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
             val aTown = game.province.towns.find { it.owner?.id == game.turn.id }!!
             game.changeTownSpecialization(aTown.owner!!, aTown.id, Defense())
             assertThat(aTown.specialization).isInstanceOf(Defense::class.java)
@@ -104,7 +123,7 @@ class GameTests {
 
         @Test
         fun `Can change a towns specialization from DEFENSE to PRODUCTION`() {
-            val game = Game.new(players, Province("a_province", ArrayList(towns)))
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
             val aTown = game.province.towns.filter { it.owner != null }.find { it.owner!!.id == game.turn.id }!!
             game.changeTownSpecialization(aTown.owner!!, aTown.id, Defense())
             // Change back to production
@@ -114,7 +133,7 @@ class GameTests {
 
         @Test
         fun `Attempting to change the specialization of a town that doesnt exist in the game will result in an exception`() {
-            val game = Game.new(players, Province("a_province", ArrayList(towns)))
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
             val aTownThatDoesntExist = Town.new("a town that doesnt exist", 11.0)
             val aValidUser = game.turn
             assertThrows<CustomException.NotFound.TownNotFoundException> { game.changeTownSpecialization(aValidUser, aTownThatDoesntExist.id, Defense()) }
@@ -122,7 +141,7 @@ class GameTests {
 
         @Test
         fun `Attempting to change the specialization by an user that has not the turn will result in an exception`() {
-            val game = Game.new(players, Province("a_province", ArrayList(towns)))
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
             val forbiddenUser = game.players.find { it.id != game.turn.id }!!
             val aTown = game.province.towns.filter { it.owner != null }.find { it.owner == forbiddenUser }!!
             assertThrows<CustomException.Forbidden.NotYourTurnException> { game.changeTownSpecialization(forbiddenUser, aTown.id, Defense()) }
@@ -130,7 +149,7 @@ class GameTests {
 
         @Test
         fun `Attempting to change the specialization of a town that doesnt belong to the user in turn results in an exception`() {
-            val game = Game.new(players, Province("a_province", ArrayList(towns)))
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
             val aValidUser = game.turn
             val notUsersTown = game.province.towns.filter { it.owner != null }.find { it.owner != aValidUser }!!
             assertThrows<CustomException.Forbidden.NotYourTownException> { game.changeTownSpecialization(aValidUser, notUsersTown.id, Defense()) }
