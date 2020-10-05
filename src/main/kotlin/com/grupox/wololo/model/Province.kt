@@ -7,23 +7,28 @@ import com.grupox.wololo.errors.CustomException.Forbidden.IllegalGauchoMovement
 import com.grupox.wololo.errors.CustomException.NotFound
 import com.grupox.wololo.errors.CustomException.NotFound.TownNotFoundException
 import com.grupox.wololo.model.helpers.*
+import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.DBRef
+import org.springframework.data.mongodb.core.mapping.Document
 import kotlin.math.*
 
 class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: String = "") : Requestable {
+
     fun getTownById(id: Int): Either<NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { TownNotFoundException() }
 
-    private val altitudes = towns.map { it.elevation }
+    private fun altitudes() = towns.map { it.elevation }
 
-    private val distances =
-            towns.map { town1 -> towns.map { town2 -> distanceBetween(town1, town2) } }.flatten().toSet().filter { it != 0.0 }
+    private fun distances() = towns.map { town1 -> towns.map { town2 -> distanceBetween(town1, town2) } }.flatten().toSet().filter { it != 0.0 }
 
-    val maxAltitude = altitudes.max()
+    var maxAltitude = altitudes().max()
 
-    val minAltitude = altitudes.min()
+    var minAltitude = altitudes().min()
 
-    val maxDistance = distances.max()
+    var maxDistance = distances().max()
 
-    val minDistance = distances.min()
+    var minDistance = distances().min()
 
     // implementation of the Haversine method which also takes into account elevation differences between two towns
     fun distanceBetween(town1: Town, town2: Town): Double {
@@ -46,14 +51,15 @@ class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: Strin
     }
 
     private fun multDistance(attacker: Town, defender: Town): Double =
-            1 - ((distanceBetween(attacker, defender) - minDistance!!) / (2 * (maxDistance!! - minDistance)))
+            1 - ((distanceBetween(attacker, defender) - minDistance!!) / (2 * (maxDistance!! - minDistance!!)))
 
     private fun multAltitude(defender: Town): Double =
-            1 + ((defender.elevation - minAltitude!!) / (2 * (maxAltitude!! - minAltitude)))
+            1 + ((defender.elevation - minAltitude!!) / (2 * (maxAltitude!! - minAltitude!!)))
 
     private fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
 
-    fun allOccupiedTownsAreFrom(user: User): Boolean = towns.filter { it.owner != null }.stream().allMatch { it.owner == user }
+    fun allOccupiedTownsAreFrom(user: User): Boolean =
+            towns.filter { it.owner != null }.stream().allMatch { it.isFrom(user) }
 
     fun addGauchosToAllTowns() {
         towns.forEach { it.addGauchos(maxAltitude!!, minAltitude!!) }

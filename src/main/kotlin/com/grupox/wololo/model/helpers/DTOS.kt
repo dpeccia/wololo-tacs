@@ -15,7 +15,7 @@ sealed class DTO {
         val coordinates: Coordinates,
         val elevation: Double,
         val imageUrl: String,
-        val ownerId: ObjectId?,
+        val ownerId: String,
         val specialization: String,
         val gauchos: Int,
         val isLocked: Boolean,
@@ -30,10 +30,10 @@ sealed class DTO {
     ) : DTO()
 
     data class GameDTO(
-        val id: Int,
+        val id: String,
         val status: Status,
         val date: Date,
-        val turnId: ObjectId,
+        val turnId: String,
         val playerIds: List<UserDTO>,
         val province: ProvinceDTO
     ) : DTO()

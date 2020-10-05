@@ -5,32 +5,35 @@ import arrow.core.rightIfNotNull
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.*
 import org.bson.types.ObjectId
+import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.PersistenceConstructor
+import org.springframework.data.mongodb.core.mapping.DBRef
+import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
+@Document(collection = "Games")
+class Game(@DBRef var players: List<User>, val province: Province, var status: Status) : Requestable {
+    @Id
+    var id: ObjectId = ObjectId.get()
 
-class Game(val players: List<User>, val province: Province, var status: Status = Status.NEW) : Requestable {
-    val id: Int = generateId()
+    var townsAmount: Int = province.towns.size
 
-    val townsAmount: Int
-        get() = province.towns.size
+    var playerAmount: Int = players.size
 
-    val playerAmount: Int
-        get() = players.size
-
+    @DBRef
     lateinit var turn: User
 
     var date: Date = Date.from(Instant.now())
 
     companion object {
-        private val idGenerator: AtomicInteger = AtomicInteger(1000)
-        fun generateId(): Int = idGenerator.incrementAndGet()
-    }
-
-    init {
-        assignTowns()
-        startGame()
+        fun new(_players: List<User>, _province: Province, _status: Status = Status.NEW): Game {
+            val newGame = Game(_players, _province, _status)
+            newGame.assignTowns()
+            newGame.startGame()
+            return newGame
+        }
     }
 
     // TODO falta chequear que nunca se cree un juego con un (MaxAltitude - MinAltitude) = 0 || (MaxDist - MinDist) = 0
@@ -60,7 +63,7 @@ class Game(val players: List<User>, val province: Province, var status: Status =
     private fun checkForbiddenAction(user: User) {
         if (status == Status.FINISHED || status == Status.CANCELED) throw CustomException.Forbidden.FinishedGameException()
         if (!isParticipating(user)) throw CustomException.Forbidden.NotAMemberException()
-        if (turn != user) throw CustomException.Forbidden.NotYourTurnException()
+        if (!isTurnOf(user)) throw CustomException.Forbidden.NotYourTurnException()
     }
 
     private fun userWon(user: User): Boolean = province.allOccupiedTownsAreFrom(user)
@@ -68,12 +71,15 @@ class Game(val players: List<User>, val province: Province, var status: Status =
     private fun updateStats(winner: User) {
         status = Status.FINISHED
         winner.updateGamesWonStats()
-        players.filter { it != winner }.forEach { it.updateGamesLostStats() }
+        players.filter { it.id.toString() != winner.id.toString() }.forEach { it.updateGamesLostStats() }
     }
 
-    fun getMember(userId: ObjectId): Either<CustomException.NotFound, User> = players.find { it.id.equals(userId) }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
+    fun getMember(userId: ObjectId): Either<CustomException.NotFound, User> =
+            players.find { it.id.toString() == userId.toString() }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
 
-    fun isParticipating(user: User): Boolean = players.contains(user)
+    fun isParticipating(user: User): Boolean = players.map { it.id.toString() }.contains(user.id.toString())
+
+    private fun isTurnOf(user: User): Boolean = turn.id.toString() == user.id.toString()
 
     fun finishTurn(user: User) {
         checkForbiddenAction(user)
@@ -84,7 +90,7 @@ class Game(val players: List<User>, val province: Province, var status: Status =
     fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {
         checkForbiddenAction(user)
         val town = province.getTownById(townId).getOrThrow()
-        if(town.owner != user) throw CustomException.Forbidden.NotYourTownException()
+        if(!town.isFrom(user)) throw CustomException.Forbidden.NotYourTownException()
         town.specialization = specialization
     }
 
@@ -100,10 +106,10 @@ class Game(val players: List<User>, val province: Province, var status: Status =
 
     override fun dto(): DTO.GameDTO =
         DTO.GameDTO(
-            id = id,
+            id = id.toString(),
             status = status,
             date = date,
-            turnId = turn.id,
+            turnId = turn.id.toString(),
             playerIds = players.map { it.dto() },
             province = province.dto()
         )
