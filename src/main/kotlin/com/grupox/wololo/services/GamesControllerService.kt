@@ -13,6 +13,7 @@ import com.grupox.wololo.model.externalservices.*
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -27,6 +28,9 @@ class GamesControllerService {
     lateinit var provinceImages: ProvincesService
     @Autowired
     lateinit var pixabay: Pixabay
+
+    private val logger = KotlinLogging.logger {}
+
 
     fun surrender(gameId: Int, userId: Int): DTO.GameDTO {
         val game: Game = RepoGames.getById(gameId).getOrThrow()

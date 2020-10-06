@@ -6,6 +6,7 @@ import com.grupox.wololo.model.helpers.AttackForm
 import com.grupox.wololo.model.helpers.MovementForm
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -14,6 +15,9 @@ import org.junit.jupiter.api.function.Executable
 class GameTests {
     val user1: User = User("a_user", "a_mail", "a_password")
     val user2: User = User("other_user", "other_mail", "other_password")
+    val user3: User = User("other_user2", "other_mail2", "other_password2")
+    val user4: User = User("other_user3", "other_mail3", "other_password3")
+    val user99: User = User("user", "mail", "pass")
 
     val town1: Town = Town(name = "town1", coordinates = Coordinates((-65.3).toFloat(), (-22.4).toFloat()), elevation = 11.0)
     val town2: Town = Town(name = "town2", coordinates = Coordinates((-66.2).toFloat(), (2.0).toFloat()), elevation = 12.0)
@@ -22,13 +26,14 @@ class GameTests {
     val town5: Town = Town(name = "town5", elevation = 15.0)
 
     val towns: List<Town> = listOf(town1, town2, town3, town4, town5)
-    val players: List<User> = listOf(user1, user2)
+    val twoPlayerList: List<User> = listOf(user1, user2)
+    val fourPlayerList: List<User> = listOf(user1, user2, user3, user4)
 
     @Nested
     inner class GameCreation {
         @Test
         fun `creating a game distributes towns with the available players evenly`() {
-            val game = Game(players = players, province = Province("a_province", ArrayList(towns)))
+            val game = Game(players = twoPlayerList, province = Province("a_province", ArrayList(towns)))
 
             val numberOfTownsAssignedToUser1: Int = game.province.towns.count { it.owner?.id == user1.id }
             val numberOfTownsAssignedToUser2: Int = game.province.towns.count { it.owner?.id == user2.id }
@@ -38,35 +43,56 @@ class GameTests {
 
         @Test
         fun `Attempting to create a game with more players than towns throws IlegalGameException`() {
-            assertThrows<CustomException.BadRequest.IllegalGameException> { Game(players = players, province = Province("a_province", ArrayList(listOf(town1)))) }
+            assertThrows<CustomException.BadRequest.IllegalGameException> { Game(players = twoPlayerList, province = Province("a_province", ArrayList(listOf(town1)))) }
         }
 
         @Test
-        fun `Attempting to create a game without players throws IlegalGameException`() {
+        fun `Attempting to create a game without players throws IllegalGameException`() {
             assertThrows<CustomException.BadRequest.IllegalGameException> { Game(players = listOf(), province = Province("a_province", ArrayList(towns))) }
         }
 
         @Test
-        fun `Can successfully create a game with none empty list of players`() {
-            assertDoesNotThrow { Game(players = players, province = Province("a_province", ArrayList(towns))) }
+        fun `Attempting to create a game with only one player throws IllegalGameException`() {
+            assertThrows<CustomException.BadRequest.IllegalGameException> { Game(players = listOf(user1), province = Province("a_province", ArrayList(towns))) }
+        }
+
+        @Test
+        fun `Can successfully create a game with 2 players`() {
+            assertDoesNotThrow { Game(players = twoPlayerList, province = Province("a_province", ArrayList(towns))) }
+        }
+
+        @Test
+        fun `Can successfully create a game with 3 players`() {
+            assertDoesNotThrow { Game(players = listOf(user1, user2, user3), province = Province("a_province", ArrayList(towns))) }
+        }
+
+        @Test
+        fun `Can successfully create a game with 4 players`() {
+            assertDoesNotThrow { Game(players = fourPlayerList, province = Province("a_province", ArrayList(towns))) }
+        }
+
+        @Test
+        fun `Attempting to create a game with 5 players throws IllegalGameException`() {
+            val fivePlayerList = listOf(user1, user2, user3, user4, user99)
+            assertThrows<CustomException.BadRequest.IllegalGameException> { Game(players = fivePlayerList, province = Province("a_province", ArrayList(towns))) }
         }
 
         @Test
         fun `Towns specialization is PRODUCTION by default`() {
-            val game = Game(players = players, province = Province("a_province", ArrayList(towns)))
+            val game = Game(players = twoPlayerList, province = Province("a_province", ArrayList(towns)))
             val aTown = game.province.towns[0]
             assertThat(aTown.specialization).isInstanceOf(Production::class.java)
         }
 
         @Test
         fun `Game status is OnGoing when creation finish`() {
-            val game = Game(players = players, province = Province("a_province", ArrayList(towns)))
+            val game = Game(players = twoPlayerList, province = Province("a_province", ArrayList(towns)))
             assertThat(game.status).isEqualTo(Status.ONGOING)
         }
 
         @Test
         fun `Is someone turn when the Game Begins`() {
-            val game = Game(players = players, province = Province("a_province", ArrayList(towns)))
+            val game = Game(players = twoPlayerList, province = Province("a_province", ArrayList(towns)))
             assertNotNull(game.turn)
         }
 
@@ -76,7 +102,7 @@ class GameTests {
             val elCondor = Town("El Cóndor", elevation = 3609.618408203125)
             val abraPampa = Town("Abra Pampa", elevation = 3519.69287109375)
             val jujuy = Province("Jujuy", arrayListOf(yavi, elCondor, abraPampa))
-            val game = Game(players = players, province = jujuy)
+            Game(players = twoPlayerList, province = jujuy)
             assertAll(
                     Executable { assertThat(yavi.gauchos).isEqualTo(15) },
                     Executable { assertThat(elCondor.gauchos).isEqualTo(8) },
@@ -89,7 +115,7 @@ class GameTests {
     inner class ChangeTownSpecialization {
         @Test
         fun `Can change a towns specialization from PRODUCTION to DEFENSE`() {
-            val game = Game(players = players, province = Province("a_province", ArrayList(towns)))
+            val game = Game(players = twoPlayerList, province = Province("a_province", ArrayList(towns)))
             val aTown = game.province.towns.find { it.owner?.id == game.turn.id }!!
             game.changeTownSpecialization(aTown.owner!!, aTown.id, Defense())
             assertThat(aTown.specialization).isInstanceOf(Defense::class.java)
@@ -97,7 +123,7 @@ class GameTests {
 
         @Test
         fun `Can change a towns specialization from DEFENSE to PRODUCTION`() {
-            val game = Game(players = players, province = Province("a_province", ArrayList(towns)))
+            val game = Game(players = twoPlayerList, province = Province("a_province", ArrayList(towns)))
             val aTown = game.province.towns.filter { it.owner != null }.find { it.owner!!.id == game.turn.id }!!
             game.changeTownSpecialization(aTown.owner!!, aTown.id, Defense())
             // Change back to production
@@ -107,7 +133,7 @@ class GameTests {
 
         @Test
         fun `Attempting to change the specialization of a town that doesnt exist in the game will result in an exception`() {
-            val game = Game(players = players, province = Province("a_province", ArrayList(towns)))
+            val game = Game(players = twoPlayerList, province = Province("a_province", ArrayList(towns)))
             val aTownThatDoesntExist = Town("a town that doesnt exist", elevation = 11.0)
             val aValidUser = game.turn
             assertThrows<CustomException.NotFound.TownNotFoundException> { game.changeTownSpecialization(aValidUser, aTownThatDoesntExist.id, Defense()) }
@@ -115,7 +141,7 @@ class GameTests {
 
         @Test
         fun `Attempting to change the specialization by an user that has not the turn will result in an exception`() {
-            val game = Game(players = players, province = Province("a_province", ArrayList(towns)))
+            val game = Game(players = twoPlayerList, province = Province("a_province", ArrayList(towns)))
             val forbiddenUser = game.players.find { it.id != game.turn.id }!!
             val aTown = game.province.towns.filter { it.owner != null }.find { it.owner == forbiddenUser }!!
             assertThrows<CustomException.Forbidden.NotYourTurnException> { game.changeTownSpecialization(forbiddenUser, aTown.id, Defense()) }
@@ -123,7 +149,7 @@ class GameTests {
 
         @Test
         fun `Attempting to change the specialization of a town that doesnt belong to the user in turn results in an exception`() {
-            val game = Game(players = players, province = Province("a_province", ArrayList(towns)))
+            val game = Game(players = twoPlayerList, province = Province("a_province", ArrayList(towns)))
             val aValidUser = game.turn
             val notUsersTown = game.province.towns.filter { it.owner != null }.find { it.owner != aValidUser }!!
             assertThrows<CustomException.Forbidden.NotYourTownException> { game.changeTownSpecialization(aValidUser, notUsersTown.id, Defense()) }
@@ -133,7 +159,14 @@ class GameTests {
     @Nested
     inner class MoveGauchos {
         private val towns: List<Town> = listOf(town1, town2)
-        private val game = Game(players = listOf(user1), province = Province("a_province", ArrayList(towns)))
+        private val game = Game(players = listOf(user1, user99), province = Province("a_province", ArrayList(towns)))
+
+        @BeforeEach
+        fun fixtureMoveGauchos() {
+            game.turn = user1
+            town1.owner = user1
+            town2.owner = user1
+        }
 
         @Test
         fun `trying to move gauchos from a finished game throws FinishedGameException`() {
@@ -171,7 +204,14 @@ class GameTests {
     @Nested
     inner class AttackTown {
         private val towns: List<Town> = listOf(town1, town2)
-        private val game = Game(players = listOf(user1), province = Province("a_province", ArrayList(towns)))
+        private val game = Game(players = listOf(user1, user99), province = Province("a_province", ArrayList(towns)))
+
+        @BeforeEach
+        fun fixtureAttackTown() {
+            game.turn = user1
+            town1.owner = user1
+            town2.owner = user1
+        }
 
         @Test
         fun `trying to attack town from a finished game throws FinishedGameException`() {
@@ -211,7 +251,14 @@ class GameTests {
     @Nested
     inner class Turn {
         private val towns: List<Town> = listOf(town1, town2)
-        private val game = Game(players = listOf(user1), province = Province("a_province", ArrayList(towns)))
+        private val game = Game(players = listOf(user1, user99), province = Province("a_province", ArrayList(towns)))
+
+        @BeforeEach
+        fun fixtureTurn() {
+            game.turn = user1
+            town1.owner = user1
+            town2.owner = user1
+        }
 
         @Test
         fun `trying to finished turn from a finished game throws FinishedGameException`() {

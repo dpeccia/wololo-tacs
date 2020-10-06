@@ -24,7 +24,7 @@ object RepoGames : Repository<Game> {
                     status= Status.NEW
             ),
             Game(
-                    players = listOf(User("user", "mail", "password")),
+                    players = listOf(User("user", "mail", "password"), User("user2","mail2", "password2")),
                     province = Province(
                             name = "Córdoba",
 
