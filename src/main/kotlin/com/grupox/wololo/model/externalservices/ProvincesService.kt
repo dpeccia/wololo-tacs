@@ -65,10 +65,12 @@ class ProvincesService {
     }
 
     fun townsGeoJSONs(provinceName: String, townNames: List<String>): List<TownGeoJSON> {
-        val formatedProvinceName = unaccentString(provinceName).toUpperCase()
-        val byProvince = _townsGeoJSONs.filter { json -> json.features.any { it.properties.province == formatedProvinceName } }
-        val formatedTownNames = townNames.map { unaccentString(it).toUpperCase() }
-        return byProvince.filter { json -> json.features.any { formatedTownNames.contains(it.properties.town) } }
+        val formattedProvinceName = unaccent(provinceName).toUpperCase()
+        val byProvince = _townsGeoJSONs.filter { json -> json.features.any { it.properties.province == formattedProvinceName } }
+        val formattedTownNames = townNames.map { formatTownName(it) }
+        println(townNames)
+        println(formattedTownNames)
+        return byProvince.filter { json -> json.features.any { formattedTownNames.contains(it.properties.town) } }
     }
 
     private fun formatLine(line: String): String =
@@ -80,11 +82,29 @@ class ProvincesService {
                     .joinToString(" ") { if (it.length > 3) it.capitalize() else it }
                     .capitalize()
 
-    private fun unaccentString(str: String): String {
-        val regexUnaccent = "\\p{InCombiningDiacriticalMarks}+".toRegex()
-        val temp = Normalizer.normalize(str, Normalizer.Form.NFD)
-        return regexUnaccent.replace(temp, "")
+    private fun unaccent(str: String): String {
+        return str.map { unaccentChar(it) }.joinToString("")
     }
+
+    private fun unaccentChar(char: Char): Char {
+        val escapeRegex = "[ñÑ]".toRegex()
+        val asString = char.toString()
+
+        if(asString.matches(escapeRegex))
+            return char
+
+        val regexUnaccent = "\\p{InCombiningDiacriticalMarks}+".toRegex()
+        val temp = Normalizer.normalize(asString, Normalizer.Form.NFD)
+        return regexUnaccent.replace(temp, "")[0]
+    }
+
+    private fun unpunctuate(str: String): String {
+        val regexPunctuation = "[.,;]".toRegex()
+        return regexPunctuation.replace(str, "")
+    }
+
+    private fun formatTownName(townName: String) =
+            unpunctuate(unaccent(townName)).toUpperCase()
 }
 
 data class TownGeoJSONProperties(val province: String, val town: String)

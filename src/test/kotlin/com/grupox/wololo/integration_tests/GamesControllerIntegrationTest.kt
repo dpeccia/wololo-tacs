@@ -85,6 +85,14 @@ class GamesControllerIntegrationTest {
         }
 
         @Test
+        fun `Can get the GeoJSON of a town with punctuation characters word`() {
+            val province = "Buenos Aires"
+            val town = "Jose C. Paz"
+            val result = gamesControllerService.getTownsGeoJSONs(province, town)
+            assertThat(result.any { json -> json.features.any { it.properties.province == "BUENOS AIRES" && it.properties.town == "JOSE C PAZ" } })
+        }
+
+        @Test
         fun `Can get the GeoJSON of multiple towns by separating them with a '|'`() {
             val province = "Misiones"
             val town = " capital |  25 de mayo   | apóstoles"  // Arbitrary amount of white spaces
