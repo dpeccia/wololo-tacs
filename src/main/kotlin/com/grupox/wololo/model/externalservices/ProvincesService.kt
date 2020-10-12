@@ -3,8 +3,12 @@ package com.grupox.wololo.model.externalservices
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.grupox.wololo.configs.properties.PixabayProperties
 import com.grupox.wololo.errors.CustomException
+import org.geojson.FeatureCollection
+import org.geojson.GeoJsonObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.PropertySource
@@ -13,6 +17,7 @@ import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.io.File
+import java.text.Normalizer
 
 @Service
 @PropertySource("classpath:provinces.properties")
@@ -23,6 +28,28 @@ class ProvincesService {
 
     @Autowired
     private lateinit var env: Environment
+
+    private lateinit var _townsGeoJSONs: List<TownGeoJSON>
+
+    init {
+        val jsonString: String = File("src/main/resources/departamentos-argentina.json").readText(Charsets.UTF_8)
+        val mapper = jacksonObjectMapper()
+        val allTownsGeoInfo = mapper.readValue<FeatureCollection>(jsonString)
+        this._townsGeoJSONs = allTownsGeoInfo.features.map {
+            TownGeoJSON(
+                type = "FeatureCollection",
+                features = listOf(
+                    TownGeoJSONInfo(
+                        type = "Feature",
+                        properties = TownGeoJSONProperties(
+                            departamento = it.properties["departamento"] as String
+                        ),
+                        geometry = it.geometry
+                    )
+                )
+            )
+        }
+    }
 
     //@Cacheable("withTimeToLive") No se por qué rompe cuando lo uso
     fun getUrl(provinceName: String): String =
@@ -36,6 +63,11 @@ class ProvincesService {
         return eitherFile.map { file -> file.readLines().filter { it.isNotBlank() }.map { formatLine(it) } }
     }
 
+    fun townsGeoJSONs(townNames: List<String>): List<TownGeoJSON> {
+        val formatedTownNames = townNames.map { unaccentString(it).toUpperCase() }
+        return this._townsGeoJSONs.filter { json -> json.features.any { formatedTownNames.contains(it.properties.departamento) } }
+    }
+
     private fun formatLine(line: String): String =
             line.substringBefore('.')
                     .removeSurrounding(" ")
@@ -44,4 +76,16 @@ class ProvincesService {
                     .split(' ')
                     .joinToString(" ") { if (it.length > 3) it.capitalize() else it }
                     .capitalize()
+
+    private fun unaccentString(str: String): String {
+        val regexUnaccent = "\\p{InCombiningDiacriticalMarks}+".toRegex()
+        val temp = Normalizer.normalize(str, Normalizer.Form.NFD)
+        return regexUnaccent.replace(temp, "")
+    }
 }
+
+data class TownGeoJSONProperties(val departamento: String)
+
+data class TownGeoJSONInfo(val type: String, val properties: TownGeoJSONProperties, val geometry: GeoJsonObject)
+
+data class TownGeoJSON(val type: String, val features: List<TownGeoJSONInfo>)

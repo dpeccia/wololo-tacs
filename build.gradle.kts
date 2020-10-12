@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
 
 plugins {
     id("org.springframework.boot") version "2.3.3.RELEASE"
@@ -44,7 +43,8 @@ dependencies {
     implementation("io.springfox:springfox-swagger-ui:2.7.0")
     implementation("io.jsonwebtoken:jjwt-api:0.11.1")
     implementation("com.github.ben-manes.caffeine:caffeine")
-    implementation ("io.github.microutils:kotlin-logging:1.6.26")
+    implementation("io.github.microutils:kotlin-logging:1.6.26")
+    implementation("de.grundid.opendatalab:geojson-jackson:1.14")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.1")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
