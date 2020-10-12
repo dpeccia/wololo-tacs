@@ -128,8 +128,8 @@ class GamesController : BaseController() {
 
     @GetMapping("/provinces/towns-geojsons")
     @ApiOperation("Gets the GeoJSON data from the list of '|' separated towns")
-    fun getTownsGeoJSONs(@RequestParam("towns") towns: String, request: HttpServletRequest) : List<TownGeoJSON> {
+    fun getTownsGeoJSONs(@RequestParam("province") province: String, @RequestParam("towns") towns: String, request: HttpServletRequest) : List<TownGeoJSON> {
         checkAndGetUserId(request)
-        return gamesControllerService.getTownsGeoJSONs(towns)
+        return gamesControllerService.getTownsGeoJSONs(province, towns)
     }
 }

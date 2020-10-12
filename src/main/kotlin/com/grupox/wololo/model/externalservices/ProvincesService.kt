@@ -42,7 +42,8 @@ class ProvincesService {
                     TownGeoJSONInfo(
                         type = "Feature",
                         properties = TownGeoJSONProperties(
-                            departamento = it.properties["departamento"] as String
+                            province = it.properties["provincia"] as String,
+                            town = it.properties["departamento"] as String
                         ),
                         geometry = it.geometry
                     )
@@ -63,9 +64,11 @@ class ProvincesService {
         return eitherFile.map { file -> file.readLines().filter { it.isNotBlank() }.map { formatLine(it) } }
     }
 
-    fun townsGeoJSONs(townNames: List<String>): List<TownGeoJSON> {
+    fun townsGeoJSONs(provinceName: String, townNames: List<String>): List<TownGeoJSON> {
+        val formatedProvinceName = unaccentString(provinceName).toUpperCase()
+        val byProvince = _townsGeoJSONs.filter { json -> json.features.any { it.properties.province == formatedProvinceName } }
         val formatedTownNames = townNames.map { unaccentString(it).toUpperCase() }
-        return this._townsGeoJSONs.filter { json -> json.features.any { formatedTownNames.contains(it.properties.departamento) } }
+        return byProvince.filter { json -> json.features.any { formatedTownNames.contains(it.properties.town) } }
     }
 
     private fun formatLine(line: String): String =
@@ -84,7 +87,7 @@ class ProvincesService {
     }
 }
 
-data class TownGeoJSONProperties(val departamento: String)
+data class TownGeoJSONProperties(val province: String, val town: String)
 
 data class TownGeoJSONInfo(val type: String, val properties: TownGeoJSONProperties, val geometry: GeoJsonObject)
 

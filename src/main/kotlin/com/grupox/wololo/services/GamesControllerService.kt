@@ -69,9 +69,9 @@ class GamesControllerService {
 
     fun getProvinces(): List<String> = provincesService.availableProvinces().getOrThrow()
 
-    fun getTownsGeoJSONs(towns: String): List<TownGeoJSON> {
+    fun getTownsGeoJSONs(province: String, towns: String): List<TownGeoJSON> {
         val townNames: List<String> = towns.split('|').map { it.trim() }
-        return provincesService.townsGeoJSONs(townNames)
+        return provincesService.townsGeoJSONs(province, townNames)
     }
 
     fun getTownStats(gameId: Int, townId: Int): DTO.TownDTO {
