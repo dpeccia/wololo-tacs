@@ -25,7 +25,7 @@ class GamesControllerService {
     @Autowired
     lateinit var topoData: TopoData
     @Autowired
-    lateinit var provinceImages: ProvincesService
+    lateinit var provincesService: ProvincesService
     @Autowired
     lateinit var pixabay: Pixabay
 
@@ -67,7 +67,12 @@ class GamesControllerService {
         return game.dto()
     }
 
-    fun getProvinces(): List<String> = provinceImages.availableProvinces().getOrThrow()
+    fun getProvinces(): List<String> = provincesService.availableProvinces().getOrThrow()
+
+    fun getTownsGeoJSONs(province: String, towns: String): List<TownGeoJSON> {
+        val townNames: List<String> = towns.split('|').map { it.trim() }
+        return provincesService.townsGeoJSONs(province, townNames)
+    }
 
     fun getTownStats(gameId: Int, townId: Int): DTO.TownDTO {
         val game = RepoGames.getById(gameId).getOrThrow()
@@ -130,7 +135,7 @@ class GamesControllerService {
                 Town(data.name, data.coordinates, elevation, imageUrl)
             }
 
-            val provinceImage: String = provinceImages.getUrl(form.provinceName)
+            val provinceImage: String = provincesService.getUrl(form.provinceName)
             Game(users,  Province(form.provinceName, ArrayList(towns), provinceImage))
         }.getOrThrow()
 

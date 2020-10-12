@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TownsQuery(
-        @JsonProperty("municipios") val matches: List<TownGeoRef>
+        @JsonProperty("departamentos") val matches: List<TownGeoRef>
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -30,8 +30,8 @@ interface IGeoRef {
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 class GeoRef(@Autowired private val self: GeoRef?) : HttpService("GeoRef"), IGeoRef {
-    private val townsDataUrl = "https://apis.datos.gob.ar/georef/api/municipios"
-    private val maxMatches = "200"
+    private val townsDataUrl = "https://apis.datos.gob.ar/georef/api/departamentos"
+    private val maxMatches = "50"
 
     @Cacheable(cacheNames = ["withTimeToLive"])
     override fun requestTownsData(provinceName: String): Either<CustomException, List<TownGeoRef>> {

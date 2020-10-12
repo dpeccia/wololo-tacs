@@ -1,6 +1,7 @@
 package com.grupox.wololo.controllers
 
 import com.grupox.wololo.model.Status
+import com.grupox.wololo.model.externalservices.TownGeoJSON
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
@@ -123,5 +124,12 @@ class GamesController : BaseController() {
     fun getProvinces(request: HttpServletRequest) : List<String> {
         checkAndGetUserId(request)
         return gamesControllerService.getProvinces()
+    }
+
+    @GetMapping("/provinces/towns-geojsons")
+    @ApiOperation("Gets the GeoJSON data from the list of '|' separated towns")
+    fun getTownsGeoJSONs(@RequestParam("province") province: String, @RequestParam("towns") towns: String, request: HttpServletRequest) : List<TownGeoJSON> {
+        checkAndGetUserId(request)
+        return gamesControllerService.getTownsGeoJSONs(province, towns)
     }
 }
