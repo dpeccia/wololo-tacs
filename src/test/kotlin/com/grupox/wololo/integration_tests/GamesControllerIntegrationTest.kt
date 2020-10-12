@@ -4,6 +4,7 @@ import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.SHA512Hash
 import com.grupox.wololo.model.repos.RepoUsers
+import com.grupox.wololo.services.GamesControllerService
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
@@ -27,7 +28,11 @@ class GamesControllerIntegrationTest {
     lateinit var users: ArrayList<User>
 
     @Autowired
-    val sha512: SHA512Hash = SHA512Hash()
+    lateinit var sha512: SHA512Hash
+
+    @Autowired
+    lateinit var gamesControllerService: GamesControllerService
+
 
     @BeforeEach
     fun beforeEach() {
@@ -51,6 +56,40 @@ class GamesControllerIntegrationTest {
         @Test
         fun `Can get games by previously logging in`() {
             //TODO: not implemented.
+        }
+    }
+
+    @Nested inner class TownGeoJSONs {
+        @Test
+        fun `Can get the GeoJSON of a town with accentuation`() {
+            val province = "Misiones"
+            val town = "Apóstoles"
+            val result = gamesControllerService.getTownsGeoJSONs(province, town)
+            assertThat(result.any { json -> json.features.any { it.properties.province == "MISIONES" && it.properties.town == "APOSTOLES" } })
+        }
+
+        @Test
+        fun `Can get the GeoJSON of a town with more than 1 word in their name`() {
+            val province = "Misiones"
+            val town = "25 de mayo"
+            val result = gamesControllerService.getTownsGeoJSONs(province, town)
+            assertThat(result.any { json -> json.features.any { it.properties.province == "MISIONES" && it.properties.town == "25 DE MAYO" } })
+        }
+
+        @Test
+        fun `Can get the GeoJSON of a town with 1 word`() {
+            val province = "Misiones"
+            val town = "capital"
+            val result = gamesControllerService.getTownsGeoJSONs(province, town)
+            assertThat(result.any { json -> json.features.any { it.properties.province == "MISIONES" && it.properties.town == "CAPITAL" } })
+        }
+
+        @Test
+        fun `Can get the GeoJSON of multiple towns by separating them with a '|'`() {
+            val province = "Misiones"
+            val town = " capital |  25 de mayo   | apóstoles"  // Arbitrary amount of white spaces
+            val result = gamesControllerService.getTownsGeoJSONs(province, town)
+            assertThat(result.size == 3)
         }
     }
 
@@ -85,8 +124,6 @@ class GamesControllerIntegrationTest {
 
             assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
         }
-
-
     }
 
 
