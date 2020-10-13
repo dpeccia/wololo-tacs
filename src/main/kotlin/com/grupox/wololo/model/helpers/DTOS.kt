@@ -3,6 +3,7 @@ package com.grupox.wololo.model.helpers
 import com.grupox.wololo.model.Coordinates
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.Status
+import org.bson.types.ObjectId
 import java.util.*
 
 sealed class DTO {
@@ -14,7 +15,7 @@ sealed class DTO {
         val coordinates: Coordinates,
         val elevation: Double,
         val imageUrl: String,
-        val ownerId: Int?,
+        val ownerId: String,
         val specialization: String,
         val gauchos: Int,
         val isLocked: Boolean,
@@ -30,17 +31,17 @@ sealed class DTO {
     ) : DTO()
 
     data class GameDTO(
-        val id: Int,
+        val id: String,
         val status: Status,
         val date: Date,
-        val turnId: Int,
+        val turnId: String,
         val playerIds: List<UserDTO>,
         val province: ProvinceDTO
     ) : DTO()
 
     data class UserDTO(
-        val id: Int,
-        val username: String,
-        val stats: Stats
+            val id: String,
+            val username: String,
+            val stats: Stats
     ) : DTO()
 }
