@@ -2,6 +2,7 @@ package com.grupox.wololo.controllers
 
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Status
+import com.grupox.wololo.model.externalservices.TownGeoJSON
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
@@ -126,6 +127,13 @@ class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
     fun getProvinces(request: HttpServletRequest) : List<String> {
         checkAndGetUserId(request)
         return gamesControllerService.getProvinces()
+    }
+
+    @GetMapping("/provinces/towns-geojsons")
+    @ApiOperation("Gets the GeoJSON data from the list of '|' separated towns")
+    fun getTownsGeoJSONs(@RequestParam("province") province: String, @RequestParam("towns") towns: String, request: HttpServletRequest) : List<TownGeoJSON> {
+        checkAndGetUserId(request)
+        return gamesControllerService.getTownsGeoJSONs(province, towns)
     }
 
     fun throwIfNotAllowed(id: ObjectId) {

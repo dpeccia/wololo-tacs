@@ -101,10 +101,18 @@ class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: Strin
         defender.defend(attacker.owner!!, attackerQtyBeforeAttack, multDist, multAlt)
     }
 
+    private fun calculateCentroid(): Coordinates {
+        val townAmount = towns.size
+        val averageLon: Float = towns.map { it.coordinates.longitude }.sum() / townAmount
+        val averageLat: Float = towns.map { it.coordinates.latitude }.sum() / townAmount
+        return Coordinates(longitude = averageLon, latitude = averageLat)
+    }
+
     override fun dto(): DTO.ProvinceDTO =
         DTO.ProvinceDTO(
             name = name,
             imageUrl = imageUrl,
+            centroid = calculateCentroid(),
             towns = towns.map { it.dto() }
         )
 }
