@@ -1,10 +1,13 @@
 package com.grupox.wololo.controllers
 
+import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.externalservices.TownGeoJSON
 import com.grupox.wololo.model.helpers.*
+import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
 import io.swagger.annotations.ApiOperation
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
@@ -13,7 +16,7 @@ import javax.servlet.http.HttpServletRequest
 
 @RequestMapping("/games")
 @RestController
-class GamesController : BaseController() {
+class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
 
@@ -36,9 +39,9 @@ class GamesController : BaseController() {
 
     @GetMapping("/{id}")
     @ApiOperation(value = "Gets a game")
-    fun getGameById(@PathVariable("id") id: Int, request: HttpServletRequest): DTO.GameDTO {
+    fun getGameById(@PathVariable("id") id: String, request: HttpServletRequest): DTO.GameDTO {
         val userId = checkAndGetUserId(request)
-        return gamesControllerService.getGame(userId, id)
+        return gamesControllerService.getGame(userId, ObjectId(id))
     }
 
     @GetMapping("/stats")
@@ -66,57 +69,57 @@ class GamesController : BaseController() {
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Surrenders in a game (it becomes CANCELED)")
-    fun surrender(@PathVariable("id") id: Int, request: HttpServletRequest): DTO.GameDTO {
+    fun surrender(@PathVariable("id") id: String, request: HttpServletRequest): DTO.GameDTO {
         val userId = checkAndGetUserId(request)
-        return gamesControllerService.surrender(id, userId)
+        return gamesControllerService.surrender(ObjectId(id), userId)
     }
 
     @PutMapping("/{id}/actions/turn")
     @ApiOperation(value = "Finishes the current Turn")
-    fun finishTurn(@PathVariable("id") id: Int, request: HttpServletRequest): DTO.GameDTO {
+    fun finishTurn(@PathVariable("id") id: String, request: HttpServletRequest): DTO.GameDTO {
         val userId = checkAndGetUserId(request)
-        return gamesControllerService.finishTurn(userId, id)
+        return gamesControllerService.finishTurn(userId, ObjectId(id))
     }
 
     @PostMapping("/{id}/actions/movement")
     @ApiOperation(value = "Moves the gauchos between towns")
     fun moveGauchosBetweenTowns(
-            @PathVariable("id") id: Int,
+            @PathVariable("id") id: String,
             @RequestBody movementData: MovementForm,
             request: HttpServletRequest): DTO.GameDTO {
         val userId = checkAndGetUserId(request)
-        return gamesControllerService.moveGauchosBetweenTowns(userId, id, movementData)
+        return gamesControllerService.moveGauchosBetweenTowns(userId, ObjectId(id), movementData)
     }
 
     @PostMapping("/{id}/actions/attack")
     @ApiOperation(value = "Attacks a town")
     fun attackTown(
-            @PathVariable("id") id: Int,
+            @PathVariable("id") id: String,
             @RequestBody attackData: AttackForm,
             request: HttpServletRequest): DTO.GameDTO {
         val userId = checkAndGetUserId(request)
-        return gamesControllerService.attackTown(userId, id, attackData)
+        return gamesControllerService.attackTown(userId, ObjectId(id), attackData)
     }
 
     @PutMapping("/{id}/towns/{idTown}")
     @ApiOperation(value = "Updates the town specialization")
     fun updateTownSpecialization(
-            @PathVariable("id") id: Int,
+            @PathVariable("id") id: String,
             @PathVariable("idTown") townId: Int,
             @RequestBody newSpecialization: String,
             request: HttpServletRequest): DTO.GameDTO {
         val userId = checkAndGetUserId(request)
-        return gamesControllerService.updateTownSpecialization(userId, id, townId, newSpecialization)
+        return gamesControllerService.updateTownSpecialization(userId, ObjectId(id), townId, newSpecialization)
     }
 
     @GetMapping("/{id}/towns/{idTown}")
     @ApiOperation(value = "Gets the town stats and an image")
     fun getTownData(
-            @PathVariable("id") id: Int,
+            @PathVariable("id") id: String,
             @PathVariable("idTown") idTown: Int,
             request: HttpServletRequest) : DTO.TownDTO {
         checkAndGetUserId(request)
-        return gamesControllerService.getTownStats(id, idTown)
+        return gamesControllerService.getTownStats(ObjectId(id), idTown)
     }
 
     @GetMapping("/provinces")
@@ -131,5 +134,9 @@ class GamesController : BaseController() {
     fun getTownsGeoJSONs(@RequestParam("province") province: String, @RequestParam("towns") towns: String, request: HttpServletRequest) : List<TownGeoJSON> {
         checkAndGetUserId(request)
         return gamesControllerService.getTownsGeoJSONs(province, towns)
+    }
+
+    fun throwIfNotAllowed(id: ObjectId) {
+        repoUsers.findByIsAdminTrueAndId(id).orElseThrow { CustomException.Forbidden.OperationNotAuthorized()}
     }
 }

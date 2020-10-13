@@ -1,8 +1,11 @@
 package com.grupox.wololo.integration_tests
 
+import com.grupox.wololo.MockitoHelper
+import com.grupox.wololo.model.Game
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.SHA512Hash
+import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
 import io.mockk.every
@@ -11,8 +14,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
+import org.mockito.Mockito.doReturn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.util.LinkedMultiValueMap
@@ -27,6 +33,14 @@ class GamesControllerIntegrationTest {
 
     lateinit var users: ArrayList<User>
 
+    lateinit var games: ArrayList<Game>
+
+    @SpyBean
+    lateinit var repoUsers: RepoUsers
+
+    @SpyBean
+    lateinit var repoGames: RepoGames
+
     @Autowired
     lateinit var sha512: SHA512Hash
 
@@ -40,9 +54,14 @@ class GamesControllerIntegrationTest {
             User("example_admin", "example_admin",sha512.getSHA512("example_admin"), isAdmin = true),
             User("example_not_admin", "example_not_admin",sha512.getSHA512("example_not_admin"))
         )
+        games = arrayListOf()
         webClient = WebClient.builder().baseUrl("http://localhost:${port}").build()
-        mockkObject(RepoUsers)
-        every { RepoUsers.getAll() } returns users
+        doReturn(users).`when`(repoUsers).findAll()
+        doReturn(games).`when`(repoGames).findAll()
+        doReturn(Optional.of(users[0])).`when`(repoUsers).findByIsAdminTrueAndId(users[0].id)
+        doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminTrueAndId(users[1].id)
+        doReturn(Optional.of(users[0])).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
+        doReturn(Optional.of(users[1])).`when`(repoUsers).findByMailAndPassword("example_not_admin", sha512.getSHA512("example_not_admin"))
     }
 
     @Nested

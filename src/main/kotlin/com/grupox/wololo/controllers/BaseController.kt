@@ -6,6 +6,8 @@ import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.getOrThrow
 import com.grupox.wololo.model.repos.RepoUsers
+import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -34,14 +36,9 @@ abstract class BaseController {
     @ResponseStatus(HttpStatus.FAILED_DEPENDENCY) // Revisar si es correcto esta http status
     fun handleServiceException(exception: CustomException) = exception.dto()
 
-    fun checkAndGetUserId(request: HttpServletRequest): Int {
+    fun checkAndGetUserId(request: HttpServletRequest): ObjectId {
         val cookie: Cookie? = WebUtils.getCookie(request, "X-Auth")
         val jwt = cookie?.value
-        return JwtSigner.validateJwt(jwt.toOption()).getOrThrow().body.subject.toInt()
+        return ObjectId(JwtSigner.validateJwt(jwt.toOption()).getOrThrow().body.subject)
     }
-
-    fun throwIfNotAllowed(id: Int) {
-        val admin: User = RepoUsers.getAdminById(id).getOrThrow()
-    }
-
 }
