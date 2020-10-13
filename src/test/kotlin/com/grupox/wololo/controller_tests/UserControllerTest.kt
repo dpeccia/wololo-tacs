@@ -1,18 +1,23 @@
 package com.grupox.wololo.controller_tests
 
+import com.grupox.wololo.MockitoHelper
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.LoginForm
 import com.grupox.wololo.model.helpers.SHA512Hash
+import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.UsersControllerService
 import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.SpyBean
 import java.util.*
 
 @SpringBootTest
@@ -25,6 +30,9 @@ class UserControllerTest {
 
     lateinit var users: ArrayList<User>
 
+    @SpyBean
+    lateinit var repoUsers: RepoUsers
+
     @BeforeEach
     fun fixture() {
         users = arrayListOf(
@@ -32,8 +40,36 @@ class UserControllerTest {
             User("example_normal_user", "example_normal_user", sha512.getSHA512("example_admin"), stats = Stats(1, 1)),
             User("example_normal_user2", "example_normal_user2", sha512.getSHA512("example_admin"), stats = Stats(1, 1))
         )
-        mockkObject(RepoUsers)
-        every { RepoUsers.getAll() } returns users
+        doReturn(users).`when`(repoUsers).findAll()
+        doReturn(users.filter { !it.isAdmin } ).`when`(repoUsers).findAllByIsAdminFalse()
+        doReturn(Optional.of(users[0])).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
+        doReturn(Optional.of(users[1])).`when`(repoUsers).findByMailAndPassword("example_normal_user", sha512.getSHA512("example_admin"))
+        doReturn(Optional.of(users[2])).`when`(repoUsers).findByMailAndPassword("example_normal_user2", sha512.getSHA512("example_admin"))
+        doReturn(listOf(users[2])).`when`(repoUsers).findAllByIsAdminFalseAndUsernameLike("example_normal_user2")
+        doReturn(listOf(users[1])).`when`(repoUsers).findAllByIsAdminFalseAndUsernameLike("example_normal_user")
+        doReturn(Optional.of(users[1])).`when`(repoUsers).findByIsAdminFalseAndMail("example_normal_user")
+        doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminFalseAndMail("new_user")
+        doReturn(null).`when`(repoUsers).save(MockitoHelper.anyObject())
+    }
+
+    @Nested
+    inner class SignUpTest {
+        @Test
+        fun `sign up with repeated username throws IllegalUserException`() {
+            assertThrows<CustomException.BadRequest.IllegalUserException>
+            { usersControllerService.createUser(UserForm("example_normal_user", "example_normal_user", "")) }
+        }
+
+        @Test
+        fun `sign up with non repeated username doesnt throw an Exception`() {
+            assertDoesNotThrow{ usersControllerService.createUser(UserForm("new_user", "new_user", "")) }
+        }
+
+        @Test
+        fun `sign up with non repeated username returns user dto`() {
+            val userDto = usersControllerService.createUser(UserForm("new_user", "new_user", ""))
+            assertThat(userDto.username).isEqualTo("new_user")
+        }
     }
 
     @Nested

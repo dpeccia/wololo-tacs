@@ -17,9 +17,9 @@ class ProvinceTests {
     val user1: User = User("a_user", "a_mail", "a_password")
     val user2: User = User("other_user", "other_mail", "other_password")
 
-    val town1: Town = Town(name = "town1", elevation = 20.0)
-    val town2: Town = Town(name = "town2", elevation = 10.0)
-    val townThatDoesntExists = Town(name = "town that doesn't exist", elevation = 11.0)
+    val town1: Town = Town.new("town1", 20.0)
+    val town2: Town = Town.new("town2", 10.0)
+    val townThatDoesntExists = Town.new("town that doesn't exist", 11.0)
     private val towns: List<Town> = listOf(town1, town2)
     private val province = Province("a_province", ArrayList(towns))
 
@@ -118,10 +118,10 @@ class ProvinceTests {
 
         @BeforeEach
         fun fixture() {
-            yavi = Town("Yavi", Coordinates((-65.3412864273208).toFloat(), (-22.1949119799291).toFloat()), 3485.0263671875)
-            elCondor = Town("El Cóndor", Coordinates((-65.3795310298623).toFloat(), (-22.414030404424).toFloat()), 3609.618408203125)
-            cangrejillos = Town("Cangrejillos", Coordinates((-65.5405751330491).toFloat(), (-22.4438999595476).toFloat()), 3617.323974609375)
-            abraPampa = Town("Abra Pampa", Coordinates((-66.0322682108588).toFloat(), (-22.8431449411788).toFloat()), 3519.69287109375)
+            yavi = Town.new("Yavi", 3485.0263671875, Coordinates((-65.3412864273208).toFloat(), (-22.1949119799291).toFloat()))
+            elCondor = Town.new("El Cóndor", 3609.618408203125, Coordinates((-65.3795310298623).toFloat(), (-22.414030404424).toFloat()))
+            cangrejillos = Town.new("Cangrejillos", 3617.323974609375, Coordinates((-65.5405751330491).toFloat(), (-22.4438999595476).toFloat()))
+            abraPampa = Town.new("Abra Pampa", 3519.69287109375, Coordinates((-66.0322682108588).toFloat(), (-22.8431449411788).toFloat()))
             yavi.owner = user1
             elCondor.owner = user1
             cangrejillos.owner = user2
@@ -185,7 +185,7 @@ class ProvinceTests {
 
         @Test
         fun `the distance between to towns changes if one elevation changes`() {
-            val elCondorWithFakeElevation = Town("El Cóndor", Coordinates((-65.3795310298623).toFloat(), (-22.414030404424).toFloat()), 100.0)
+            val elCondorWithFakeElevation = Town.new("El Cóndor", 100.0, Coordinates((-65.3795310298623).toFloat(), (-22.414030404424).toFloat()))
             assertThat(jujuy.distanceBetween(yavi, elCondor)).isNotEqualTo(jujuy.distanceBetween(yavi, elCondorWithFakeElevation))
         }
 
