@@ -68,8 +68,6 @@ class ProvincesService {
         val formattedProvinceName = unaccent(provinceName).toUpperCase()
         val byProvince = _townsGeoJSONs.filter { json -> json.features.any { it.properties.province == formattedProvinceName } }
         val formattedTownNames = townNames.map { formatTownName(it) }
-        println(townNames)
-        println(formattedTownNames)
         return byProvince.filter { json -> json.features.any { formattedTownNames.contains(it.properties.town) } }
     }
 
@@ -103,8 +101,7 @@ class ProvincesService {
         return regexPunctuation.replace(str, "")
     }
 
-    private fun formatTownName(townName: String) =
-            unpunctuate(unaccent(townName)).toUpperCase()
+    private fun formatTownName(townName: String) = unpunctuate(unaccent(townName)).toUpperCase()
 }
 
 data class TownGeoJSONProperties(val province: String, val town: String)
