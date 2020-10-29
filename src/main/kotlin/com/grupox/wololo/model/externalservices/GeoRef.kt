@@ -1,19 +1,39 @@
 package com.grupox.wololo.model.externalservices
 
-import arrow.core.Either
+import arrow.core.*
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Coordinates
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.Cacheable
+import io.github.rybalkinsd.kohttp.dsl.httpPost
+import io.github.rybalkinsd.kohttp.ext.url
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.RequestBody
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class TownsQuery(
-        @JsonProperty("departamentos") val matches: List<TownGeoRef>
+data class GeoRefTownRequest (
+        @JsonProperty("departamentos") val towns: List<GeoRefTownBodyParams>
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class GeoRefTownBodyParams(
+        @JsonProperty("provincia") val province: String,
+        @JsonProperty("nombre") val name: String,
+        @JsonProperty("max") val max: Int = 1
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class GeoRefTownResponse(
+        @JsonProperty("resultados") val results: List<GeoRefTownResults>
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class GeoRefTownResults (
+        @JsonProperty("departamentos") val towns: List<TownGeoRef>
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,21 +43,29 @@ data class TownGeoRef(
         @JsonProperty("centroide") val coordinates: Coordinates
 )
 
-interface IGeoRef {
-    fun requestTownsData(provinceName: String): Either<CustomException, List<TownGeoRef>>
-}
-
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-class GeoRef(@Autowired private val self: GeoRef?) : HttpService("GeoRef"), IGeoRef {
+class GeoRef {
     private val townsDataUrl = "https://apis.datos.gob.ar/georef/api/departamentos"
-    private val maxMatches = "50"
+    private val mapper = jacksonObjectMapper()
 
-    @Cacheable(cacheNames = ["withTimeToLive"])
-    override fun requestTownsData(provinceName: String): Either<CustomException, List<TownGeoRef>> {
-        return requestData<TownsQuery>(townsDataUrl, mapOf("provincia" to provinceName, "max" to maxMatches)).map { it.matches }
+    fun requestTownsData(provinceName: String, townsNames: List<String>): Either<CustomException, List<TownGeoRef>> {
+        val res = httpPost {
+            url(townsDataUrl)
+            body {
+                json(createBody(provinceName, townsNames))
+            }
+        }
+        if(!res.isSuccessful) return Left(CustomException.Service.UnsuccessfulExternalRequestException("GeoRef", res.code()))
+        if(res.body() == null) return Left(CustomException.Service.InvalidExternalResponseException("Request: POST $townsDataUrl returned with null"))
+        val georefResponse = mapper.readValue<GeoRefTownResponse>(res.body()!!.string())
+        return Right(georefResponse.results.map { it.towns.first() })
     }
 
-    fun requestTownsData(provinceName: String, amount: Int): Either<CustomException, List<TownGeoRef>> =
-        self!!.requestTownsData(provinceName).map { it.take(amount) }
+    private fun createBody(province: String, townsNames: List<String>): String {
+        val towns = townsNames.map { GeoRefTownBodyParams(province, it) }
+        return mapper.writeValueAsString(GeoRefTownRequest(towns))
+    }
+
+
 }

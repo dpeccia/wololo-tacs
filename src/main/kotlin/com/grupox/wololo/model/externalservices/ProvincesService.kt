@@ -42,8 +42,9 @@ class ProvincesService {
                     TownGeoJSONInfo(
                         type = "Feature",
                         properties = TownGeoJSONProperties(
-                            province = it.properties["provincia"] as String,
-                            town = it.properties["departamento"] as String
+                                province = it.properties["provincia"] as String,
+                                town = it.properties["departamento"] as String,
+                                bordering = it.properties["limitrofes"] as List<String>
                         ),
                         geometry = it.geometry
                     )
@@ -69,6 +70,28 @@ class ProvincesService {
         val byProvince = _townsGeoJSONs.filter { json -> json.features.any { it.properties.province == formattedProvinceName } }
         val formattedTownNames = townNames.map { formatTownName(it) }
         return byProvince.filter { json -> json.features.any { formattedTownNames.contains(it.properties.town) } }
+    }
+
+    fun getRandomBorderingTowns(provinceName: String, townAmount: Int): List<TownGeoJSONWithBordering> {
+        val formattedProvinceName = unaccent(provinceName).toUpperCase()
+        val byProvince = _townsGeoJSONs
+                .filter { json -> json.features.any { it.properties.province == formattedProvinceName } }
+                .map { TownGeoJSONProperties(formattedProvinceName, formatTownName(it.features.first().properties.town),
+                        it.features.first().properties.bordering.map { b -> formatTownName(b) }) }
+        val randomTown = byProvince.shuffled().first()
+        val towns = listOf(TownGeoJSONWithBordering(randomTown.town, randomTown.bordering))
+        return getTownsRecursive(towns.first(), byProvince, towns, townAmount - 1)
+    }
+
+    private fun getTownsRecursive(seed: TownGeoJSONWithBordering, towns: List<TownGeoJSONProperties>, result: List<TownGeoJSONWithBordering>, townAmount: Int): List<TownGeoJSONWithBordering> {
+        if(townAmount == 0) return result
+        var borderingTowns = seed.borderingTowns.map { btown -> TownGeoJSONWithBordering(btown, towns.find { it.town == btown }!!.bordering) }
+        if(borderingTowns.size > townAmount)
+            borderingTowns = borderingTowns.take(townAmount)
+        val res = result + (borderingTowns - result.intersect(borderingTowns))
+        val townQty = townAmount - (borderingTowns - result.intersect(borderingTowns)).size
+        val nextSeed = borderingTowns.shuffled().find { t -> t.borderingTowns.any { !res.map{ r -> r.town}.contains(it) } }!!
+        return getTownsRecursive(nextSeed, towns, res, townQty)
     }
 
     private fun formatLine(line: String): String =
@@ -104,8 +127,10 @@ class ProvincesService {
     private fun formatTownName(townName: String) = unpunctuate(unaccent(townName)).toUpperCase()
 }
 
-data class TownGeoJSONProperties(val province: String, val town: String)
+data class TownGeoJSONProperties(val province: String, val town: String, val bordering: List<String>)
 
 data class TownGeoJSONInfo(val type: String, val properties: TownGeoJSONProperties, val geometry: GeoJsonObject)
 
 data class TownGeoJSON(val type: String, val features: List<TownGeoJSONInfo>)
+
+data class TownGeoJSONWithBordering(val town: String, val borderingTowns: List<String>)
