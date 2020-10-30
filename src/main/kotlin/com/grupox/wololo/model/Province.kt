@@ -73,11 +73,21 @@ class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: Strin
         townsFrom(user).forEach { it.unlock() }
     }
 
+    private fun areNotBorderingTowns(town: Town, otherTown: Town) = !town.borderingTowns.contains(otherTown.name)
+
     private fun checkIllegalMovements(user: User, fromTown: Town, toTown: Town) {
         when {
             toTown.id == fromTown.id -> throw IllegalGauchoMovement("You can´t move gauchos from a town to itself")
             !fromTown.isFrom(user) || !toTown.isFrom(user) -> throw IllegalGauchoMovement("You only can move gauchos between your current towns")
+            areNotBorderingTowns(fromTown, toTown) -> throw IllegalGauchoMovement("You only can move gauchos between towns that are bordering")
             toTown.isLocked -> throw IllegalGauchoMovement("You only can move gauchos to a town that is unlocked")
+        }
+    }
+
+    private fun checkIllegalAttacks(user: User, attacker: Town, defender: Town) {
+        when {
+            !attacker.isFrom(user) || defender.isFrom(user) -> throw IllegalAttack("You only can attack from your town to an enemy town")
+            areNotBorderingTowns(attacker, defender) -> throw IllegalAttack("You only can attack a bordering town")
         }
     }
 
@@ -92,8 +102,7 @@ class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: Strin
     fun attackTown(user: User, attackForm: AttackForm) {
         val attacker = this.getTownById(attackForm.from).getOrThrow()
         val defender = this.getTownById(attackForm.to).getOrThrow()
-        if(!attacker.isFrom(user) || defender.isFrom(user))
-            throw IllegalAttack("You only can attack from your town to an enemy town")
+        checkIllegalAttacks(user, attacker, defender)
         val attackerQtyBeforeAttack = attacker.gauchos
         val multDist = multDistance(attacker, defender)
         val multAlt = multAltitude(defender)
