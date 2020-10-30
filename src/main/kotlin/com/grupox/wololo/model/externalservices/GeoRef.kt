@@ -7,8 +7,13 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Coordinates
+import io.github.rybalkinsd.kohttp.client.client
+import io.github.rybalkinsd.kohttp.client.defaultHttpClient
+import io.github.rybalkinsd.kohttp.client.fork
 import io.github.rybalkinsd.kohttp.dsl.httpPost
 import io.github.rybalkinsd.kohttp.ext.url
+import io.github.rybalkinsd.kohttp.interceptors.RetryInterceptor
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Service
@@ -39,7 +44,7 @@ data class GeoRefTownResults (
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TownGeoRef(
         @JsonProperty("id") val id: Int,
-        @JsonProperty("nombre") val name: String,
+        @JsonProperty("nombre") var name: String,
         @JsonProperty("centroide") val coordinates: Coordinates
 )
 
@@ -49,13 +54,22 @@ class GeoRef {
     private val townsDataUrl = "https://apis.datos.gob.ar/georef/api/departamentos"
     private val mapper = jacksonObjectMapper()
 
+    @Cacheable("withTimeToLive")
     fun requestTownsData(provinceName: String, townsNames: List<String>): Either<CustomException, List<TownGeoRef>> {
         val res = httpPost {
             url(townsDataUrl)
             body {
                 json(createBody(provinceName, townsNames))
             }
+            client {
+                defaultHttpClient.fork {
+                    interceptors {
+                        +RetryInterceptor()
+                    }
+                }
+            }
         }
+
         if(!res.isSuccessful) return Left(CustomException.Service.UnsuccessfulExternalRequestException("GeoRef", res.code()))
         if(res.body() == null) return Left(CustomException.Service.InvalidExternalResponseException("Request: POST $townsDataUrl returned with null"))
         val georefResponse = mapper.readValue<GeoRefTownResponse>(res.body()!!.string())

@@ -7,6 +7,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.grupox.wololo.configs.properties.PixabayProperties
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.formatLine
+import com.grupox.wololo.model.helpers.formatTownName
+import com.grupox.wololo.model.helpers.unaccent
 import org.geojson.FeatureCollection
 import org.geojson.GeoJsonObject
 import org.springframework.beans.factory.annotation.Autowired
@@ -96,38 +99,6 @@ class ProvincesService {
         nextSeed.wasSeed = true
         return getTownsRecursive(nextSeed, towns, res, townQty)
     }
-
-    private fun formatLine(line: String): String =
-            line.substringBefore('.')
-                    .removeSurrounding(" ")
-                    .replace('_', ' ')
-                    .toLowerCase()
-                    .split(' ')
-                    .joinToString(" ") { if (it.length > 3) it.capitalize() else it }
-                    .capitalize()
-
-    private fun unaccent(str: String): String {
-        return str.map { unaccentChar(it) }.joinToString("")
-    }
-
-    private fun unaccentChar(char: Char): Char {
-        val escapeRegex = "[ñÑ]".toRegex()
-        val asString = char.toString()
-
-        if(asString.matches(escapeRegex))
-            return char
-
-        val regexUnaccent = "\\p{InCombiningDiacriticalMarks}+".toRegex()
-        val temp = Normalizer.normalize(asString, Normalizer.Form.NFD)
-        return regexUnaccent.replace(temp, "")[0]
-    }
-
-    private fun unpunctuate(str: String): String {
-        val regexPunctuation = "[.,;]".toRegex()
-        return regexPunctuation.replace(str, "")
-    }
-
-    fun formatTownName(townName: String) = unpunctuate(unaccent(townName)).toUpperCase()
 }
 
 data class TownGeoJSONProperties(val province: String, val town: String, val bordering: List<String>)
