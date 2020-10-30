@@ -127,9 +127,12 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
             val townsData = !geoRef.requestTownsData(form.provinceName, townsGeoJson.map { it.town })
 
             val towns = townsData.map { data ->
-                Town.new(data.name, !topoData.requestElevation(data.coordinates), data.coordinates, !pixabay.requestTownImage(data.name))
+                Town.new(ProvincesService().formatTownName(data.name),
+                        !topoData.requestElevation(data.coordinates),
+                        data.coordinates, !pixabay.requestTownImage(data.name),
+                townsGeoJson.find { it.town == ProvincesService().formatTownName(data.name) }!!.borderingTowns)
             }
-            val province = Province(form.provinceName, ArrayList(towns), provincesService.getUrl(form.provinceName))
+            val province = Province(ProvincesService().formatTownName(form.provinceName), ArrayList(towns), provincesService.getUrl(form.provinceName))
             Game.new(users, province)
         }.getOrThrow()
 

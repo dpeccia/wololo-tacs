@@ -59,6 +59,7 @@ class GeoRef {
         if(!res.isSuccessful) return Left(CustomException.Service.UnsuccessfulExternalRequestException("GeoRef", res.code()))
         if(res.body() == null) return Left(CustomException.Service.InvalidExternalResponseException("Request: POST $townsDataUrl returned with null"))
         val georefResponse = mapper.readValue<GeoRefTownResponse>(res.body()!!.string())
+        if(georefResponse.results.map { it.towns }.any { it.isEmpty() }) return Left(CustomException.Service.InvalidExternalResponseException("Request: POST $townsDataUrl returned with null"))
         return Right(georefResponse.results.map { it.towns.first() })
     }
 
