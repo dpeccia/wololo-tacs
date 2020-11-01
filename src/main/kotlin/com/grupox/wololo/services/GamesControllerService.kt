@@ -162,7 +162,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
 
             townsWithBorderingAndCoordinates.zip(townsWithElevationSortedByCoord) {
                 mergedTown, topoDataTown ->
-                    Town.new(mergedTown.name, topoDataTown.elevation, mergedTown.coordinates, !pixabay.requestTownImage(mergedTown.name), mergedTown.borderingTowns)
+                    Town.new(mergedTown.name, topoDataTown.elevation, mergedTown.borderingTowns, mergedTown.coordinates, !pixabay.requestTownImage(mergedTown.name))
             }
         }
     }
