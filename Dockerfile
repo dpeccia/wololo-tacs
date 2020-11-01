@@ -4,7 +4,7 @@ FROM openjdk:11-jdk as BUILD
 
 COPY . /src
 WORKDIR /src
-RUN ./gradlew build --stacktrace
+RUN ./gradlew build --stacktrace -x test
 
 FROM openjdk:11-jre
 
