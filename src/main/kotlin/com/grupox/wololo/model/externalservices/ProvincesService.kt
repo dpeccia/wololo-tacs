@@ -1,8 +1,6 @@
 package com.grupox.wololo.model.externalservices
 
-import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.grupox.wololo.configs.properties.PixabayProperties
@@ -32,7 +30,7 @@ class ProvincesService {
     @Autowired
     private lateinit var env: Environment
 
-    private lateinit var _townsGeoJSONs: List<TownGeoJSON>
+    lateinit var _townsGeoJSONs: List<TownGeoJSON>
 
     init {
         val jsonString: String = File("src/main/resources/departamentos-argentina.json").readText(Charsets.UTF_8)
@@ -75,15 +73,19 @@ class ProvincesService {
         return byProvince.filter { json -> json.features.any { formattedTownNames.contains(it.properties.town) } }
     }
 
-    fun getRandomBorderingTowns(provinceName: String, townAmount: Int): List<TownGeoJSONWithBordering> {
+    fun getRandomBorderingTowns(provinceName: String, townAmount: Int): Either<CustomException, List<TownGeoJSONWithBordering>> {
         val formattedProvinceName = unaccent(provinceName).toUpperCase()
         val byProvince = _townsGeoJSONs
                 .filter { json -> json.features.any { it.properties.province == formattedProvinceName } }
                 .map { TownGeoJSONProperties(formattedProvinceName, formatTownName(it.features.first().properties.town),
                         it.features.first().properties.bordering.map { b -> formatTownName(b) }) }
+        if(byProvince.size < townAmount) return Left(CustomException.BadRequest.NotEnoughTownsException(provinceName, townAmount, byProvince.size))
         val randomTown = byProvince.shuffled().first()
         val towns = listOf(TownGeoJSONWithBordering(randomTown.town, randomTown.bordering, true))
-        return getTownsRecursive(towns.first(), byProvince, towns, townAmount - 1)
+        val result = getTownsRecursive(towns.first(), byProvince, towns, townAmount - 1)
+        val resultAsStrings = result.map { it.town }
+        result.forEach { t -> t.borderingTowns = t.borderingTowns.filter { resultAsStrings.contains(it) } }
+        return Right(result)
     }
 
     private fun getTownsRecursive(seed: TownGeoJSONWithBordering, towns: List<TownGeoJSONProperties>, result: List<TownGeoJSONWithBordering>, townAmount: Int): List<TownGeoJSONWithBordering> {
@@ -107,4 +109,4 @@ data class TownGeoJSONInfo(val type: String, val properties: TownGeoJSONProperti
 
 data class TownGeoJSON(val type: String, val features: List<TownGeoJSONInfo>)
 
-data class TownGeoJSONWithBordering(val town: String, val borderingTowns: List<String>, var wasSeed: Boolean = false)
+data class TownGeoJSONWithBordering(val town: String, var borderingTowns: List<String>, var wasSeed: Boolean = false)

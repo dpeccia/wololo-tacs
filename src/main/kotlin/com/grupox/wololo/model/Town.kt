@@ -9,7 +9,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats, val borderingTowns: List<String>) : Requestable {
+class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats, var borderingTowns: List<String>) : Requestable {
     @DBRef
     var owner: User? = null
 

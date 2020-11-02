@@ -90,6 +90,16 @@ class ProvinceTests {
         }
 
         @Test
+        fun `user1 cannot move gauchos to a town that isnt bordering`() {
+            town1.owner = user1
+            town2.owner = user1
+            town2.borderingTowns = listOf()
+            town1.borderingTowns = listOf()
+            assertThrows<CustomException.Forbidden.IllegalGauchoMovement>
+            { province.moveGauchosBetweenTowns(user1, MovementForm(town1.id, town2.id,2)) }
+        }
+
+        @Test
         fun `successfully move 3 gauchos from town1 to town2 leaves town1 with 7 gauchos and town2 with 23 gauchos`() {
             town1.owner = user1
             town2.owner = user1
@@ -199,6 +209,15 @@ class ProvinceTests {
         fun `minDistance in Jujuy is the distance between El Condor and Cangrejillos`() { // checked with Google Maps manually
             assertThat(jujuy.minDistance).isEqualTo(jujuy.distanceBetween(elCondor, cangrejillos))
             assertThat(round(jujuy.minDistance!!)).isEqualTo(16882.0)
+        }
+
+        @Test
+        fun `user1 cannot atack a town that is not bordering`() {
+            yavi.gauchos = 5
+            abraPampa.gauchos = 4
+            yavi.borderingTowns = listOf()
+            abraPampa.borderingTowns = listOf()
+            assertThrows<CustomException.Forbidden.IllegalAttack>{ jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id)) }
         }
 
         @Test

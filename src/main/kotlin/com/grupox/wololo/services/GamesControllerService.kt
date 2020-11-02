@@ -145,7 +145,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
 
     private fun getRandomTowns(form: GameForm): Either<CustomException, List<Town>> {
         return Either.fx {
-            val townsGeoJson = provincesService.getRandomBorderingTowns(form.provinceName, form.townAmount)
+            val townsGeoJson = !provincesService.getRandomBorderingTowns(form.provinceName, form.townAmount)
             val townsWithCoordinates = !geoRef.requestTownsData(form.provinceName, townsGeoJson.map { it.town })
             val townsWithElevation = !topoData.requestElevation(townsWithCoordinates.map { it.coordinates })
 
@@ -157,8 +157,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
                 geojson, georef -> MergedGeoRefGeoJsonTown(geojson.town, georef.coordinates, geojson.borderingTowns)
             }.sortedWith(compareBy({ it.coordinates.latitude }, { it.coordinates.longitude }))
 
-            val townsWithElevationSortedByCoord =
-                    townsWithElevation.sortedWith(compareBy({ it.location.lat }, { it.location.lng }))
+            val townsWithElevationSortedByCoord = townsWithElevation.sortedWith(compareBy({ it.location.lat }, { it.location.lng }))
 
             townsWithBorderingAndCoordinates.zip(townsWithElevationSortedByCoord) {
                 mergedTown, topoDataTown ->
