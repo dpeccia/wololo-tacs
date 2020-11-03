@@ -58,6 +58,7 @@ class GamesControllerTest {
         doReturn(users).`when`(repoUsers).findAll()
         doReturn(Optional.of(user1)).`when`(repoUsers).findByIsAdminFalseAndId(user1.id)
         doReturn(Optional.of(user2)).`when`(repoUsers).findByIsAdminFalseAndId(user2.id)
+        doReturn(Optional.of(user3)).`when`(repoUsers).findByIsAdminFalseAndId(user3.id)
         doReturn(Optional.of(game1)).`when`(repoGames).findById(game1.id)
         doReturn(Optional.of(game2)).`when`(repoGames).findById(game2.id)
         doReturn(Optional.of(game3)).`when`(repoGames).findById(game3.id)
@@ -90,9 +91,28 @@ class GamesControllerTest {
 
         @Test
         fun `A valid turn finish should change the turn to the next player`() {
-            game1.turn = user1
-            val gameDTO = gamesControllerService.finishTurn(game1.turn.id, game1.id)
-            assertThat(gameDTO.turnId).isEqualTo(user3.id.toHexString())
+            val initialPlayer = game1.turn
+            val gameDTO = gamesControllerService.finishTurn(initialPlayer.id, game1.id)
+            assertThat(gameDTO.turnId).isNotEqualTo(initialPlayer.id.toHexString())
+        }
+
+        @Test
+        fun `in a 2 player game, finishing turn twice results in the initial player's turn`() {
+            val twoPlayerGame = game1
+            val initialPlayer = twoPlayerGame.turn
+            gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            val dto = gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            assertThat(initialPlayer.id.toHexString()).isEqualTo(dto.turnId)
+        }
+
+        @Test
+        fun `in a 2 player me, finishing turn three times results in the second player's turn` () {
+            val twoPlayerGame = game1
+            val initialPlayer = twoPlayerGame.turn
+            gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            val dto = gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            assertThat(initialPlayer.id.toHexString()).isNotEqualTo(dto.turnId)
         }
     }
 
