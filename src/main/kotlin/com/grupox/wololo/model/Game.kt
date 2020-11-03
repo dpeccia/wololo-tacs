@@ -55,7 +55,7 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
     }
 
     private fun changeTurn() {
-        val playersIterator = players.listIterator(players.indexOf(turn) + 1)
+        val playersIterator = players.listIterator(players.map { it.id }.indexOf(turn.id) + 1)
         turn = if(playersIterator.hasNext())
             playersIterator.next()
         else
