@@ -21,16 +21,17 @@ data class LocationData(val lat: Float, val lng: Float)
 
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-class TopoData : HttpService("TopoData") {
-    private val baseUrl: String = "http://api.opentopodata.org/v1/test-dataset"
+class TopoData {
+    private val baseUrl: String = "https://api.opentopodata.org/v1/test-dataset"
+    var httpService = HttpService("TopoData")
 
     @Cacheable("withTimeToLive")
     fun requestElevation(coordinatesList: List<Coordinates>): Either<CustomException, List<ElevationData>> {
         val coordinates = coordinatesList.joinToString("|") { "${it.latitude},${it.longitude}" }
-        val queryResponse: Either<CustomException, TopoDataResponse> = requestData(baseUrl, mapOf("locations" to coordinates))
+        val queryResponse: Either<CustomException, TopoDataResponse> = httpService.requestData(baseUrl, mapOf("locations" to coordinates))
 
         return queryResponse
-                .filterOrOther({ it.results.isNotEmpty() }, { CustomException.Service.InvalidExternalResponseException("Theres is no data for coordinates: $coordinates in $apiName API") })
+                .filterOrOther({ it.results.isNotEmpty() }, { CustomException.Service.InvalidExternalResponseException("Theres is no data for coordinates: $coordinates in TopoData API") })
                 .map { it.results }
     }
 }

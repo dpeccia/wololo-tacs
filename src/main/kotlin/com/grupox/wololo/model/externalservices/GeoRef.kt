@@ -13,11 +13,13 @@ import io.github.rybalkinsd.kohttp.client.fork
 import io.github.rybalkinsd.kohttp.dsl.httpPost
 import io.github.rybalkinsd.kohttp.ext.url
 import io.github.rybalkinsd.kohttp.interceptors.RetryInterceptor
+import okhttp3.Response
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.ResponseBody
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GeoRefTownRequest (
@@ -56,26 +58,29 @@ class GeoRef {
 
     @Cacheable("withTimeToLive")
     fun requestTownsData(provinceName: String, townsNames: List<String>): Either<CustomException, List<TownGeoRef>> {
-        val res = httpPost {
-            url(townsDataUrl)
-            body {
-                json(createBody(provinceName, townsNames))
-            }
-            client {
-                defaultHttpClient.fork {
-                    interceptors {
-                        +RetryInterceptor()
-                    }
-                }
-            }
-        }
+        val res = postDataToGeoRef(provinceName, townsNames)
 
         if(!res.isSuccessful) return Left(CustomException.Service.UnsuccessfulExternalRequestException("GeoRef", res.code()))
         if(res.body() == null) return Left(CustomException.Service.InvalidExternalResponseException("Request: POST $townsDataUrl returned with null"))
         val georefResponse = mapper.readValue<GeoRefTownResponse>(res.body()!!.string())
+        res.close()
         if(georefResponse.results.map { it.towns }.any { it.isEmpty() }) return Left(CustomException.Service.InvalidExternalResponseException("Request: POST $townsDataUrl returned with null"))
         return Right(georefResponse.results.map { it.towns.first() })
     }
+
+    fun postDataToGeoRef(provinceName: String, townsNames: List<String>): Response =
+            httpPost { url(townsDataUrl)
+                body {
+                    json(createBody(provinceName, townsNames))
+                }
+                client {
+                    defaultHttpClient.fork {
+                        interceptors {
+                            +RetryInterceptor()
+                        }
+                    }
+                }
+            }
 
     private fun createBody(province: String, townsNames: List<String>): String {
         val towns = townsNames.map { GeoRefTownBodyParams(province, it) }
