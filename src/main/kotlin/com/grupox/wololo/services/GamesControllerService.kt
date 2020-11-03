@@ -1,11 +1,8 @@
 package com.grupox.wololo.services
 
 import arrow.core.Either
-import arrow.core.extensions.either.applicative.applicative
 import arrow.core.extensions.fx
 import arrow.core.extensions.list.functorFilter.filter
-import arrow.core.extensions.list.traverse.sequence
-import arrow.core.fix
 import arrow.optics.extensions.list.cons.cons
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
@@ -13,12 +10,10 @@ import com.grupox.wololo.model.externalservices.*
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
-import mu.KotlinLogging
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 
 @Service
 class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val repoGames: RepoGames) {

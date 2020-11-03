@@ -1,6 +1,5 @@
 package com.grupox.wololo.controller_tests
 
-import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.AttackForm
@@ -9,14 +8,10 @@ import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
-import io.mockk.every
-import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
-import org.bson.types.ObjectId
 import org.junit.jupiter.api.*
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
-import org.mockito.Mockito.*
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.doReturn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
@@ -67,6 +62,7 @@ class GamesControllerTest {
         doReturn(Optional.of(game2)).`when`(repoGames).findById(game2.id)
         doReturn(Optional.of(game3)).`when`(repoGames).findById(game3.id)
         doReturn(Optional.of(game4)).`when`(repoGames).findById(game4.id)
+        doReturn(game1).`when`(repoGames).save(game1)
         doReturn(games.filter { it.isParticipating(user1) }).`when`(repoGames).findAllByPlayersContains(user1)
         doAnswer { throw CustomException.NotFound.GameNotFoundException() }.`when`(repoGames).findById(gameNotInRepo.id)
         doAnswer { throw CustomException.NotFound.UserNotFoundException() }.`when`(repoUsers).findByIsAdminFalseAndId(userNotInRepo.id)
@@ -90,6 +86,13 @@ class GamesControllerTest {
         fun `trying to finish turn with a user that exists and a game that exists doesnt throw an Exception`() {
             game1.turn = user1
             assertDoesNotThrow { gamesControllerService.finishTurn(user1.id, game1.id) }
+        }
+
+        @Test
+        fun `A valid turn finish should change the turn to the next player`() {
+            game1.turn = user1
+            val gameDTO = gamesControllerService.finishTurn(game1.turn.id, game1.id)
+            assertThat(gameDTO.turnId).isEqualTo(user3.id.toHexString())
         }
     }
 

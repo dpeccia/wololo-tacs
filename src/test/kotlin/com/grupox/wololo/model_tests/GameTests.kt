@@ -345,6 +345,26 @@ class GameTests {
         }
 
         @Test
+        fun `in a 2 player game, finishing turn twice results in the initial player's turn`() {
+            val twoPlayerGame = Game.new(listOf(user1, user2), Province("a_province", arrayListOf(town1, town2, town3, town4)))
+            val initialPlayer = twoPlayerGame.turn
+            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            assertEquals(initialPlayer, twoPlayerGame.turn)
+        }
+
+
+        @Test
+        fun `in a 2 player me, finishing turn three times results in the second player's turn` () {
+            val twoPlayerGame = Game.new(listOf(user1, user2), Province("a_province", arrayListOf(town1, town2, town3, town4)))
+            val initialPlayer = twoPlayerGame.turn
+            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            assertNotEquals(initialPlayer, twoPlayerGame.turn)
+        }
+
+        @Test
         fun `if the last player of the first round, finishes his turn and didnt win, turn is changed to first player again`() {
             val user3 = User("user3", "new_mail", "sdaddraf")
             val game2 = Game.new(listOf(user1, user2, user3), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
