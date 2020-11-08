@@ -344,8 +344,7 @@ class GameTests {
 
         @Test
         fun `if the first player finishes his turn and he didnt win, turn is changed to next player`() {
-            val user3 = User("user3", "new_mail", "sdaddraf")
-            val game2 = Game.new(listOf(user1, user2, user3), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
+            val game2 = Game.new(listOf(user1, user2), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
             game2.turn = user1
             game2.finishTurn(user1)
             assertThat(game2.turn).isEqualTo(user2)
@@ -375,15 +374,17 @@ class GameTests {
         fun `if the last player of the first round, finishes his turn and didnt win, turn is changed to first player again`() {
             val user3 = User("user3", "new_mail", "sdaddraf")
             val game2 = Game.new(listOf(user1, user2, user3), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
-            game2.turn = user3
-            game2.finishTurn(user3)
-            assertThat(game2.turn).isEqualTo(user1)
+            val firstPlayer = game2.turn
+            game2.finishTurn(firstPlayer)
+            game2.finishTurn(game2.turn)
+            val lastPlayer = game2.turn
+            game2.finishTurn(lastPlayer)
+            assertThat(game2.turn).isEqualTo(firstPlayer)
         }
 
         @Test
-        fun `if the turn has changed, the gauchos quantity of the towns from the next player are updated`() {
-            val user3 = User("user3", "new_mail", "sdaddraf")
-            val game2 = Game.new(listOf(user1, user2, user3), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
+        fun `if the turn has changed, the gauchos quantity of the towns of the next player are updated`() {
+            val game2 = Game.new(listOf(user1, user2), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
             game2.turn = user1
             val gauchosQtysOfUser2BeforeHisTurnStarts = game2.province.towns.filter { it.owner == user2 }.map { it.gauchos }
             game2.finishTurn(user1)

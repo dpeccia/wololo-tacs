@@ -6,12 +6,10 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.*
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.PersistenceConstructor
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 
 @Document(collection = "Games")
 class Game(@DBRef var players: List<User>, val province: Province, var status: Status) : Requestable {
@@ -22,8 +20,11 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
 
     var playerAmount: Int = players.size
 
-    @DBRef
-    lateinit var turn: User
+    private val turnManager: TurnManager<ObjectId> = TurnManager(this.players.map { it.id }.shuffled())
+
+    var turn: User
+        get() = this.players.find { it.id == turnManager.current }!!
+        set(value) { this.turnManager.current = value.id }
 
     var date: Date = Date.from(Instant.now())
 
@@ -49,18 +50,13 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
     }
 
     private fun startGame() {
-        turn = players.shuffled().first()
         province.addGauchosToAllTowns()
         status = Status.ONGOING
     }
 
     private fun changeTurn() {
-        val playersIterator = players.listIterator(players.map { it.id }.indexOf(turn.id) + 1)
-        turn = if(playersIterator.hasNext())
-            playersIterator.next()
-        else
-            players.first()
-        province.addGauchosToAllTownsFrom(turn)
+        this.turnManager.changeTurn()
+        province.addGauchosToAllTownsFrom(this.turn)
     }
 
     private fun checkForbiddenAction(user: User) {
