@@ -27,4 +27,15 @@ class User(val username: String, mail: String, private var password: String, val
             username = username,
             stats = stats
         )
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is User) {
+            return false
+        }
+        return id == other.id
+    }
 }
