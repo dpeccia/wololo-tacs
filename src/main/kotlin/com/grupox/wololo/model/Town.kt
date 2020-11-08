@@ -74,8 +74,8 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates, val elev
             specialization = specialization.toString(),
             gauchos = gauchos,
             isLocked = isLocked,
-            gauchosGeneratedByDefense =  stats.gauchosGeneratedByDefense,
-            gauchosGeneratedByProduction =  stats.gauchosGeneratedByProduction
+            gauchosGeneratedByDefense = stats.gauchosGeneratedByDefense,
+            gauchosGeneratedByProduction = stats.gauchosGeneratedByProduction
         )
 }
 

@@ -91,9 +91,10 @@ class GamesControllerTest {
 
         @Test
         fun `A valid turn finish should change the turn to the next player`() {
-            val initialPlayer = game1.turn
+            val initialPlayer = user3
+            game1.turn = initialPlayer
             val gameDTO = gamesControllerService.finishTurn(initialPlayer.id, game1.id)
-            assertThat(gameDTO.turnId).isNotEqualTo(initialPlayer.id.toHexString())
+            assertThat(gameDTO.turnId).isEqualTo(user1.id.toHexString())
         }
 
         @Test

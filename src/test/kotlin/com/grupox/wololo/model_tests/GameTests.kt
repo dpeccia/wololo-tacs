@@ -32,6 +32,13 @@ class GameTests {
     @Nested
     inner class GameCreation {
         @Test
+        fun `creating a 2 player game with two towns distributes them 1 for each player`() {
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(listOf(town1, town2))))
+            val numberOfTownsAssignedToUser1: Int = game.province.towns.count { it.owner?.id == user1.id }
+            assertEquals(numberOfTownsAssignedToUser1, 1)
+        }
+
+        @Test
         fun `creating a game distributes towns with the available players evenly`() {
             val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
 
