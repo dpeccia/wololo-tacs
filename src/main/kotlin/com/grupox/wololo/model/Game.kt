@@ -39,7 +39,6 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
         }
     }
 
-    // TODO falta chequear que nunca se cree un juego con un (MaxAltitude - MinAltitude) = 0 || (MaxDist - MinDist) = 0
     private fun checkIfIllegal(){
         if (playerAmount < 2 || playerAmount > 4) throw CustomException.BadRequest.IllegalGameException("There is not enough players. Actual: $playerAmount, but expected an amount between 2 (inclusive) and 4 (inclusive)")
         if (townsAmount < playerAmount) throw CustomException.BadRequest.IllegalGameException("There is not enough towns for the given players")
