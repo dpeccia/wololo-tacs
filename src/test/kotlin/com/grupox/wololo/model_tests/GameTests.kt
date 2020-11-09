@@ -255,6 +255,31 @@ class GameTests {
     }
 
     @Nested
+    inner class Surrender {
+        val twoPlayerGame = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
+        val multiplePlayersGame = Game.new(fourPlayerList, Province("a_province", ArrayList(towns)))
+
+        @Test
+        fun `surrender a game leaving only one player remaining cancels the game`() {
+            twoPlayerGame.surrender(user1)
+            assertThat(twoPlayerGame.status).isEqualTo(Status.CANCELED)
+        }
+
+        @Test
+        fun `surrender a game leaving more than on players remaining continues the game`() {
+            multiplePlayersGame.surrender(user1)
+            assertThat(multiplePlayersGame.status).isEqualTo(Status.ONGOING)
+        }
+
+        @Test
+        fun `surrender a game leaving more than on players remaining makes the quiting player's towns become neutral`() {
+            val shouldBeNeutralTowns = multiplePlayersGame.province.townsFrom(user1)
+            multiplePlayersGame.surrender(user1)
+            assertThat(shouldBeNeutralTowns).allMatch { it.owner == null }
+        }
+    }
+
+    @Nested
     inner class Turn {
         private val towns: List<Town> = listOf(town1, town2)
         private val game = Game.new(listOf(user1, user99), Province("a_province", ArrayList(towns)))

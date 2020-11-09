@@ -51,7 +51,7 @@ class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: Strin
     private fun multAltitude(defender: Town): Double =
             1 + ((defender.elevation - minAltitude!!) / (2 * (maxAltitude!! - minAltitude!!)))
 
-    private fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
+    fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
 
     fun allOccupiedTownsAreFrom(user: User): Boolean =
             towns.filter { it.owner != null }.all { it.isFrom(user) }

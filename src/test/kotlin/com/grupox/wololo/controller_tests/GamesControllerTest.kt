@@ -175,8 +175,8 @@ class GamesControllerTest {
     @Nested
     inner class Surrender {
         @Test
-        fun `surrender in a game with a user that doesnt belongs to the game throws MemberNotFoundException`() {
-            assertThrows<CustomException.NotFound.MemberNotFoundException>
+        fun `surrender in a game with a user that doesnt belongs to the game throws NotAMemberException`() {
+            assertThrows<CustomException.Forbidden.NotAMemberException>
             { assertThat(gamesControllerService.surrender(game4.id, user1.id)) }
         }
 
