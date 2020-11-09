@@ -32,5 +32,5 @@ sealed class State {
 
     abstract fun diff(other: State): Change
 
-    protected fun <T>differentiate(a: T, b: T) = if(a != b) a else null
+    protected fun <T>differentiate(final: T, initial: T) = if(final != initial) final else null
 }
