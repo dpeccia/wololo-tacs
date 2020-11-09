@@ -1,15 +1,17 @@
 package com.grupox.wololo.model
 
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.ActionMutable
 import com.grupox.wololo.model.helpers.DTO
 import com.grupox.wololo.model.helpers.Requestable
+import com.grupox.wololo.model.helpers.State
 import org.springframework.data.mongodb.core.mapping.DBRef
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats) : Requestable {
+class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats) : Requestable, ActionMutable {
     @DBRef
     var owner: User? = null
 
@@ -82,5 +84,13 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates, val elev
             gauchosGeneratedByDefense = stats.gauchosGeneratedByDefense,
             gauchosGeneratedByProduction = stats.gauchosGeneratedByProduction
         )
+
+    override fun state(): State.TownState =
+            State.TownState(
+                id = this.id,
+                ownerId = this.owner?.id,
+                specialization = this.specialization.toString(),
+                gauchos = this.gauchos
+            )
 }
 

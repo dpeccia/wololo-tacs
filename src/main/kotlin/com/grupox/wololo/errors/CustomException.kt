@@ -44,6 +44,7 @@ sealed class CustomException(message: String) : Exception(message), Requestable 
 
     sealed class InternalServer(message: String) : CustomException("Internal server: $message") {
         class TurnManagerParticipantException(id: String) : InternalServer("turn manager couldn't find a participant with id: $id")
+        class DiffException : InternalServer("Incomparable states")
     }
 
     override fun dto(): DTO.ExceptionDTO = DTO.ExceptionDTO(message) // Default

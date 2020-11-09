@@ -3,7 +3,6 @@ package com.grupox.wololo.model.helpers
 import com.grupox.wololo.model.Coordinates
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.Status
-import org.bson.types.ObjectId
 import java.util.*
 
 sealed class DTO {

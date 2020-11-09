@@ -26,27 +26,16 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     @Autowired
     lateinit var pixabay: Pixabay
     
-    fun surrender(gameId: ObjectId, userId: ObjectId): DTO.GameDTO {
-//        val game: Game = getGame(gameId)
-//        val user: User = game.getMember(userId).getOrThrow()
-//
-//        user.updateGamesLostStats()
-//        if (game.playerAmount <= 2) {
-//            game.players.filter { it.id != user.id }.map { it.updateGamesWonStats() }  // Update stats ganadores
-//            game.status = Status.CANCELED
-//        }
-//        val updatedGame = repoGames.save(game)
-//        return updatedGame.dto()
-        return this.play(gameId, userId) { game, user -> game.surrender(user) }
-    }
+    fun surrender(gameId: ObjectId, userId: ObjectId): Change.GameChange =
+            this.play(gameId, userId) { game, user -> game.surrender(user) }
 
-    fun finishTurn(userId: ObjectId, gameId: ObjectId): DTO.GameDTO =
+    fun finishTurn(userId: ObjectId, gameId: ObjectId): Change.GameChange =
             this.play(gameId, userId) { game, user -> game.finishTurn(user) }
 
-    fun moveGauchosBetweenTowns(userId: ObjectId, gameId: ObjectId, movementData: MovementForm): DTO.GameDTO =
+    fun moveGauchosBetweenTowns(userId: ObjectId, gameId: ObjectId, movementData: MovementForm): Change.GameChange =
             this.play(gameId, userId) { game, user -> game.moveGauchosBetweenTowns(user, movementData) }
 
-    fun attackTown(userId: ObjectId, gameId: ObjectId, attackData: AttackForm): DTO.GameDTO =
+    fun attackTown(userId: ObjectId, gameId: ObjectId, attackData: AttackForm): Change.GameChange =
             this.play(gameId, userId) { game, user -> game.attackTown(user, attackData) }
 
     fun getProvinces(): List<String> = provincesService.availableProvinces().getOrThrow()
@@ -121,7 +110,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
         return savedGame.dto()
     }
 
-    fun updateTownSpecialization(userId: ObjectId, gameId: ObjectId, townId: Int, newSpecialization: String): DTO.GameDTO =
+    fun updateTownSpecialization(userId: ObjectId, gameId: ObjectId, townId: Int, newSpecialization: String): Change.GameChange =
             this.play(gameId, userId) { game, user ->
                 when (newSpecialization.toUpperCase()) {
                     "PRODUCTION" -> game.changeTownSpecialization(user, townId, Production())
@@ -135,11 +124,13 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     private fun getUser(id: ObjectId): User =
             repoUsers.findByIsAdminFalseAndId(id).orElseThrow { CustomException.NotFound.UserNotFoundException() }
 
-    private fun play(gameId: ObjectId, userId: ObjectId, action: (Game, User) -> Unit): DTO.GameDTO {
+    private fun play(gameId: ObjectId, userId: ObjectId, action: (Game, User) -> Unit): Change.GameChange {
         val game = getGame(gameId)
         val user = getUser(userId)
+        val initialState = game.state()
         action(game, user)
         val updatedGame = repoGames.save(game)
-        return updatedGame.dto()
+        val finalState = updatedGame.state()
+        return finalState.diff(initialState)
     }
 }

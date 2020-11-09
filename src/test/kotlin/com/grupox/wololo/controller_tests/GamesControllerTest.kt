@@ -93,8 +93,8 @@ class GamesControllerTest {
         fun `A valid turn finish should change the turn to the next player`() {
             val initialPlayer = user3
             game1.turn = initialPlayer
-            val gameDTO = gamesControllerService.finishTurn(initialPlayer.id, game1.id)
-            assertThat(gameDTO.turnId).isEqualTo(user1.id.toHexString())
+            val gameChange = gamesControllerService.finishTurn(initialPlayer.id, game1.id)
+            assertThat(gameChange.deltaTurnId).isEqualTo(user1.id)
         }
 
         @Test
@@ -102,8 +102,8 @@ class GamesControllerTest {
             val twoPlayerGame = game1
             val initialPlayer = twoPlayerGame.turn
             gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
-            val dto = gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
-            assertThat(initialPlayer.id.toHexString()).isEqualTo(dto.turnId)
+            val gameChange = gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            assertThat(initialPlayer.id).isEqualTo(gameChange.deltaTurnId)
         }
 
         @Test
@@ -112,8 +112,8 @@ class GamesControllerTest {
             val initialPlayer = twoPlayerGame.turn
             gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
             gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
-            val dto = gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
-            assertThat(initialPlayer.id.toHexString()).isNotEqualTo(dto.turnId)
+            val gameChange = gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            assertThat(initialPlayer.id.toHexString()).isNotEqualTo(gameChange.deltaTurnId)
         }
     }
 

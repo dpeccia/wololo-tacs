@@ -13,7 +13,7 @@ import java.time.Instant
 import java.util.*
 
 @Document(collection = "Games")
-class Game(@DBRef var players: List<User>, val province: Province, var status: Status) : Requestable {
+class Game(@DBRef var players: List<User>, val province: Province, var status: Status) : Requestable, ActionMutable {
     @Id
     val id: ObjectId = ObjectId.get()
 
@@ -86,7 +86,6 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
         if(userWon(user)) updateStats(user) else changeTurn()
     }
 
-
     fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {
         checkForbiddenAction(user)
         val town = province.getTownById(townId).getOrThrow()
@@ -127,5 +126,13 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
             turnId = turn.id.toString(),
             playerIds = players.map { it.dto() },
             province = province.dto()
+        )
+
+    override fun state(): State.GameState =
+        State.GameState(
+                id = this.id,
+                status = this.status,
+                turnId = this.turn.id,
+                towns = this.province.towns.map { it.state() }
         )
 }

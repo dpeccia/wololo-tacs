@@ -69,14 +69,14 @@ class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Surrenders in a game (it becomes CANCELED)")
-    fun surrender(@PathVariable("id") id: String, request: HttpServletRequest): DTO.GameDTO {
+    fun surrender(@PathVariable("id") id: String, request: HttpServletRequest): Change.GameChange {
         val userId = checkAndGetUserId(request)
         return gamesControllerService.surrender(ObjectId(id), userId)
     }
 
     @PutMapping("/{id}/actions/turn")
     @ApiOperation(value = "Finishes the current Turn")
-    fun finishTurn(@PathVariable("id") id: String, request: HttpServletRequest): DTO.GameDTO {
+    fun finishTurn(@PathVariable("id") id: String, request: HttpServletRequest): Change.GameChange{
         val userId = checkAndGetUserId(request)
         return gamesControllerService.finishTurn(userId, ObjectId(id))
     }
@@ -86,7 +86,7 @@ class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
     fun moveGauchosBetweenTowns(
             @PathVariable("id") id: String,
             @RequestBody movementData: MovementForm,
-            request: HttpServletRequest): DTO.GameDTO {
+            request: HttpServletRequest): Change.GameChange {
         val userId = checkAndGetUserId(request)
         return gamesControllerService.moveGauchosBetweenTowns(userId, ObjectId(id), movementData)
     }
@@ -96,7 +96,7 @@ class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
     fun attackTown(
             @PathVariable("id") id: String,
             @RequestBody attackData: AttackForm,
-            request: HttpServletRequest): DTO.GameDTO {
+            request: HttpServletRequest): Change.GameChange {
         val userId = checkAndGetUserId(request)
         return gamesControllerService.attackTown(userId, ObjectId(id), attackData)
     }
@@ -107,7 +107,7 @@ class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
             @PathVariable("id") id: String,
             @PathVariable("idTown") townId: Int,
             @RequestBody newSpecialization: String,
-            request: HttpServletRequest): DTO.GameDTO {
+            request: HttpServletRequest): Change.GameChange {
         val userId = checkAndGetUserId(request)
         return gamesControllerService.updateTownSpecialization(userId, ObjectId(id), townId, newSpecialization)
     }
