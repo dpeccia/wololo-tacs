@@ -3,23 +3,24 @@ package com.grupox.wololo.model.helpers
 import com.grupox.wololo.model.Coordinates
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.Status
+import org.bson.types.ObjectId
 import java.util.*
 
 sealed class DTO {
     data class ExceptionDTO(val message: String?) : DTO()
 
     data class TownDTO(
-        val id: Int,
-        val name: String,
-        val coordinates: Coordinates,
-        val elevation: Double,
-        val imageUrl: String,
-        val ownerId: String,
-        val specialization: String,
-        val gauchos: Int,
-        val isLocked: Boolean,
-        val gauchosGeneratedByDefense : Int,
-        val gauchosGeneratedByProduction : Int
+            val id: ObjectId,
+            val name: String,
+            val coordinates: Coordinates,
+            val elevation: Double,
+            val imageUrl: String,
+            val ownerId: String,
+            val specialization: String,
+            val gauchos: Int,
+            val isLocked: Boolean,
+            val gauchosGeneratedByDefense : Int,
+            val gauchosGeneratedByProduction : Int
     ) : DTO()
 
     data class ProvinceDTO(

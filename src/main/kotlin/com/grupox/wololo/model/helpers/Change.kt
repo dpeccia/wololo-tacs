@@ -5,7 +5,7 @@ import org.bson.types.ObjectId
 
 sealed class Change {
     data class TownChange(
-        val id: Int,
+        val id: ObjectId,
         val deltaGauchos: Int,
         val deltaSpecialization: String?,
         val deltaOwnerId: ObjectId?

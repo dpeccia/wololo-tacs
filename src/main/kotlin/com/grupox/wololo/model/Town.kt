@@ -5,13 +5,18 @@ import com.grupox.wololo.model.helpers.ActionMutable
 import com.grupox.wololo.model.helpers.DTO
 import com.grupox.wololo.model.helpers.Requestable
 import com.grupox.wololo.model.helpers.State
+import org.bson.types.ObjectId
+import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.DBRef
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats) : Requestable, ActionMutable {
+class Town(val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats) : Requestable, ActionMutable {
+    @Id
+    val id: ObjectId = ObjectId.get()
+
     @DBRef
     var owner: User? = null
 
@@ -20,10 +25,9 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates, val elev
     var gauchos = 0
 
     companion object {
-        private val idGenerator: AtomicInteger = AtomicInteger(0)
         fun new(_name: String, _elevation: Double, _coordinates: Coordinates = Coordinates(0f,0f), _townImage: String = "",
                 _stats: TownStats = TownStats(0,0)): Town =
-                Town(idGenerator.incrementAndGet(), _name, _coordinates, _elevation, _townImage, _stats)
+                Town(_name, _coordinates, _elevation, _townImage, _stats)
     }
 
     fun isFrom(user: User) = owner?.id.toString() == user.id.toString()

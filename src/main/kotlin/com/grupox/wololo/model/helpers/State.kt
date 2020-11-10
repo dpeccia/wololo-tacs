@@ -5,8 +5,8 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Status
 import org.bson.types.ObjectId
 
-sealed class State {
-    class GameState(val id: ObjectId, val turnId: ObjectId, val status: Status, val towns: List<TownState>) : State() {
+sealed class State(val id: ObjectId) {
+    class GameState(id: ObjectId, val turnId: ObjectId, val status: Status, val towns: List<TownState>) : State(id) {
         override fun diff(other: State): Change.GameChange {
             if (other !is GameState || this.id != other.id) throw CustomException.InternalServer.DiffException()
             return Change.GameChange(
@@ -18,7 +18,7 @@ sealed class State {
         }
     }
 
-    class TownState(val id: Int, val ownerId: ObjectId?, val gauchos: Int, val specialization: String) : State() {
+    class TownState(id: ObjectId, val ownerId: ObjectId?, val gauchos: Int, val specialization: String) : State(id) {
         override fun diff(other: State): Change.TownChange {
             if (other !is TownState || this.id != other.id) throw CustomException.InternalServer.DiffException()
             return Change.TownChange(

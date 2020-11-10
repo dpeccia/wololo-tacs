@@ -45,7 +45,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
         return provincesService.townsGeoJSONs(province, townNames)
     }
     
-    fun getTownStats(gameId: ObjectId, townId: Int): DTO.TownDTO {
+    fun getTownStats(gameId: ObjectId, townId: ObjectId): DTO.TownDTO {
         val game = getGame(gameId)
         val town = game.province.getTownById(townId).getOrThrow()
         return town.dto()
@@ -110,7 +110,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
         return savedGame.dto()
     }
 
-    fun updateTownSpecialization(userId: ObjectId, gameId: ObjectId, townId: Int, newSpecialization: String): Change.GameChange =
+    fun updateTownSpecialization(userId: ObjectId, gameId: ObjectId, townId: ObjectId, newSpecialization: String): Change.GameChange =
             this.play(gameId, userId) { game, user ->
                 when (newSpecialization.toUpperCase()) {
                     "PRODUCTION" -> game.changeTownSpecialization(user, townId, Production())

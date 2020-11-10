@@ -86,7 +86,7 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
         if(userWon(user)) updateStats(user) else changeTurn()
     }
 
-    fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {
+    fun changeTownSpecialization(user: User, townId: ObjectId, specialization: Specialization) {
         checkForbiddenAction(user)
         val town = province.getTownById(townId).getOrThrow()
         if(!town.isFrom(user)) throw CustomException.Forbidden.NotYourTownException()

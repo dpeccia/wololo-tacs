@@ -105,21 +105,21 @@ class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
     @ApiOperation(value = "Updates the town specialization")
     fun updateTownSpecialization(
             @PathVariable("id") id: String,
-            @PathVariable("idTown") townId: Int,
+            @PathVariable("idTown") townId: String,
             @RequestBody newSpecialization: String,
             request: HttpServletRequest): Change.GameChange {
         val userId = checkAndGetUserId(request)
-        return gamesControllerService.updateTownSpecialization(userId, ObjectId(id), townId, newSpecialization)
+        return gamesControllerService.updateTownSpecialization(userId, ObjectId(id), ObjectId(townId), newSpecialization)
     }
 
     @GetMapping("/{id}/towns/{idTown}")
     @ApiOperation(value = "Gets the town stats and an image")
     fun getTownData(
             @PathVariable("id") id: String,
-            @PathVariable("idTown") idTown: Int,
+            @PathVariable("idTown") idTown: String,
             request: HttpServletRequest) : DTO.TownDTO {
         checkAndGetUserId(request)
-        return gamesControllerService.getTownStats(ObjectId(id), idTown)
+        return gamesControllerService.getTownStats(ObjectId(id), ObjectId(idTown))
     }
 
     @GetMapping("/provinces")

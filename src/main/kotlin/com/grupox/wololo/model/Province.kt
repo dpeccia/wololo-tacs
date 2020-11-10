@@ -7,11 +7,12 @@ import com.grupox.wololo.errors.CustomException.Forbidden.IllegalGauchoMovement
 import com.grupox.wololo.errors.CustomException.NotFound
 import com.grupox.wololo.errors.CustomException.NotFound.TownNotFoundException
 import com.grupox.wololo.model.helpers.*
+import org.bson.types.ObjectId
 import kotlin.math.*
 
 class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: String = "") : Requestable {
 
-    fun getTownById(id: Int): Either<NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { TownNotFoundException() }
+    fun getTownById(id: ObjectId): Either<NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { TownNotFoundException() }
 
     private fun altitudes() = towns.map { it.elevation }
 
