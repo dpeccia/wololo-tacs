@@ -8,6 +8,7 @@ import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
+import com.grupox.wololo.services.UsersControllerService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.mockito.Mockito.doAnswer
@@ -23,6 +24,9 @@ import java.util.*
 class GamesControllerTest {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
+
+    @Autowired
+    lateinit var usersControllerService: UsersControllerService
 
     @SpyBean
     lateinit var repoUsers: RepoUsers
@@ -55,6 +59,7 @@ class GamesControllerTest {
     @BeforeEach
     fun fixture() {
         doReturn(games).`when`(repoGames).findAll()
+        doReturn(users).`when`(repoUsers).findAllByIsAdminFalse()
         doReturn(users).`when`(repoUsers).findAll()
         doReturn(Optional.of(user1)).`when`(repoUsers).findByIsAdminFalseAndId(user1.id)
         doReturn(Optional.of(user2)).`when`(repoUsers).findByIsAdminFalseAndId(user2.id)
@@ -320,6 +325,53 @@ class GamesControllerTest {
             val anyGame = game2
             assertThrows<CustomException.NotFound.UserNotFoundException> { gamesControllerService.getGame(nonExistentUser.id, anyGame.id) }
         }
+    }
+
+    @Nested
+    inner class Admin {
+
+        @BeforeEach
+        fun fixtureAdmin() {
+            user1.stats.gamesWon = 2
+            user1.stats.gamesLost = 1
+
+            user2.stats.gamesWon = 4
+            user2.stats.gamesLost = 3
+
+            user3.stats.gamesWon = 3
+            user3.stats.gamesLost = 2
+
+        }
+        @Test
+        fun `Scoreboard sorted by games won `() {
+            val sortedUsers = usersControllerService.getScoreboard("gamesWon")
+            assertThat(sortedUsers).isEqualTo(listOf(user2, user3, user1).map { it.dto() })
+
+        }
+
+        @Test
+        fun `Scoreboard sorted by games lost `() {
+            val sortedUsers = usersControllerService.getScoreboard("gamesLost")
+            assertThat(sortedUsers).isEqualTo(listOf(user2, user3, user1).map { it.dto() })
+
+        }
+
+        @Test
+        fun `Gets game stats from a date range`() {
+            val filteredGames = gamesControllerService.getGamesInADateRange(Date.from(Instant.now().minus(Duration.ofDays(5))), Date.from(Instant.now().plus(Duration.ofDays(100))))
+            assertThat(gamesControllerService.getGamesStats(filteredGames)).isNotNull
+
+        }
+
+        @Test
+        fun `Gets all games stats when not specifying a date range`() {
+            val filteredGames = gamesControllerService.getAllGamesDTO()
+            assertThat(gamesControllerService.getGamesStats(filteredGames)).isEqualTo(gamesControllerService.getGamesStats(games.map{it.dto()}))
+
+        }
+
+//
+//     }
     }
 
 //    @Test

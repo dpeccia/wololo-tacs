@@ -94,13 +94,18 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
         return repoGames.findAll().filter { it.date in from..to }.map { it.dto()}
     }
 
-    fun getGamesStats(from: Date, to: Date): GamePublicInfo {
+    fun getGamesStats(gamesList: List<DTO.GameDTO>): GamePublicInfo {
 
-        fun numberOfGames(status : String) : Int {
-            return getGamesInADateRange(from, to).map { it.status }.filter { it.toString() == status }.count()
+        fun numberOfGames(gamesList: List<DTO.GameDTO>, status : String) : Int {
+            return gamesList.map { it.status }.filter { it.toString() == status }.count()
         }
 
-        return GamePublicInfo(numberOfGames("NEW"), numberOfGames("ONGOING"), numberOfGames("FINISHED"), numberOfGames("CANCELED"))
+        return GamePublicInfo(numberOfGames(gamesList,"NEW"), numberOfGames(gamesList,"ONGOING"), numberOfGames(gamesList,"FINISHED"), numberOfGames(gamesList,"CANCELED"))
+    }
+
+    fun getAllGamesDTO(): List<DTO.GameDTO> {
+        val games: List<Game> = repoGames.findAll()
+        return games.map { it.dto() }
     }
 
     fun createGame(userId: ObjectId, form: GameForm): DTO.GameDTO {
