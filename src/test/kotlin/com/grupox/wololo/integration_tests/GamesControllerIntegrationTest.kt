@@ -121,7 +121,7 @@ class GamesControllerIntegrationTest {
     }
 
     @Nested
-    inner class AdminOperations {
+    inner class AdminGamesOperations {
         @Test
         fun `can't get games stats when not logged as admin`() {
             val loginResponse = webClient.post().uri("/users/tokens")
@@ -196,9 +196,6 @@ class GamesControllerIntegrationTest {
 
             assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
         }
-
-
-
     }
 
 
