@@ -9,7 +9,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats) : Requestable {
+class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats, var borderingTowns: List<String>) : Requestable {
     @DBRef
     var owner: User? = null
 
@@ -19,9 +19,9 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates, val elev
 
     companion object {
         private val idGenerator: AtomicInteger = AtomicInteger(0)
-        fun new(_name: String, _elevation: Double, _coordinates: Coordinates = Coordinates(0f,0f), _townImage: String = "",
-                _stats: TownStats = TownStats(0,0)): Town =
-                Town(idGenerator.incrementAndGet(), _name, _coordinates, _elevation, _townImage, _stats)
+        fun new(_name: String, _elevation: Double, _borderingTowns: List<String>, _coordinates: Coordinates = Coordinates(0f,0f),
+                _townImage: String = "", _stats: TownStats = TownStats(0,0)): Town =
+                Town(idGenerator.incrementAndGet(), _name, _coordinates, _elevation, _townImage, _stats, _borderingTowns)
     }
 
     fun isFrom(user: User) = owner?.id.toString() == user.id.toString()

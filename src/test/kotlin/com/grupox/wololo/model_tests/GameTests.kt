@@ -19,11 +19,11 @@ class GameTests {
     val user4: User = User("other_user3", "other_mail3", "other_password3")
     val user99: User = User("user", "mail", "pass")
 
-    val town1: Town = Town.new("town1", 11.0, Coordinates((-65.3).toFloat(), (-22.4).toFloat()))
-    val town2: Town = Town.new("town2", 12.0, Coordinates((-66.2).toFloat(), (2.0).toFloat()))
-    val town3: Town = Town.new("town3", 13.0)
-    val town4: Town = Town.new("town4", 14.0)
-    val town5: Town = Town.new("town5", 15.0)
+    val town1: Town = Town.new("town1", 11.0, listOf("town2"), Coordinates((-65.3).toFloat(), (-22.4).toFloat()))
+    val town2: Town = Town.new("town2", 12.0, listOf("town1"), Coordinates((-66.2).toFloat(), (2.0).toFloat()))
+    val town3: Town = Town.new("town3", 13.0, listOf("town4"))
+    val town4: Town = Town.new("town4", 14.0, listOf("town3"))
+    val town5: Town = Town.new("town5", 15.0, listOf(""))
 
     val towns: List<Town> = listOf(town1, town2, town3, town4, town5)
     val twoPlayerList: List<User> = listOf(user1, user2)
@@ -98,9 +98,9 @@ class GameTests {
 
         @Test
         fun `There are gauchos in all the towns when the Game begins`() {
-            val yavi = Town.new("Yavi",3485.0263671875)
-            val elCondor = Town.new("El Cóndor",3609.618408203125)
-            val abraPampa = Town.new("Abra Pampa",3519.69287109375)
+            val yavi = Town.new("Yavi",3485.0263671875, listOf("El Cóndor", "Abra Pampa"))
+            val elCondor = Town.new("El Cóndor",3609.618408203125, listOf("Yavi", "Abra Pampa"))
+            val abraPampa = Town.new("Abra Pampa",3519.69287109375, listOf("El Cóndor", "Yavi"))
             val jujuy = Province("Jujuy", arrayListOf(yavi, elCondor, abraPampa))
             Game.new(twoPlayerList, jujuy)
             assertAll(
@@ -134,7 +134,7 @@ class GameTests {
         @Test
         fun `Attempting to change the specialization of a town that doesnt exist in the game will result in an exception`() {
             val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
-            val aTownThatDoesntExist = Town.new("a town that doesnt exist", 11.0)
+            val aTownThatDoesntExist = Town.new("a town that doesnt exist", 11.0, listOf())
             val aValidUser = game.turn
             assertThrows<CustomException.NotFound.TownNotFoundException> { game.changeTownSpecialization(aValidUser, aTownThatDoesntExist.id, Defense()) }
         }

@@ -17,9 +17,9 @@ class ProvinceTests {
     val user1: User = User("a_user", "a_mail", "a_password")
     val user2: User = User("other_user", "other_mail", "other_password")
 
-    val town1: Town = Town.new("town1", 20.0)
-    val town2: Town = Town.new("town2", 10.0)
-    val townThatDoesntExists = Town.new("town that doesn't exist", 11.0)
+    val town1: Town = Town.new("town1", 20.0, listOf("town2"))
+    val town2: Town = Town.new("town2", 10.0, listOf("town1"))
+    val townThatDoesntExists = Town.new("town that doesn't exist", 11.0, listOf())
     private val towns: List<Town> = listOf(town1, town2)
     private val province = Province("a_province", ArrayList(towns))
 
@@ -90,6 +90,16 @@ class ProvinceTests {
         }
 
         @Test
+        fun `user1 cannot move gauchos to a town that isnt bordering`() {
+            town1.owner = user1
+            town2.owner = user1
+            town2.borderingTowns = listOf()
+            town1.borderingTowns = listOf()
+            assertThrows<CustomException.Forbidden.IllegalGauchoMovement>
+            { province.moveGauchosBetweenTowns(user1, MovementForm(town1.id, town2.id,2)) }
+        }
+
+        @Test
         fun `successfully move 3 gauchos from town1 to town2 leaves town1 with 7 gauchos and town2 with 23 gauchos`() {
             town1.owner = user1
             town2.owner = user1
@@ -118,10 +128,10 @@ class ProvinceTests {
 
         @BeforeEach
         fun fixture() {
-            yavi = Town.new("Yavi", 3485.0263671875, Coordinates((-65.3412864273208).toFloat(), (-22.1949119799291).toFloat()))
-            elCondor = Town.new("El Cóndor", 3609.618408203125, Coordinates((-65.3795310298623).toFloat(), (-22.414030404424).toFloat()))
-            cangrejillos = Town.new("Cangrejillos", 3617.323974609375, Coordinates((-65.5405751330491).toFloat(), (-22.4438999595476).toFloat()))
-            abraPampa = Town.new("Abra Pampa", 3519.69287109375, Coordinates((-66.0322682108588).toFloat(), (-22.8431449411788).toFloat()))
+            yavi = Town.new("Yavi", 3485.0263671875, listOf("El Cóndor", "Cangrejillos", "Abra Pampa"), Coordinates((-65.3412864273208).toFloat(), (-22.1949119799291).toFloat()))
+            elCondor = Town.new("El Cóndor", 3609.618408203125, listOf("Yavi", "Cangrejillos", "Abra Pampa"), Coordinates((-65.3795310298623).toFloat(), (-22.414030404424).toFloat()))
+            cangrejillos = Town.new("Cangrejillos", 3617.323974609375, listOf("El Cóndor", "Yavi", "Abra Pampa"), Coordinates((-65.5405751330491).toFloat(), (-22.4438999595476).toFloat()))
+            abraPampa = Town.new("Abra Pampa", 3519.69287109375, listOf("El Cóndor", "Cangrejillos", "Yavi"), Coordinates((-66.0322682108588).toFloat(), (-22.8431449411788).toFloat()))
             yavi.owner = user1
             elCondor.owner = user1
             cangrejillos.owner = user2
@@ -185,7 +195,7 @@ class ProvinceTests {
 
         @Test
         fun `the distance between to towns changes if one elevation changes`() {
-            val elCondorWithFakeElevation = Town.new("El Cóndor", 100.0, Coordinates((-65.3795310298623).toFloat(), (-22.414030404424).toFloat()))
+            val elCondorWithFakeElevation = Town.new("El Cóndor", 100.0, listOf(), Coordinates((-65.3795310298623).toFloat(), (-22.414030404424).toFloat()))
             assertThat(jujuy.distanceBetween(yavi, elCondor)).isNotEqualTo(jujuy.distanceBetween(yavi, elCondorWithFakeElevation))
         }
 
@@ -199,6 +209,15 @@ class ProvinceTests {
         fun `minDistance in Jujuy is the distance between El Condor and Cangrejillos`() { // checked with Google Maps manually
             assertThat(jujuy.minDistance).isEqualTo(jujuy.distanceBetween(elCondor, cangrejillos))
             assertThat(round(jujuy.minDistance!!)).isEqualTo(16882.0)
+        }
+
+        @Test
+        fun `user1 cannot atack a town that is not bordering`() {
+            yavi.gauchos = 5
+            abraPampa.gauchos = 4
+            yavi.borderingTowns = listOf()
+            abraPampa.borderingTowns = listOf()
+            assertThrows<CustomException.Forbidden.IllegalAttack>{ jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id)) }
         }
 
         @Test

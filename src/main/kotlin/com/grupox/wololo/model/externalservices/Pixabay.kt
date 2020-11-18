@@ -28,7 +28,7 @@ interface IPixabay{
 
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-class Pixabay : HttpService(apiName = "Pixabay"), IPixabay{
+class Pixabay : IPixabay{
     @Autowired
     lateinit var pixabayProperties: PixabayProperties
 
@@ -38,7 +38,7 @@ class Pixabay : HttpService(apiName = "Pixabay"), IPixabay{
     @Cacheable("withTimeToLive")
     override fun requestTownImage(townName: String): Either<CustomException, String> {
         val query = formatString(townName)
-        val response = requestData<ImageQueryResponse>(baseUrl, mapOf("key" to pixabayProperties.apiKey, "category" to category, "q" to query))
+        val response = HttpService("Pixabay").requestData<ImageQueryResponse>(baseUrl, mapOf("key" to pixabayProperties.apiKey, "category" to category, "q" to query))
 
         return response.map {
             if (it.totalHits <= 0)

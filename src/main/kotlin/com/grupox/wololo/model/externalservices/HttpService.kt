@@ -2,19 +2,46 @@ package com.grupox.wololo.model.externalservices
 
 import arrow.core.*
 import arrow.core.extensions.list.foldable.foldLeft
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.getOrThrow
+import io.github.rybalkinsd.kohttp.client.client
+import io.github.rybalkinsd.kohttp.client.defaultHttpClient
+import io.github.rybalkinsd.kohttp.client.fork
+import io.github.rybalkinsd.kohttp.dsl.httpGet
 import io.github.rybalkinsd.kohttp.ext.httpGet
+import io.github.rybalkinsd.kohttp.ext.url
+import io.github.rybalkinsd.kohttp.interceptors.RetryInterceptor
 import io.github.rybalkinsd.kohttp.jackson.ext.toType
+import okhttp3.Response
+import org.springframework.stereotype.Service
 
-abstract class HttpService(val apiName: String) {
-    protected inline fun <reified DataT : Any>requestData(url: String, queryParams: Map<String, String>): Either<CustomException, DataT> {
+class HttpService(val apiName: String) {
+    inline fun <reified DataT : Any>requestData(url: String, queryParams: Map<String, String>): Either<CustomException, DataT> {
         val finalUrl = appendQueryParams(url, queryParams)
-        return Right(finalUrl.httpGet())
-                .filterOrOther({ it.isSuccessful }, { CustomException.Service.UnsuccessfulExternalRequestException(apiName, it.code()) })
-                .flatMap { it.toType<DataT>().rightIfNotNull { CustomException.Service.InvalidExternalResponseException("Request: GET $finalUrl returned with null") } }
+        val mapper = jacksonObjectMapper()
+        val res = getData(finalUrl)
+        if(!res.isSuccessful) return Left(CustomException.Service.UnsuccessfulExternalRequestException(apiName, res.code()))
+        if(res.body() == null) return Left(CustomException.Service.InvalidExternalResponseException("Request: GET $finalUrl returned with null"))
+        val response = mapper.readValue<DataT>(res.body()!!.string())
+        res.close()
+        return Right(response)
     }
 
-    protected fun appendQueryParams(url: String, queryParams: Map<String, String>): String =
+    fun getData(finalUrl: String): Response =
+            httpGet {
+                url(finalUrl)
+                client {
+                    defaultHttpClient.fork {
+                        interceptors {
+                            +RetryInterceptor()
+                        }
+                    }
+                }
+            }
+
+    fun appendQueryParams(url: String, queryParams: Map<String, String>): String =
             queryParams.toList()
                     .foldLeft("$url?") { unf, (key, value) -> "$unf$key=$value&" }
                     .removeSuffix("&")

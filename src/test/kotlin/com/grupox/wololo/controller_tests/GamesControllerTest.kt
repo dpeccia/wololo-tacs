@@ -1,6 +1,5 @@
 package com.grupox.wololo.controller_tests
 
-import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.AttackForm
@@ -9,13 +8,8 @@ import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
-import io.mockk.every
-import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
-import org.bson.types.ObjectId
 import org.junit.jupiter.api.*
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -35,25 +29,25 @@ class GamesControllerTest {
     @SpyBean
     lateinit var repoGames: RepoGames
 
-    val user1: User = User("a_username", "a_mail", "a_password")
-    val user2: User = User("a_username2", "a_mail2", "a_password2")
-    val user3: User = User("a_username3", "a_mail3", "a_password3")
+    private final val user1: User = User("a_username", "a_mail", "a_password")
+    private final val user2: User = User("a_username2", "a_mail2", "a_password2")
+    private final val user3: User = User("a_username3", "a_mail3", "a_password3")
     val userNotInRepo: User = User("other_username", "other_mail", "other_password")
-    val users: List<User> = listOf(user1, user2, user3)
+    private final val users: List<User> = listOf(user1, user2, user3)
 
-    val town1: Town = Town.new("town1", 10.0)
-    val town2: Town = Town.new("town2", 11.0)
-    val town3: Town = Town.new("town3", 12.0)
-    val town4: Town = Town.new("town4", 13.0)
-    val town5: Town = Town.new("town5", 14.0)
-    val town6: Town = Town.new("town6", 15.0)
-    val townNotInRepo = Town.new("not in repo", 16.0)
-    val towns: List<Town> = listOf(town1, town2, town3, town4, town5, town6)
+    private final val town1: Town = Town.new("town1", 10.0, listOf("town2"))
+    private final val town2: Town = Town.new("town2", 11.0, listOf("town1"))
+    private final val town3: Town = Town.new("town3", 12.0, listOf("town4"))
+    private final val town4: Town = Town.new("town4", 13.0, listOf("town3"))
+    private final val town5: Town = Town.new("town5", 14.0, listOf("town6"))
+    private final val town6: Town = Town.new("town6", 15.0, listOf("town5"))
+    val townNotInRepo = Town.new("not in repo", 16.0, listOf("town2"))
+    private final val towns: List<Town> = listOf(town1, town2, town3, town4, town5, town6)
 
-    val game1: Game = Game.new(listOf(user1, user3), Province("a_province", ArrayList(listOf(town1, town2))))
-    val game2: Game = Game.new(users, Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
-    val game3: Game = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
-    val game4: Game = Game.new(listOf(user2, user3), Province("a_province", ArrayList(towns)))
+    private final val game1: Game = Game.new(listOf(user1, user3), Province("a_province", ArrayList(listOf(town1, town2))))
+    private final val game2: Game = Game.new(users, Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
+    private final val game3: Game = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
+    private final val game4: Game = Game.new(listOf(user2, user3), Province("a_province", ArrayList(towns)))
     val gameNotInRepo: Game = Game.new(listOf(user1, user3), Province("another_province", ArrayList(towns)))
     val games: List<Game> = listOf(game2, game3, game1, game4)
 

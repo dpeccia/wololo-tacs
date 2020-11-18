@@ -14,7 +14,7 @@ class TownTests {
 
     @BeforeEach
     fun fixture() {
-        town = Town.new("town", 10.0)
+        town = Town.new("town", 10.0, listOf())
         town.gauchos = 10
     }
 
