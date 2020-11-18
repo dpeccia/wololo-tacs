@@ -32,6 +32,13 @@ class GameTests {
     @Nested
     inner class GameCreation {
         @Test
+        fun `creating a 2 player game with two towns distributes them 1 for each player`() {
+            val game = Game.new(twoPlayerList, Province("a_province", ArrayList(listOf(town1, town2))))
+            val numberOfTownsAssignedToUser1: Int = game.province.towns.count { it.owner?.id == user1.id }
+            assertEquals(numberOfTownsAssignedToUser1, 1)
+        }
+
+        @Test
         fun `creating a game distributes towns with the available players evenly`() {
             val game = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
 
@@ -248,6 +255,31 @@ class GameTests {
     }
 
     @Nested
+    inner class Surrender {
+        val twoPlayerGame = Game.new(twoPlayerList, Province("a_province", ArrayList(towns)))
+        val multiplePlayersGame = Game.new(fourPlayerList, Province("a_province", ArrayList(towns)))
+
+        @Test
+        fun `surrender a game leaving only one player remaining cancels the game`() {
+            twoPlayerGame.surrender(user1)
+            assertThat(twoPlayerGame.status).isEqualTo(Status.CANCELED)
+        }
+
+        @Test
+        fun `surrender a game leaving more than on players remaining continues the game`() {
+            multiplePlayersGame.surrender(user1)
+            assertThat(multiplePlayersGame.status).isEqualTo(Status.ONGOING)
+        }
+
+        @Test
+        fun `surrender a game leaving more than on players remaining makes the quiting player's towns become neutral`() {
+            val shouldBeNeutralTowns = multiplePlayersGame.province.townsFrom(user1)
+            multiplePlayersGame.surrender(user1)
+            assertThat(shouldBeNeutralTowns).allMatch { it.owner == null }
+        }
+    }
+
+    @Nested
     inner class Turn {
         private val towns: List<Town> = listOf(town1, town2)
         private val game = Game.new(listOf(user1, user99), Province("a_province", ArrayList(towns)))
@@ -337,26 +369,47 @@ class GameTests {
 
         @Test
         fun `if the first player finishes his turn and he didnt win, turn is changed to next player`() {
-            val user3 = User("user3", "new_mail", "sdaddraf")
-            val game2 = Game.new(listOf(user1, user2, user3), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
+            val game2 = Game.new(listOf(user1, user2), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
             game2.turn = user1
             game2.finishTurn(user1)
             assertThat(game2.turn).isEqualTo(user2)
         }
 
         @Test
-        fun `if the last player of the first round, finishes his turn and didnt win, turn is changed to first player again`() {
-            val user3 = User("user3", "new_mail", "sdaddraf")
-            val game2 = Game.new(listOf(user1, user2, user3), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
-            game2.turn = user3
-            game2.finishTurn(user3)
-            assertThat(game2.turn).isEqualTo(user1)
+        fun `in a 2 player game, finishing turn twice results in the initial player's turn`() {
+            val twoPlayerGame = Game.new(listOf(user1, user2), Province("a_province", arrayListOf(town1, town2, town3, town4)))
+            val initialPlayer = twoPlayerGame.turn
+            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            assertEquals(initialPlayer, twoPlayerGame.turn)
+        }
+
+
+        @Test
+        fun `in a 2 player me, finishing turn three times results in the second player's turn` () {
+            val twoPlayerGame = Game.new(listOf(user1, user2), Province("a_province", arrayListOf(town1, town2, town3, town4)))
+            val initialPlayer = twoPlayerGame.turn
+            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            assertNotEquals(initialPlayer, twoPlayerGame.turn)
         }
 
         @Test
-        fun `if the turn has changed, the gauchos quantity of the towns from the next player are updated`() {
+        fun `if the last player of the first round, finishes his turn and didnt win, turn is changed to first player again`() {
             val user3 = User("user3", "new_mail", "sdaddraf")
             val game2 = Game.new(listOf(user1, user2, user3), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
+            val firstPlayer = game2.turn
+            game2.finishTurn(firstPlayer)
+            game2.finishTurn(game2.turn)
+            val lastPlayer = game2.turn
+            game2.finishTurn(lastPlayer)
+            assertThat(game2.turn).isEqualTo(firstPlayer)
+        }
+
+        @Test
+        fun `if the turn has changed, the gauchos quantity of the towns of the next player are updated`() {
+            val game2 = Game.new(listOf(user1, user2), Province("a_province", arrayListOf(town1, town2, town3, town4, town5)))
             game2.turn = user1
             val gauchosQtysOfUser2BeforeHisTurnStarts = game2.province.towns.filter { it.owner == user2 }.map { it.gauchos }
             game2.finishTurn(user1)

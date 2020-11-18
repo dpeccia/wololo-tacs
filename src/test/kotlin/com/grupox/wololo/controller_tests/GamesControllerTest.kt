@@ -8,8 +8,11 @@ import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
+import com.grupox.wololo.services.UsersControllerService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -22,6 +25,9 @@ import java.util.*
 class GamesControllerTest {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
+
+    @Autowired
+    lateinit var usersControllerService: UsersControllerService
 
     @SpyBean
     lateinit var repoUsers: RepoUsers
@@ -54,13 +60,16 @@ class GamesControllerTest {
     @BeforeEach
     fun fixture() {
         doReturn(games).`when`(repoGames).findAll()
+        doReturn(users).`when`(repoUsers).findAllByIsAdminFalse()
         doReturn(users).`when`(repoUsers).findAll()
         doReturn(Optional.of(user1)).`when`(repoUsers).findByIsAdminFalseAndId(user1.id)
         doReturn(Optional.of(user2)).`when`(repoUsers).findByIsAdminFalseAndId(user2.id)
+        doReturn(Optional.of(user3)).`when`(repoUsers).findByIsAdminFalseAndId(user3.id)
         doReturn(Optional.of(game1)).`when`(repoGames).findById(game1.id)
         doReturn(Optional.of(game2)).`when`(repoGames).findById(game2.id)
         doReturn(Optional.of(game3)).`when`(repoGames).findById(game3.id)
         doReturn(Optional.of(game4)).`when`(repoGames).findById(game4.id)
+        doReturn(game1).`when`(repoGames).save(game1)
         doReturn(games.filter { it.isParticipating(user1) }).`when`(repoGames).findAllByPlayersContains(user1)
         doAnswer { throw CustomException.NotFound.GameNotFoundException() }.`when`(repoGames).findById(gameNotInRepo.id)
         doAnswer { throw CustomException.NotFound.UserNotFoundException() }.`when`(repoUsers).findByIsAdminFalseAndId(userNotInRepo.id)
@@ -84,6 +93,33 @@ class GamesControllerTest {
         fun `trying to finish turn with a user that exists and a game that exists doesnt throw an Exception`() {
             game1.turn = user1
             assertDoesNotThrow { gamesControllerService.finishTurn(user1.id, game1.id) }
+        }
+
+        @Test
+        fun `A valid turn finish should change the turn to the next player`() {
+            val initialPlayer = user3
+            game1.turn = initialPlayer
+            val gameDTO = gamesControllerService.finishTurn(initialPlayer.id, game1.id)
+            assertThat(gameDTO.turnId).isEqualTo(user1.id.toHexString())
+        }
+
+        @Test
+        fun `in a 2 player game, finishing turn twice results in the initial player's turn`() {
+            val twoPlayerGame = game1
+            val initialPlayer = twoPlayerGame.turn
+            gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            val dto = gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            assertThat(initialPlayer.id.toHexString()).isEqualTo(dto.turnId)
+        }
+
+        @Test
+        fun `in a 2 player me, finishing turn three times results in the second player's turn` () {
+            val twoPlayerGame = game1
+            val initialPlayer = twoPlayerGame.turn
+            gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            val dto = gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
+            assertThat(initialPlayer.id.toHexString()).isNotEqualTo(dto.turnId)
         }
     }
 
@@ -145,8 +181,8 @@ class GamesControllerTest {
     @Nested
     inner class Surrender {
         @Test
-        fun `surrender in a game with a user that doesnt belongs to the game throws MemberNotFoundException`() {
-            assertThrows<CustomException.NotFound.MemberNotFoundException>
+        fun `surrender in a game with a user that doesnt belongs to the game throws NotAMemberException`() {
+            assertThrows<CustomException.Forbidden.NotAMemberException>
             { assertThat(gamesControllerService.surrender(game4.id, user1.id)) }
         }
 
@@ -290,6 +326,53 @@ class GamesControllerTest {
             val anyGame = game2
             assertThrows<CustomException.NotFound.UserNotFoundException> { gamesControllerService.getGame(nonExistentUser.id, anyGame.id) }
         }
+    }
+
+    @Nested
+    inner class Admin {
+
+        @BeforeEach
+        fun fixtureAdmin() {
+            user1.stats.gamesWon = 2
+            user1.stats.gamesLost = 1
+
+            user2.stats.gamesWon = 4
+            user2.stats.gamesLost = 3
+
+            user3.stats.gamesWon = 3
+            user3.stats.gamesLost = 2
+
+        }
+        @Test
+        fun `Scoreboard sorted by games won `() {
+            val sortedUsers = usersControllerService.getScoreboard("gamesWon")
+            assertThat(sortedUsers).isEqualTo(listOf(user2, user3, user1).map { it.dto() })
+
+        }
+
+        @Test
+        fun `Scoreboard sorted by games lost `() {
+            val sortedUsers = usersControllerService.getScoreboard("gamesLost")
+            assertThat(sortedUsers).isEqualTo(listOf(user2, user3, user1).map { it.dto() })
+
+        }
+
+        @Test
+        fun `Gets game stats from a date range`() {
+            val filteredGames = gamesControllerService.getGamesInADateRange(Date.from(Instant.now().minus(Duration.ofDays(5))), Date.from(Instant.now().plus(Duration.ofDays(100))))
+            assertThat(gamesControllerService.getGamesStats(filteredGames)).isNotNull
+
+        }
+
+        @Test
+        fun `Gets all games stats when not specifying a date range`() {
+            val filteredGames = gamesControllerService.getAllGamesDTO()
+            assertThat(gamesControllerService.getGamesStats(filteredGames)).isEqualTo(gamesControllerService.getGamesStats(games.map{it.dto()}))
+
+        }
+
+//
+//     }
     }
 
 //    @Test

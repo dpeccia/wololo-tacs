@@ -4,6 +4,7 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoUsers
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
@@ -50,8 +51,25 @@ class UsersControllerService(@Autowired val repoUsers: RepoUsers) {
         repoUsers.findByMailAndPassword(user.mail, sha512.getSHA512(user.password))
                 .orElseThrow { CustomException.Unauthorized.BadLoginException() }.dto()
 
+    fun throwIfNotAllowed(id: ObjectId) {
+        repoUsers.findByIsAdminTrueAndId(id).orElseThrow { CustomException.Forbidden.OperationNotAuthorized()}
+    }
+
     fun getUsers(_username: String?): List<DTO.UserDTO> {
         val username = _username ?: return repoUsers.findAllByIsAdminFalse().map { it.dto() }
         return repoUsers.findAllByIsAdminFalseAndUsernameLike(username).map { it.dto() }
     }
+
+    fun getScoreboard(sort: String?):List<DTO.UserDTO> {
+
+        var users: List<User> = repoUsers.findAllByIsAdminFalse()
+
+        users = when (sort) {
+            "gamesWon" -> users.sortedByDescending { it.stats.gamesWon }
+            "gamesLost" -> users.sortedByDescending { it.stats.gamesLost }
+            else -> users
+        }
+        return users.map { it.dto() }.take(10)
+    }
+
 }

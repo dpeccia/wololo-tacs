@@ -6,6 +6,7 @@ import com.grupox.wololo.model.externalservices.TownGeoJSON
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
+import com.grupox.wololo.services.UsersControllerService
 import io.swagger.annotations.ApiOperation
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,9 +17,12 @@ import javax.servlet.http.HttpServletRequest
 
 @RequestMapping("/games")
 @RestController
-class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
+class GamesController() : BaseController() {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
+
+    @Autowired
+    lateinit var usersControllerService: UsersControllerService
 
     @GetMapping
     @ApiOperation(value = "Gets the games of the current user. Params: sort=id|date|numberOfTowns|numberOfPlayers & status & date")
@@ -46,13 +50,19 @@ class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
 
     @GetMapping("/stats")
     @ApiOperation(value = "Gets games stats from a date range")
-    fun getGamesStats(@RequestParam("from", required = false) from: Date,
-                      @RequestParam("to", required = false) to: Date,
+    fun getGamesStats(@RequestParam("from", required = false) from: Date?,
+                      @RequestParam("to", required = false) to: Date?,
                       @ApiIgnore @CookieValue("X-Auth") authCookie : String?,
                       request: HttpServletRequest): GamePublicInfo {
         val userId = checkAndGetUserId(request)
-        throwIfNotAllowed(userId)
-        return gamesControllerService.getGamesStats(from, to)
+        val list: List<DTO.GameDTO>
+        usersControllerService.throwIfNotAllowed(userId)
+        if (from != null && to != null){
+            list = gamesControllerService.getGamesInADateRange(from, to)
+        }else{
+            list = gamesControllerService.getAllGamesDTO()
+        }
+        return gamesControllerService.getGamesStats(list)
     }
 
     @GetMapping("/date")
@@ -62,7 +72,7 @@ class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
                       @ApiIgnore @CookieValue("X-Auth") authCookie : String?,
                       request: HttpServletRequest): List<DTO.GameDTO> {
         val userId = checkAndGetUserId(request)
-        throwIfNotAllowed(userId)
+        usersControllerService.throwIfNotAllowed(userId)
         return gamesControllerService.getGamesInADateRange(from, to)
 
     }
@@ -136,7 +146,5 @@ class GamesController(@Autowired val repoUsers: RepoUsers) : BaseController() {
         return gamesControllerService.getTownsGeoJSONs(province, towns)
     }
 
-    fun throwIfNotAllowed(id: ObjectId) {
-        repoUsers.findByIsAdminTrueAndId(id).orElseThrow { CustomException.Forbidden.OperationNotAuthorized()}
-    }
 }
+

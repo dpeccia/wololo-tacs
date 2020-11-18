@@ -1,5 +1,6 @@
 package com.grupox.wololo.controllers
 
+import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.DTO
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.LoginForm
@@ -7,6 +8,7 @@ import com.grupox.wololo.model.helpers.UserForm
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.UsersControllerService
 import io.swagger.annotations.ApiOperation
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
@@ -47,4 +49,14 @@ class UsersController : BaseController() {
         checkAndGetUserId(request)
         return usersControllerService.getUsers(_username)
     }
+
+    @GetMapping("/scoreboard")
+    @ApiOperation(value = "Gets a top 10 ranking of users ordered by games won")
+    fun getScoreboard(@RequestParam("sort", required = false) sort: String?,request: HttpServletRequest): List<DTO.UserDTO> {
+        val userId = checkAndGetUserId(request)
+        usersControllerService.throwIfNotAllowed(userId)
+        return usersControllerService.getScoreboard(sort)
+    }
+
+
 }

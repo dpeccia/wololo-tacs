@@ -2,12 +2,9 @@ package com.grupox.wololo.controllers
 
 import arrow.core.toOption
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.User
 import com.grupox.wololo.model.helpers.JwtSigner
 import com.grupox.wololo.model.helpers.getOrThrow
-import com.grupox.wololo.model.repos.RepoUsers
 import org.bson.types.ObjectId
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -16,6 +13,10 @@ import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
 abstract class BaseController {
+    @ExceptionHandler(CustomException.InternalServer::class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleInternalServerException(exception: CustomException) = exception.dto()
+
     @ExceptionHandler(CustomException.NotFound::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFoundException(exception: CustomException) = exception.dto()

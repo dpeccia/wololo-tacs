@@ -27,41 +27,27 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     lateinit var pixabay: Pixabay
     
     fun surrender(gameId: ObjectId, userId: ObjectId): DTO.GameDTO {
-        val game: Game = getGame(gameId)
-        val user: User = game.getMember(userId).getOrThrow()
-
-        user.updateGamesLostStats()
-        if (game.playerAmount <= 2) {
-            game.players.filter { it.id != user.id }.map { it.updateGamesWonStats() }  // Update stats ganadores
-            game.status = Status.CANCELED
-        }
-        val updatedGame = repoGames.save(game)
-        return updatedGame.dto()
+//        val game: Game = getGame(gameId)
+//        val user: User = game.getMember(userId).getOrThrow()
+//
+//        user.updateGamesLostStats()
+//        if (game.playerAmount <= 2) {
+//            game.players.filter { it.id != user.id }.map { it.updateGamesWonStats() }  // Update stats ganadores
+//            game.status = Status.CANCELED
+//        }
+//        val updatedGame = repoGames.save(game)
+//        return updatedGame.dto()
+        return this.play(gameId, userId) { game, user -> game.surrender(user) }
     }
 
-    fun finishTurn(userId: ObjectId, gameId: ObjectId): DTO.GameDTO {
-        val game = getGame(gameId)
-        val user = getUser(userId)
-        game.finishTurn(user)
-        val updatedGame = repoGames.save(game)
-        return updatedGame.dto()
-    }
+    fun finishTurn(userId: ObjectId, gameId: ObjectId): DTO.GameDTO =
+            this.play(gameId, userId) { game, user -> game.finishTurn(user) }
 
-    fun moveGauchosBetweenTowns(userId: ObjectId, gameId: ObjectId, movementData: MovementForm): DTO.GameDTO {
-        val game = getGame(gameId)
-        val user = getUser(userId)
-        game.moveGauchosBetweenTowns(user, movementData)
-        val updatedGame = repoGames.save(game)
-        return updatedGame.dto()
-    }
+    fun moveGauchosBetweenTowns(userId: ObjectId, gameId: ObjectId, movementData: MovementForm): DTO.GameDTO =
+            this.play(gameId, userId) { game, user -> game.moveGauchosBetweenTowns(user, movementData) }
 
-    fun attackTown(userId: ObjectId, gameId: ObjectId, attackData: AttackForm): DTO.GameDTO {
-        val game = getGame(gameId)
-        val user = getUser(userId)
-        game.attackTown(user, attackData)
-        val updatedGame = repoGames.save(game)
-        return updatedGame.dto()
-    }
+    fun attackTown(userId: ObjectId, gameId: ObjectId, attackData: AttackForm): DTO.GameDTO =
+            this.play(gameId, userId) { game, user -> game.attackTown(user, attackData) }
 
     fun getProvinces(): List<String> = provincesService.availableProvinces().getOrThrow()
 
@@ -108,13 +94,18 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
         return repoGames.findAll().filter { it.date in from..to }.map { it.dto()}
     }
 
-    fun getGamesStats(from: Date, to: Date): GamePublicInfo {
+    fun getGamesStats(gamesList: List<DTO.GameDTO>): GamePublicInfo {
 
-        fun numberOfGames(status : String) : Int {
-            return getGamesInADateRange(from, to).map { it.status }.filter { it.toString() == status }.count()
+        fun numberOfGames(gamesList: List<DTO.GameDTO>, status : String) : Int {
+            return gamesList.map { it.status }.filter { it.toString() == status }.count()
         }
 
-        return GamePublicInfo(numberOfGames("NEW"), numberOfGames("ONGOING"), numberOfGames("FINISHED"), numberOfGames("CANCELED"))
+        return GamePublicInfo(numberOfGames(gamesList,"NEW"), numberOfGames(gamesList,"ONGOING"), numberOfGames(gamesList,"FINISHED"), numberOfGames(gamesList,"CANCELED"))
+    }
+
+    fun getAllGamesDTO(): List<DTO.GameDTO> {
+        val games: List<Game> = repoGames.findAll()
+        return games.map { it.dto() }
     }
 
     fun createGame(userId: ObjectId, form: GameForm): DTO.GameDTO {
@@ -132,16 +123,13 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
         return savedGame.dto()
     }
 
-    fun updateTownSpecialization(userId: ObjectId, gameId: ObjectId, townId: Int, newSpecialization: String): DTO.GameDTO {
-        val game = getGame(gameId)
-        val user = getUser(userId)
-        when (newSpecialization.toUpperCase()) {
-            "PRODUCTION" -> game.changeTownSpecialization(user, townId, Production())
-            "DEFENSE"    -> game.changeTownSpecialization(user, townId, Defense())
-        }
-        val updatedGame = repoGames.save(game)
-        return updatedGame.dto()
-    }
+    fun updateTownSpecialization(userId: ObjectId, gameId: ObjectId, townId: Int, newSpecialization: String): DTO.GameDTO =
+            this.play(gameId, userId) { game, user ->
+                when (newSpecialization.toUpperCase()) {
+                    "PRODUCTION" -> game.changeTownSpecialization(user, townId, Production())
+                    "DEFENSE"    -> game.changeTownSpecialization(user, townId, Defense())
+                }
+            }
 
     private fun getRandomTowns(form: GameForm): Either<CustomException, List<Town>> {
         return Either.fx {
@@ -171,6 +159,14 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
 
     private fun getUser(id: ObjectId): User =
             repoUsers.findByIsAdminFalseAndId(id).orElseThrow { CustomException.NotFound.UserNotFoundException() }
+
+    private fun play(gameId: ObjectId, userId: ObjectId, action: (Game, User) -> Unit): DTO.GameDTO {
+        val game = getGame(gameId)
+        val user = getUser(userId)
+        action(game, user)
+        val updatedGame = repoGames.save(game)
+        return updatedGame.dto()
+    }
 
     private data class MergedGeoRefGeoJsonTown(val name: String, val coordinates: Coordinates, val borderingTowns: List<String>)
 }

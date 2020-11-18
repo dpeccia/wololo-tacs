@@ -7,11 +7,6 @@ import com.grupox.wololo.errors.CustomException.Forbidden.IllegalGauchoMovement
 import com.grupox.wololo.errors.CustomException.NotFound
 import com.grupox.wololo.errors.CustomException.NotFound.TownNotFoundException
 import com.grupox.wololo.model.helpers.*
-import org.bson.types.ObjectId
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.DBRef
-import org.springframework.data.mongodb.core.mapping.Document
 import kotlin.math.*
 
 class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: String = "") : Requestable {
@@ -56,10 +51,10 @@ class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: Strin
     private fun multAltitude(defender: Town): Double =
             1 + ((defender.elevation - minAltitude!!) / (2 * (maxAltitude!! - minAltitude!!)))
 
-    private fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
+    fun townsFrom(user: User): List<Town> = towns.filter { it.isFrom(user) }
 
     fun allOccupiedTownsAreFrom(user: User): Boolean =
-            towns.filter { it.owner != null }.stream().allMatch { it.isFrom(user) }
+            towns.filter { it.owner != null }.all { it.isFrom(user) }
 
     fun addGauchosToAllTowns() {
         towns.forEach { it.addGauchos(maxAltitude!!, minAltitude!!) }

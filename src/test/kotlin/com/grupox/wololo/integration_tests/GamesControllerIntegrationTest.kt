@@ -173,7 +173,7 @@ class GamesControllerIntegrationTest {
     }
 
     @Nested
-    inner class AdminOperations {
+    inner class AdminGamesOperations {
         @Test
         fun `can't get games stats when not logged as admin`() {
             val loginResponse = webClient.post().uri("/users/tokens")
@@ -199,6 +199,51 @@ class GamesControllerIntegrationTest {
                     .toMap()
 
             val response = webClient.get().uri("/games/stats?from=2020/09/25&to=2020/12/25").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
+                    .exchange().block()
+
+            assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
+        }
+
+        @Test
+        fun `gets all games stats when logged as admin and not specifying a date range`() {
+            val loginResponse = webClient.post().uri("/users/tokens")
+                    .bodyValue(LoginForm("example_admin", "example_admin")).exchange()
+                    .block() ?: throw RuntimeException("Should have gotten a response")
+            val responseCookies = loginResponse.cookies()
+                    .map { it.key to it.value.map { cookie -> cookie.value } }
+                    .toMap()
+
+            val response = webClient.get().uri("/games/stats").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
+                    .exchange().block()
+
+            assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
+        }
+
+        @Test
+        fun `can't get scoreboard when not logged as admin`() {
+            val loginResponse = webClient.post().uri("/users/tokens")
+                    .bodyValue(LoginForm("example_not_admin", "example_not_admin")).exchange()
+                    .block() ?: throw RuntimeException("Should have gotten a response")
+            val responseCookies = loginResponse.cookies()
+                    .map { it.key to it.value.map { cookie -> cookie.value } }
+                    .toMap()
+
+            val response = webClient.get().uri("/users/scoreboard").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
+                    .exchange().block()
+
+            assertThat(response?.statusCode()).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @Test
+        fun `can get scoreboard when logged as admin`() {
+            val loginResponse = webClient.post().uri("/users/tokens")
+                    .bodyValue(LoginForm("example_admin", "example_admin")).exchange()
+                    .block() ?: throw RuntimeException("Should have gotten a response")
+            val responseCookies = loginResponse.cookies()
+                    .map { it.key to it.value.map { cookie -> cookie.value } }
+                    .toMap()
+
+            val response = webClient.get().uri("/users/scoreboard").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
                     .exchange().block()
 
             assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)

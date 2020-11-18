@@ -63,6 +63,11 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates, val elev
         this.gauchos = max(gauchosDefenseFinal, 0)
     }
 
+    fun neutralize() {
+        this.owner = null
+        // Por ahi queremos setear un numero de gauchos particular
+    }
+
     override fun dto(): DTO.TownDTO =
         DTO.TownDTO(
             id = id,
@@ -74,8 +79,8 @@ class Town(val id: Int, val name: String, val coordinates: Coordinates, val elev
             specialization = specialization.toString(),
             gauchos = gauchos,
             isLocked = isLocked,
-            gauchosGeneratedByDefense =  stats.gauchosGeneratedByDefense,
-            gauchosGeneratedByProduction =  stats.gauchosGeneratedByProduction
+            gauchosGeneratedByDefense = stats.gauchosGeneratedByDefense,
+            gauchosGeneratedByProduction = stats.gauchosGeneratedByProduction
         )
 }
 

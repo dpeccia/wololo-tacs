@@ -11,6 +11,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.doReturn
@@ -39,6 +40,7 @@ class UserControllerIntegrationTest {
     val sha512: SHA512Hash = SHA512Hash()
 
     lateinit var user: User
+    lateinit var user2: User
     lateinit var users: ArrayList<User>
 
     @SpyBean
@@ -47,11 +49,19 @@ class UserControllerIntegrationTest {
     @BeforeEach
     fun fixture() {
         user = User("example_admin", "example_admin", sha512.getSHA512("example_admin"), isAdmin = true)
-        users = arrayListOf(user)
+        user2 = User("example_not_admin", "example_not_admin", sha512.getSHA512("example_not_admin"), isAdmin = false)
+        users = arrayListOf(user, user2)
+
         webClient = WebClient.builder().baseUrl("http://localhost:${serverPort}").build()
         doReturn(users).`when`(repoUsers).findAll()
         doReturn(users.filter { !it.isAdmin }).`when`(repoUsers).findAllByIsAdminFalse()
         doReturn(Optional.of(user)).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
+
+        doReturn(Optional.of(users[0])).`when`(repoUsers).findByIsAdminTrueAndId(users[0].id)
+        doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminTrueAndId(users[1].id)
+        doReturn(Optional.of(users[0])).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
+        doReturn(Optional.of(users[1])).`when`(repoUsers).findByMailAndPassword("example_not_admin", sha512.getSHA512("example_not_admin"))
+
     }
 
     @Test
@@ -133,6 +143,38 @@ class UserControllerIntegrationTest {
         val response = webClient.get().uri("/users").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
                 .exchange().block()
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
+    }
+    @Nested
+    inner class AdminUsersOperations {
+        @Test
+        fun `can't get scoreboard when not logged as admin`() {
+            val loginResponse = webClient.post().uri("/users/tokens")
+                    .bodyValue(LoginForm("example_not_admin", "example_not_admin")).exchange()
+                    .block() ?: throw RuntimeException("Should have gotten a response")
+            val responseCookies = loginResponse.cookies()
+                    .map { it.key to it.value.map { cookie -> cookie.value } }
+                    .toMap()
+
+            val response = webClient.get().uri("/users/scoreboard").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
+                    .exchange().block()
+
+            assertThat(response?.statusCode()).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @Test
+        fun `can get scoreboard when logged as admin`() {
+            val loginResponse = webClient.post().uri("/users/tokens")
+                    .bodyValue(LoginForm("example_admin", "example_admin")).exchange()
+                    .block() ?: throw RuntimeException("Should have gotten a response")
+            val responseCookies = loginResponse.cookies()
+                    .map { it.key to it.value.map { cookie -> cookie.value } }
+                    .toMap()
+
+            val response = webClient.get().uri("/users/scoreboard").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
+                    .exchange().block()
+
+            assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
+        }
     }
 
 }
