@@ -14,19 +14,25 @@ import org.junit.jupiter.api.function.Executable
 import kotlin.math.round
 
 class ProvinceTests {
-    val user1: User = User("a_user", "a_mail", "a_password")
-    val user2: User = User("other_user", "other_mail", "other_password")
-
-    val town1: Town = Town.new("town1", 20.0, listOf("town2"))
-    val town2: Town = Town.new("town2", 10.0, listOf("town1"))
-    val townThatDoesntExists = Town.new("town that doesn't exist", 11.0, listOf())
-    private val towns: List<Town> = listOf(town1, town2)
-    private val province = Province("a_province", ArrayList(towns))
+    private lateinit var user1: User
+    private lateinit var user2: User
+    private lateinit var town1: Town
+    private lateinit var town2: Town
+    private lateinit var townThatDoesntExists: Town
+    private lateinit var towns: List<Town>
+    private lateinit var province: Province
 
     @BeforeEach
     fun fixture() {
+        user1 = User("a_user", "a_mail", "a_password")
+        user2 = User("other_user", "other_mail", "other_password")
+        town1 = Town.new("town1", 20.0, listOf("town2"))
+        town2 = Town.new("town2", 10.0, listOf("town1"))
+        townThatDoesntExists = Town.new("town that doesn't exist", 11.0, listOf())
         town1.gauchos = 10
         town2.gauchos = 20
+        towns = listOf(town1, town2)
+        province = Province("a_province", ArrayList(towns))
     }
 
     @Nested

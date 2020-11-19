@@ -5,7 +5,6 @@ import com.grupox.wololo.model.externalservices.GeoRef
 import com.grupox.wololo.model.helpers.getOrThrow
 import okhttp3.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.doReturn
@@ -13,7 +12,6 @@ import org.mockito.Mockito.spy
 
 class GeoRefTest {
     lateinit var geoRef: GeoRef
-
     private val correctJsonResponse: String = "{\"resultados\":[{\"cantidad\":1,\"departamentos\":[{\"centroide\":{\"lat\":-34.9157089757004,\"lon\":-59.9584822196811},\"id\":\"06224\",\"nombre\":\"Chivilcoy\",\"provincia\":{\"id\":\"06\",\"nombre\":\"Buenos Aires\"}}],\"inicio\":0,\"parametros\":{\"max\":1,\"nombre\":\"chivilcoy\"},\"total\":1},{\"cantidad\":1,\"departamentos\":[{\"centroide\":{\"lat\":-35.5103702936319,\"lon\":-58.7694635013319},\"id\":\"06547\",\"nombre\":\"Monte\",\"provincia\":{\"id\":\"06\",\"nombre\":\"Buenos Aires\"}}],\"inicio\":0,\"parametros\":{\"max\":1,\"nombre\":\"monte\"},\"total\":5},{\"cantidad\":1,\"departamentos\":[{\"centroide\":{\"lat\":-35.6765966680226,\"lon\":-59.7037033020054},\"id\":\"06707\",\"nombre\":\"Saladillo\",\"provincia\":{\"id\":\"06\",\"nombre\":\"Buenos Aires\"}}],\"inicio\":0,\"parametros\":{\"max\":1,\"nombre\":\"saladillo\"},\"total\":1}]}"
     private val incorrectJsonResponse: String = "{\"resultados\":[{\"cantidad\":0,\"departamentos\":[],\"inicio\":0,\"parametros\":{\"max\":1,\"nombre\":\"chivilcoy\"},\"total\":1},{\"cantidad\":1,\"departamentos\":[{\"centroide\":{\"lat\":-35.5103702936319,\"lon\":-58.7694635013319},\"id\":\"06547\",\"nombre\":\"Monte\",\"provincia\":{\"id\":\"06\",\"nombre\":\"Buenos Aires\"}}],\"inicio\":0,\"parametros\":{\"max\":1,\"nombre\":\"monte\"},\"total\":5},{\"cantidad\":1,\"departamentos\":[{\"centroide\":{\"lat\":-35.6765966680226,\"lon\":-59.7037033020054},\"id\":\"06707\",\"nombre\":\"Saladillo\",\"provincia\":{\"id\":\"06\",\"nombre\":\"Buenos Aires\"}}],\"inicio\":0,\"parametros\":{\"max\":1,\"nombre\":\"saladillo\"},\"total\":1}]}"
     private lateinit var response: Response

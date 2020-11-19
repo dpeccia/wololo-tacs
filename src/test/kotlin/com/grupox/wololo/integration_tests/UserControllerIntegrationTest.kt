@@ -61,7 +61,6 @@ class UserControllerIntegrationTest {
         doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminTrueAndId(users[1].id)
         doReturn(Optional.of(users[0])).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
         doReturn(Optional.of(users[1])).`when`(repoUsers).findByMailAndPassword("example_not_admin", sha512.getSHA512("example_not_admin"))
-
     }
 
     @Test
@@ -114,18 +113,6 @@ class UserControllerIntegrationTest {
         assertThat(logoutResponse?.cookies()?.get("X-Auth")?.get(0)?.maxAge).isEqualTo(Duration.ZERO)
     }
 
-    // TODO arreglar test (que insertUser sea a un mock
-    /*@Test
-    fun `sign up allows for subsequent login`() {
-        val signupResponse = webClient!!.post().uri("/users")
-                .bodyValue(UserCredentials("example_name", "example_password")).exchange().block()
-        assertThat(signupResponse?.statusCode()).isEqualTo(HttpStatus.OK)
-
-        val loginResponse = webClient!!.post().uri("/users/tokens")
-                .bodyValue(UserCredentials("example_name", "example_password")).exchange().block()
-        assertThat(loginResponse?.statusCode()).isEqualTo(HttpStatus.OK)
-    }*/
-
     @Test
     fun `cannot obtain users details if not logged in`() {
         val response = webClient.get().uri("/users").exchange().block()
@@ -144,6 +131,7 @@ class UserControllerIntegrationTest {
                 .exchange().block()
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
     }
+
     @Nested
     inner class AdminUsersOperations {
         @Test

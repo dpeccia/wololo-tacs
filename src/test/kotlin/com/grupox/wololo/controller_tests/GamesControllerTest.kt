@@ -9,11 +9,11 @@ import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
 import com.grupox.wololo.services.UsersControllerService
+import flexjson.JSONDeserializer
+import flexjson.JSONSerializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
-import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
@@ -25,40 +25,57 @@ import java.util.*
 class GamesControllerTest {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
-
     @Autowired
     lateinit var usersControllerService: UsersControllerService
 
     @SpyBean
     lateinit var repoUsers: RepoUsers
-
     @SpyBean
     lateinit var repoGames: RepoGames
 
-    private final val user1: User = User("a_username", "a_mail", "a_password")
-    private final val user2: User = User("a_username2", "a_mail2", "a_password2")
-    private final val user3: User = User("a_username3", "a_mail3", "a_password3")
-    val userNotInRepo: User = User("other_username", "other_mail", "other_password")
-    private final val users: List<User> = listOf(user1, user2, user3)
-
-    private final val town1: Town = Town.new("town1", 10.0, listOf("town2"))
-    private final val town2: Town = Town.new("town2", 11.0, listOf("town1"))
-    private final val town3: Town = Town.new("town3", 12.0, listOf("town4"))
-    private final val town4: Town = Town.new("town4", 13.0, listOf("town3"))
-    private final val town5: Town = Town.new("town5", 14.0, listOf("town6"))
-    private final val town6: Town = Town.new("town6", 15.0, listOf("town5"))
-    val townNotInRepo = Town.new("not in repo", 16.0, listOf("town2"))
-    private final val towns: List<Town> = listOf(town1, town2, town3, town4, town5, town6)
-
-    private final val game1: Game = Game.new(listOf(user1, user3), Province("a_province", ArrayList(listOf(town1, town2))))
-    private final val game2: Game = Game.new(users, Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
-    private final val game3: Game = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1, town2, town3, town4))))
-    private final val game4: Game = Game.new(listOf(user2, user3), Province("a_province", ArrayList(towns)))
-    val gameNotInRepo: Game = Game.new(listOf(user1, user3), Province("another_province", ArrayList(towns)))
-    val games: List<Game> = listOf(game2, game3, game1, game4)
+    private lateinit var user1: User
+    private lateinit var user2: User
+    private lateinit var user3: User
+    private lateinit var userNotInRepo: User
+    private lateinit var users: List<User>
+    private lateinit var town1: Town
+    private lateinit var town2: Town
+    private lateinit var town3: Town
+    private lateinit var town4: Town
+    private lateinit var town5: Town
+    private lateinit var town6: Town
+    private lateinit var townNotInRepo: Town
+    private lateinit var towns: List<Town>
+    private lateinit var game1: Game
+    private lateinit var game2: Game
+    private lateinit var game3: Game
+    private lateinit var game4: Game
+    private lateinit var gameNotInRepo: Game
+    private lateinit var games: List<Game>
 
     @BeforeEach
     fun fixture() {
+        user1 = User("a_username", "a_mail", "a_password")
+        user2 = User("a_username2", "a_mail2", "a_password2")
+        user3 = User("a_username3", "a_mail3", "a_password3")
+        userNotInRepo = User("other_username", "other_mail", "other_password")
+        users = listOf(user1, user2, user3)
+
+        town1 = Town.new("town1", 10.0, listOf("town2"))
+        town2 = Town.new("town2", 11.0, listOf("town1"))
+        town3 = Town.new("town3", 12.0, listOf("town4"))
+        town4 = Town.new("town4", 13.0, listOf("town3"))
+        town5 = Town.new("town5", 14.0, listOf("town6"))
+        town6 = Town.new("town6", 15.0, listOf("town5"))
+        townNotInRepo = Town.new("not in repo", 16.0, listOf("town2"))
+
+        game1 = Game.new(listOf(user1, user3), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy()))))
+        game2 = Game.new(users, Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy()))))
+        game3 = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy()))))
+        game4 = Game.new(listOf(user2, user3), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy(), town6.copy()))))
+        gameNotInRepo = Game.new(listOf(user1, user3), Province("another_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy(), town6.copy()))))
+        games = listOf(game2, game3, game1, game4)
+
         doReturn(games).`when`(repoGames).findAll()
         doReturn(users).`when`(repoUsers).findAllByIsAdminFalse()
         doReturn(users).`when`(repoUsers).findAll()
@@ -129,25 +146,25 @@ class GamesControllerTest {
         @BeforeEach
         fun fixtureMoveGauchos() {
             game1.turn = user1
-            town1.owner = user1
-            town2.owner = user1
+            game1.province.towns[0].owner = user1
+            game1.province.towns[1].owner = user1
         }
 
         @Test
         fun `trying to move gauchos in a game that doesnt exist throws GameNotFoundException`() {
             assertThrows<CustomException.NotFound.GameNotFoundException>
-            { gamesControllerService.moveGauchosBetweenTowns(user1.id, gameNotInRepo.id, MovementForm(town1.id,town2.id,2)) }
+            { gamesControllerService.moveGauchosBetweenTowns(user1.id, gameNotInRepo.id, MovementForm(game1.province.towns[0].id, game1.province.towns[1].id,2)) }
         }
 
         @Test
         fun `trying to move gauchos with a user that doesnt exist throws UserNotFoundException`() {
             assertThrows<CustomException.NotFound.UserNotFoundException>
-            { gamesControllerService.moveGauchosBetweenTowns(userNotInRepo.id, game1.id, MovementForm(town1.id,town2.id,2)) }
+            { gamesControllerService.moveGauchosBetweenTowns(userNotInRepo.id, game1.id, MovementForm(game1.province.towns[0].id, game1.province.towns[1].id,2)) }
         }
 
         @Test
         fun `trying to move gauchos with a user that exists and a game that exists doesnt throw an Exception`() {
-            assertDoesNotThrow { gamesControllerService.moveGauchosBetweenTowns(user1.id, game1.id, MovementForm(town1.id,town2.id,2)) }
+            assertDoesNotThrow { gamesControllerService.moveGauchosBetweenTowns(user1.id, game1.id, MovementForm(game1.province.towns[0].id, game1.province.towns[1].id,2)) }
         }
     }
 
@@ -156,26 +173,26 @@ class GamesControllerTest {
         @BeforeEach
         fun fixtureAttackTown() {
             game1.turn = user1
-            town1.owner = user1
-            town2.owner = user1
+            game1.province.towns[0].owner = user1
+            game1.province.towns[1].owner = user1
         }
 
         @Test
         fun `trying to attack town in a game that doesnt exist throws GameNotFoundException`() {
             assertThrows<CustomException.NotFound.GameNotFoundException>
-            { gamesControllerService.attackTown(user1.id, gameNotInRepo.id, AttackForm(town1.id, town2.id)) }
+            { gamesControllerService.attackTown(user1.id, gameNotInRepo.id, AttackForm(game1.province.towns[0].id, game1.province.towns[1].id)) }
         }
 
         @Test
         fun `trying to attack town with a user that doesnt exist throws UserNotFoundException`() {
             assertThrows<CustomException.NotFound.UserNotFoundException>
-            { gamesControllerService.attackTown(userNotInRepo.id, game1.id, AttackForm(town1.id, town2.id)) }
+            { gamesControllerService.attackTown(userNotInRepo.id, game1.id, AttackForm(game1.province.towns[0].id, game1.province.towns[1].id)) }
         }
 
         @Test
         fun `trying to attack town with a user that exists and a game that exists doesnt throw UserNotFound or GameNotFound`() {
             assertThrows<CustomException.Forbidden.IllegalAttack>
-            { gamesControllerService.attackTown(user1.id, game1.id, AttackForm(town1.id, town2.id)) }
+            { gamesControllerService.attackTown(user1.id, game1.id, AttackForm(game1.province.towns[0].id, game1.province.towns[1].id)) }
         }
     }
 
@@ -204,12 +221,12 @@ class GamesControllerTest {
     inner class TownStats {
         @Test
         fun `Getting gauchos amount generated by production should be more than zero when gauchos are added after a game starts`(){
-            assert(gamesControllerService.getTownStats(game3.id,town1.id).gauchosGeneratedByProduction > 0)
+            assert(gamesControllerService.getTownStats(game3.id, game3.province.towns[0].id).gauchosGeneratedByProduction > 0)
         }
 
         @Test
         fun `Getting town stats from a game that doesn't exists returns GameNotFound exception `(){
-            assertThrows<CustomException.NotFound.GameNotFoundException>{gamesControllerService.getTownStats(gameNotInRepo.id,town1.id)}
+            assertThrows<CustomException.NotFound.GameNotFoundException>{gamesControllerService.getTownStats(gameNotInRepo.id, gameNotInRepo.province.towns[0].id)}
         }
 
         @Test
@@ -232,7 +249,7 @@ class GamesControllerTest {
             val user = user2
             val sortedGames = gamesControllerService.getGames(user.id, "id", null, null)
             val ids = sortedGames.map { it.id }
-            assertThat(ids).isSorted  //isEqualTo(listOf(game2, game3, game4))
+            assertThat(ids).isSorted
         }
 
         @Test
@@ -240,7 +257,7 @@ class GamesControllerTest {
             val user = user1
             val sortedGames = gamesControllerService.getGames(user.id, "date", null, null)
             val dates = sortedGames.map { it.date }
-            assertThat(dates).isSorted   //isEqualTo(listOf(singlePlayerGame, game2, game3))
+            assertThat(dates).isSorted
         }
 
         @Test
@@ -275,22 +292,12 @@ class GamesControllerTest {
         fun `Get game's result can be filtered by status`() {
             val user = user1
             game1.turn = user
-            town1.owner = user1
-            town2.owner = user2
+            game1.province.towns[0].owner = user1
+            game1.province.towns[1].owner = user2
             game1.finishTurn(user)
             val playerGames = gamesControllerService.getGames(user.id, null, Status.FINISHED, null)
             assertThat(playerGames).allMatch { it.status == Status.FINISHED }
         }
-
-//        @Test
-//        fun `Get game's result can be filtered by date`() {
-//          TODO("Not implemented")
-//        }
-
-//        @Test
-//        fun `Get games can be sorted and filtered altogether`() {
-//          TODO("Not implemented")
-//        }
 
         @Test
         fun `Get games fails if the given user doesn't exist with UserNotFoundException`(){
@@ -342,46 +349,30 @@ class GamesControllerTest {
 
             user3.stats.gamesWon = 3
             user3.stats.gamesLost = 2
-
         }
+
         @Test
         fun `Scoreboard sorted by games won `() {
             val sortedUsers = usersControllerService.getScoreboard("gamesWon")
             assertThat(sortedUsers).isEqualTo(listOf(user2, user3, user1).map { it.dto() })
-
         }
 
         @Test
         fun `Scoreboard sorted by games lost `() {
             val sortedUsers = usersControllerService.getScoreboard("gamesLost")
             assertThat(sortedUsers).isEqualTo(listOf(user2, user3, user1).map { it.dto() })
-
         }
 
         @Test
         fun `Gets game stats from a date range`() {
             val filteredGames = gamesControllerService.getGamesInADateRange(Date.from(Instant.now().minus(Duration.ofDays(5))), Date.from(Instant.now().plus(Duration.ofDays(100))))
             assertThat(gamesControllerService.getGamesStats(filteredGames)).isNotNull
-
         }
 
         @Test
         fun `Gets all games stats when not specifying a date range`() {
             val filteredGames = gamesControllerService.getAllGamesDTO()
             assertThat(gamesControllerService.getGamesStats(filteredGames)).isEqualTo(gamesControllerService.getGamesStats(games.map{it.dto()}))
-
         }
-
-//
-//     }
     }
-
-//    @Test
-//    fun `Change town specialization`() {
-//        val gameId = 2
-//        val userId = 5
-//        val ownedTown = RepoGames.getAll().find { it.id == gameId }?.province?.towns?.find { it.owner?.id == userId }
-//        gamesControllerService.updateTownSpecialization(userId,gameId, ownedTown?.id!!, "DEFENSE")  // Por default al comienzo es produccion.
-//        assertThat(ownedTown.specialization).isInstanceOf(Defense::class.java)
-//    }
 }
