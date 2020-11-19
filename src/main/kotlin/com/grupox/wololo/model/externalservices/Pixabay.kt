@@ -10,25 +10,19 @@ import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Service
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ImageQueryResponse(val totalHits: Int, val hits: List<HitInfo>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class ImageQueryResponse (
-    val totalHits: Int,
-    val hits: List<HitInfo>
-)
+data class HitInfo(val webformatURL: String)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class HitInfo (
-    val webformatURL: String
-)
-
-interface IPixabay{
+interface IPixabay {
     fun requestTownImage(townName: String): Either<CustomException, String>
 }
 
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-class Pixabay : IPixabay{
+class Pixabay : IPixabay {
     @Autowired
     lateinit var pixabayProperties: PixabayProperties
 
@@ -48,6 +42,5 @@ class Pixabay : IPixabay{
         }
     }
 
-    private fun formatString(str: String): String =
-        str.replace(' ', '+')
+    private fun formatString(str: String): String = str.replace(' ', '+')
 }

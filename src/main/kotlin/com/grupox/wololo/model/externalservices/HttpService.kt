@@ -5,17 +5,13 @@ import arrow.core.extensions.list.foldable.foldLeft
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.helpers.getOrThrow
 import io.github.rybalkinsd.kohttp.client.client
 import io.github.rybalkinsd.kohttp.client.defaultHttpClient
 import io.github.rybalkinsd.kohttp.client.fork
 import io.github.rybalkinsd.kohttp.dsl.httpGet
-import io.github.rybalkinsd.kohttp.ext.httpGet
 import io.github.rybalkinsd.kohttp.ext.url
 import io.github.rybalkinsd.kohttp.interceptors.RetryInterceptor
-import io.github.rybalkinsd.kohttp.jackson.ext.toType
 import okhttp3.Response
-import org.springframework.stereotype.Service
 
 class HttpService(val apiName: String) {
     inline fun <reified DataT : Any>requestData(url: String, queryParams: Map<String, String>): Either<CustomException, DataT> {

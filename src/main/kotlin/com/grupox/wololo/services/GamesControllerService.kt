@@ -13,6 +13,7 @@ import com.grupox.wololo.model.repos.RepoUsers
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -26,19 +27,8 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     @Autowired
     lateinit var pixabay: Pixabay
     
-    fun surrender(gameId: ObjectId, userId: ObjectId): DTO.GameDTO {
-//        val game: Game = getGame(gameId)
-//        val user: User = game.getMember(userId).getOrThrow()
-//
-//        user.updateGamesLostStats()
-//        if (game.playerAmount <= 2) {
-//            game.players.filter { it.id != user.id }.map { it.updateGamesWonStats() }  // Update stats ganadores
-//            game.status = Status.CANCELED
-//        }
-//        val updatedGame = repoGames.save(game)
-//        return updatedGame.dto()
-        return this.play(gameId, userId) { game, user -> game.surrender(user) }
-    }
+    fun surrender(gameId: ObjectId, userId: ObjectId): DTO.GameDTO =
+            this.play(gameId, userId) { game, user -> game.surrender(user) }
 
     fun finishTurn(userId: ObjectId, gameId: ObjectId): DTO.GameDTO =
             this.play(gameId, userId) { game, user -> game.finishTurn(user) }

@@ -7,27 +7,31 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.*
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.Instant
+import java.time.*
+import java.time.Instant.now
+import java.time.temporal.TemporalAccessor
 import java.util.*
 
 @Document(collection = "Games")
-class Game(@DBRef var players: List<User>, val province: Province, var status: Status) : Requestable {
+class Game(@DBRef var players: List<User>, val province: Province, @Indexed var status: Status) : Requestable {
     @Id
-    val id: ObjectId = ObjectId.get()
+    var id: ObjectId = ObjectId.get()
 
     val townsAmount: Int get() = province.towns.size
 
     val playerAmount: Int get() = players.size
 
-    private val turnManager: TurnManager<ObjectId> = TurnManager(this.players.map { it.id }.shuffled())
+    private var turnManager: TurnManager<ObjectId> = TurnManager(this.players.map { it.id }.shuffled())
 
     var turn: User
         get() = this.players.find { it.id == turnManager.current }!!
         set(value) { this.turnManager.current = value.id }
 
-    var date: Date = Date.from(Instant.now())
+    @Indexed
+    var date: Date = Date.from(now())
 
     companion object {
         fun new(_players: List<User>, _province: Province, _status: Status = Status.NEW): Game {

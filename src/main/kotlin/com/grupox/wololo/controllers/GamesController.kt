@@ -1,10 +1,8 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.externalservices.TownGeoJSON
 import com.grupox.wololo.model.helpers.*
-import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
 import com.grupox.wololo.services.UsersControllerService
 import io.swagger.annotations.ApiOperation
@@ -17,7 +15,7 @@ import javax.servlet.http.HttpServletRequest
 
 @RequestMapping("/games")
 @RestController
-class GamesController() : BaseController() {
+class GamesController : BaseController() {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
 
@@ -26,10 +24,11 @@ class GamesController() : BaseController() {
 
     @GetMapping
     @ApiOperation(value = "Gets the games of the current user. Params: sort=id|date|numberOfTowns|numberOfPlayers & status & date")
-    fun getGames(@RequestParam("sort", required = false) sort: String?, // TODO query params
-                 @RequestParam("status", required = false) status: Status?,
-                 @RequestParam("date", required = false) date: Date?,
-                 request: HttpServletRequest): List<DTO.GameDTO> {
+    fun getGames(
+            @RequestParam("sort", required = false) sort: String?,
+            @RequestParam("status", required = false) status: Status?,
+            @RequestParam("date", required = false) date: Date?,
+            request: HttpServletRequest): List<DTO.GameDTO> {
         val userId = checkAndGetUserId(request)
         return gamesControllerService.getGames(userId, sort, status, date)
     }
@@ -50,31 +49,31 @@ class GamesController() : BaseController() {
 
     @GetMapping("/stats")
     @ApiOperation(value = "Gets games stats from a date range")
-    fun getGamesStats(@RequestParam("from", required = false) from: Date?,
-                      @RequestParam("to", required = false) to: Date?,
-                      @ApiIgnore @CookieValue("X-Auth") authCookie : String?,
-                      request: HttpServletRequest): GamePublicInfo {
+    fun getGamesStats(
+            @RequestParam("from", required = false) from: Date?,
+            @RequestParam("to", required = false) to: Date?,
+            @ApiIgnore @CookieValue("X-Auth") authCookie : String?,
+            request: HttpServletRequest): GamePublicInfo {
         val userId = checkAndGetUserId(request)
-        val list: List<DTO.GameDTO>
         usersControllerService.throwIfNotAllowed(userId)
-        if (from != null && to != null){
-            list = gamesControllerService.getGamesInADateRange(from, to)
-        }else{
-            list = gamesControllerService.getAllGamesDTO()
+        val list: List<DTO.GameDTO> = if (from != null && to != null) {
+            gamesControllerService.getGamesInADateRange(from, to)
+        } else {
+            gamesControllerService.getAllGamesDTO()
         }
         return gamesControllerService.getGamesStats(list)
     }
 
     @GetMapping("/date")
     @ApiOperation(value = "Gets games from a date range")
-    fun getGamesByDateRange(@RequestParam("from", required = false) from: Date,
-                      @RequestParam("to", required = false) to: Date,
-                      @ApiIgnore @CookieValue("X-Auth") authCookie : String?,
-                      request: HttpServletRequest): List<DTO.GameDTO> {
+    fun getGamesByDateRange(
+            @RequestParam("from", required = false) from: Date,
+            @RequestParam("to", required = false) to: Date,
+            @ApiIgnore @CookieValue("X-Auth") authCookie : String?,
+            request: HttpServletRequest): List<DTO.GameDTO> {
         val userId = checkAndGetUserId(request)
         usersControllerService.throwIfNotAllowed(userId)
         return gamesControllerService.getGamesInADateRange(from, to)
-
     }
 
     @PutMapping("/{id}")
@@ -141,10 +140,11 @@ class GamesController() : BaseController() {
 
     @GetMapping("/provinces/towns-geojsons")
     @ApiOperation("Gets the GeoJSON data from the list of '|' separated towns")
-    fun getTownsGeoJSONs(@RequestParam("province") province: String, @RequestParam("towns") towns: String, request: HttpServletRequest) : List<TownGeoJSON> {
+    fun getTownsGeoJSONs(
+            @RequestParam("province") province: String,
+            @RequestParam("towns") towns: String,
+            request: HttpServletRequest) : List<TownGeoJSON> {
         checkAndGetUserId(request)
         return gamesControllerService.getTownsGeoJSONs(province, towns)
     }
-
 }
-

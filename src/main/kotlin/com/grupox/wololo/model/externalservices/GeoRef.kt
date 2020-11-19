@@ -18,13 +18,9 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseBody
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class GeoRefTownRequest (
-        @JsonProperty("departamentos") val towns: List<GeoRefTownBodyParams>
-)
+data class GeoRefTownRequest (@JsonProperty("departamentos") val towns: List<GeoRefTownBodyParams>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GeoRefTownBodyParams(
@@ -34,14 +30,10 @@ data class GeoRefTownBodyParams(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class GeoRefTownResponse(
-        @JsonProperty("resultados") val results: List<GeoRefTownResults>
-)
+data class GeoRefTownResponse(@JsonProperty("resultados") val results: List<GeoRefTownResults>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class GeoRefTownResults (
-        @JsonProperty("departamentos") val towns: List<TownGeoRef>
-)
+data class GeoRefTownResults (@JsonProperty("departamentos") val towns: List<TownGeoRef>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TownGeoRef(
@@ -86,6 +78,4 @@ class GeoRef {
         val towns = townsNames.map { GeoRefTownBodyParams(province, it) }
         return mapper.writeValueAsString(GeoRefTownRequest(towns))
     }
-
-
 }
