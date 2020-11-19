@@ -114,13 +114,13 @@ class Game(@DBRef var players: List<User>, val province: Province, @Indexed var 
         if (!isParticipating(user)) throw CustomException.Forbidden.NotAMemberException()
 
         user.updateGamesLostStats()
-        province.townsFrom(user).forEach { it.neutralize() }
-        this.players = this.players.filter { it.id != user.id }
-        this.turnManager.removeParticipant(user.id)
-
-        if (this.playerAmount <= 1) {
+        if (this.playerAmount == 2) {
             this.players.filter { it.id != user.id }.map { it.updateGamesWonStats() }
             this.status = Status.CANCELED
+        } else {
+            province.townsFrom(user).forEach { it.neutralize() }
+            this.players = this.players.filter { it.id != user.id }
+            this.turnManager.removeParticipant(user.id)
         }
     }
 

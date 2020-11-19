@@ -154,6 +154,8 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
         val game = getGame(gameId)
         val user = getUser(userId)
         action(game, user)
+        if(game.status == Status.FINISHED || game.status == Status.CANCELED) game.players.filter { it.id != user.id }.forEach { repoUsers.save(it) }
+        repoUsers.save(user)
         val updatedGame = repoGames.save(game)
         return updatedGame.dto()
     }
