@@ -9,8 +9,6 @@ import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
 import com.grupox.wololo.services.UsersControllerService
-import flexjson.JSONDeserializer
-import flexjson.JSONSerializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.mockito.Mockito.doReturn
