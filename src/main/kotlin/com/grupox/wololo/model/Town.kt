@@ -75,7 +75,7 @@ data class Town(val id: Int, val name: String, val coordinates: Coordinates, val
             coordinates = coordinates,
             elevation = elevation,
             imageUrl = townImage,
-            ownerId = owner?.id.toString(),
+            ownerId = owner?.id?.toString(),
             specialization = specialization.toString(),
             gauchos = gauchos,
             isLocked = isLocked,
