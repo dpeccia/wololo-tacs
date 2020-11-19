@@ -133,4 +133,15 @@ class Game(@DBRef var players: List<User>, val province: Province, @Indexed var 
             playerIds = players.map { it.dto() },
             province = province.dto()
         )
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Game) {
+            return false
+        }
+        return id == other.id
+    }
 }

@@ -70,9 +70,10 @@ class GamesControllerTest {
         doReturn(Optional.of(game3)).`when`(repoGames).findById(game3.id)
         doReturn(Optional.of(game4)).`when`(repoGames).findById(game4.id)
         doReturn(game1).`when`(repoGames).save(game1)
+        doReturn(game2).`when`(repoGames).save(game2)
         doReturn(games.filter { it.isParticipating(user1) }).`when`(repoGames).findAllByPlayersContains(user1)
-        doAnswer { throw CustomException.NotFound.GameNotFoundException() }.`when`(repoGames).findById(gameNotInRepo.id)
-        doAnswer { throw CustomException.NotFound.UserNotFoundException() }.`when`(repoUsers).findByIsAdminFalseAndId(userNotInRepo.id)
+        doReturn(Optional.empty<Game>()).`when`(repoGames).findById(gameNotInRepo.id)
+        doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminFalseAndId(userNotInRepo.id)
     }
 
     @Nested
