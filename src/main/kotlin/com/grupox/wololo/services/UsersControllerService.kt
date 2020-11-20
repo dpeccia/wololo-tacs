@@ -61,9 +61,7 @@ class UsersControllerService(@Autowired val repoUsers: RepoUsers) {
     }
 
     fun getScoreboard(sort: String?):List<DTO.UserDTO> {
-
         var users: List<User> = repoUsers.findAllByIsAdminFalse()
-
         users = when (sort) {
             "gamesWon" -> users.sortedByDescending { it.stats.gamesWon }
             "gamesLost" -> users.sortedByDescending { it.stats.gamesLost }
@@ -71,5 +69,4 @@ class UsersControllerService(@Autowired val repoUsers: RepoUsers) {
         }
         return users.map { it.dto() }.take(10)
     }
-
 }

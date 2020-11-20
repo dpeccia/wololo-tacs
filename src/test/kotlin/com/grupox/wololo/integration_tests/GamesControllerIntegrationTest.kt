@@ -74,6 +74,7 @@ class GamesControllerIntegrationTest {
         doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminTrueAndId(users[1].id)
         doReturn(Optional.of(users[0])).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
         doReturn(Optional.of(users[1])).`when`(repoUsers).findByMailAndPassword("example_not_admin", sha512.getSHA512("example_not_admin"))
+        doReturn(users.filter { !it.isAdmin } ).`when`(repoUsers).findAllByIsAdminFalse()
     }
 
     @Nested

@@ -56,7 +56,8 @@ class UserControllerIntegrationTest {
         doReturn(users).`when`(repoUsers).findAll()
         doReturn(users.filter { !it.isAdmin }).`when`(repoUsers).findAllByIsAdminFalse()
         doReturn(Optional.of(user)).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
-
+        doReturn(Optional.empty<User>()).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("wrong_password"))
+        doReturn(Optional.empty<User>()).`when`(repoUsers).findByMailAndPassword("wrong_username", sha512.getSHA512("example_admin"))
         doReturn(Optional.of(users[0])).`when`(repoUsers).findByIsAdminTrueAndId(users[0].id)
         doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminTrueAndId(users[1].id)
         doReturn(Optional.of(users[0])).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("example_admin"))
@@ -67,7 +68,6 @@ class UserControllerIntegrationTest {
     fun `login with wrong username returns UNAUTHORIZED`() {
         val response = webClient.post().uri("/users/tokens")
                 .bodyValue(LoginForm("wrong_username", "example_admin")).exchange().block()
-    println(sha512.getSHA512("admin"))
         assertThat(response?.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
 
