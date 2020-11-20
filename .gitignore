@@ -32,6 +32,3 @@ out/
 
 ### VS Code ###
 .vscode/
-
-### MongoDB ###
-mongo-volume/
