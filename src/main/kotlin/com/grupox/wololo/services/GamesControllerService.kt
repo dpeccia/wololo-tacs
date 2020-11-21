@@ -6,14 +6,16 @@ import arrow.core.extensions.list.functorFilter.filter
 import arrow.optics.extensions.list.cons.cons
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.externalservices.*
+import com.grupox.wololo.model.externalservices.GeoRef
+import com.grupox.wololo.model.externalservices.ProvincesService
+import com.grupox.wololo.model.externalservices.TopoData
+import com.grupox.wololo.model.externalservices.TownGeoJSON
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -24,8 +26,6 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     lateinit var topoData: TopoData
     @Autowired
     lateinit var provincesService: ProvincesService
-    @Autowired
-    lateinit var pixabay: Pixabay
     
     fun surrender(gameId: ObjectId, userId: ObjectId): DTO.GameDTO =
             this.play(gameId, userId) { game, user -> game.surrender(user) }
@@ -105,7 +105,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
             val users = userId.toString().cons(form.participantsIds).distinct()
                     .map { repoUsers.findByIsAdminFalseAndId(ObjectId(it)).orElseThrow { CustomException.NotFound.UserNotFoundException() } }
             val towns = !getRandomTowns(form)
-            val province = Province(formatTownName(form.provinceName), ArrayList(towns), provincesService.getUrl(form.provinceName))
+            val province = Province(formatTownName(form.provinceName), ArrayList(towns))
             Game.new(users, province)
         }.getOrThrow()
 
@@ -139,7 +139,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
 
             townsWithBorderingAndCoordinates.zip(townsWithElevationSortedByCoord) {
                 mergedTown, topoDataTown ->
-                    Town.new(mergedTown.name, topoDataTown.elevation, mergedTown.borderingTowns, mergedTown.coordinates, !pixabay.requestTownImage(mergedTown.name))
+                    Town.new(mergedTown.name, topoDataTown.elevation, mergedTown.borderingTowns, mergedTown.coordinates)
             }
         }
     }

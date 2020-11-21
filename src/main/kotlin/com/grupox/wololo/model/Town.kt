@@ -9,7 +9,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-data class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats, var borderingTowns: List<String>) : Requestable {
+data class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double,  val stats: TownStats, var borderingTowns: List<String>) : Requestable {
     @DBRef
     var owner: User? = null
 
@@ -19,9 +19,8 @@ data class Town(val id: Int, val name: String, val coordinates: Coordinates, val
 
     companion object {
         private val idGenerator: AtomicInteger = AtomicInteger(0)
-        fun new(_name: String, _elevation: Double, _borderingTowns: List<String>, _coordinates: Coordinates = Coordinates(0f,0f),
-                _townImage: String = "", _stats: TownStats = TownStats(0,0)): Town =
-                Town(idGenerator.incrementAndGet(), _name, _coordinates, _elevation, _townImage, _stats, _borderingTowns)
+        fun new(_name: String, _elevation: Double, _borderingTowns: List<String>, _coordinates: Coordinates = Coordinates(0f,0f), _stats: TownStats = TownStats(0,0)): Town =
+                Town(idGenerator.incrementAndGet(), _name, _coordinates, _elevation, _stats, _borderingTowns)
     }
 
     fun isFrom(user: User) = owner?.id.toString() == user.id.toString()
@@ -74,7 +73,6 @@ data class Town(val id: Int, val name: String, val coordinates: Coordinates, val
             name = name,
             coordinates = coordinates,
             elevation = elevation,
-            imageUrl = townImage,
             ownerId = owner?.id?.toString(),
             specialization = specialization.toString(),
             gauchos = gauchos,

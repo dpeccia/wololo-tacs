@@ -3,33 +3,23 @@ package com.grupox.wololo.model.externalservices
 import arrow.core.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.grupox.wololo.configs.properties.PixabayProperties
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.formatLine
 import com.grupox.wololo.model.helpers.formatTownName
 import com.grupox.wololo.model.helpers.unaccent
 import org.geojson.FeatureCollection
 import org.geojson.GeoJsonObject
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
-import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.io.File
-import java.text.Normalizer
 
 @Service
 @PropertySource("classpath:provinces.properties")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 class ProvincesService {
-    @Autowired
-    private lateinit var pixabayProperties: PixabayProperties
-
-    @Autowired
-    private lateinit var env: Environment
-
     lateinit var _townsGeoJSONs: List<TownGeoJSON>
 
     init {
@@ -53,10 +43,6 @@ class ProvincesService {
             )
         }
     }
-
-    //@Cacheable("withTimeToLive") No se por qué rompe cuando lo uso
-    fun getUrl(provinceName: String): String =
-        env.getProperty("${provinceName.toUpperCase().replace(' ', '_')}.url") ?: pixabayProperties.defaultImage
 
     @Cacheable("withTimeToLive")
     fun availableProvinces(): Either<CustomException, List<String>> {
