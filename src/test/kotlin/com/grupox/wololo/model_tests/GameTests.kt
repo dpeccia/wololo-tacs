@@ -16,10 +16,8 @@ import org.junit.jupiter.api.function.Executable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
+
 class GameTests {
-    @Autowired
-    lateinit var gameModeService: GameModeService
 
     private lateinit var user1: User
     private lateinit var user2: User
@@ -39,7 +37,7 @@ class GameTests {
 
     @BeforeEach
     fun fixture() {
-        normalMode = gameModeService.getDifficultyMultipliers("NORMAL")
+        normalMode = GameMode("NORMAL", 10.0, 15.0, 1.25, 1.0)
         user1 = User("a_user", "a_mail", "a_password")
         user2 = User("other_user", "other_mail", "other_password")
         user3 = User("other_user2", "other_mail2", "other_password2")

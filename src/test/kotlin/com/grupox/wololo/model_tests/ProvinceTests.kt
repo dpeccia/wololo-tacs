@@ -16,10 +16,8 @@ import org.junit.jupiter.api.function.Executable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import kotlin.math.round
-@SpringBootTest
+
 class ProvinceTests {
-    @Autowired
-    lateinit var gameModeService: GameModeService
 
     private lateinit var user1: User
     private lateinit var user2: User
@@ -41,7 +39,8 @@ class ProvinceTests {
         town2.gauchos = 20
         towns = listOf(town1, town2)
         province = Province("a_province", ArrayList(towns))
-        normalMode = gameModeService.getDifficultyMultipliers("NORMAL")
+        normalMode = GameMode("NORMAL", 10.0, 15.0, 1.25, 1.0)
+
     }
 
     @Nested

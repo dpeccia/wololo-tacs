@@ -23,8 +23,6 @@ class GamesControllerTest {
     lateinit var gamesControllerService: GamesControllerService
     @Autowired
     lateinit var usersControllerService: UsersControllerService
-    @Autowired
-    lateinit var gameModeService: GameModeService
 
     @SpyBean
     lateinit var repoUsers: RepoUsers
@@ -50,6 +48,7 @@ class GamesControllerTest {
     private lateinit var gameNotInRepo: Game
     private lateinit var games: List<Game>
     private lateinit var normalMode: GameMode
+    private lateinit var normalConfig: GameMode
 
     @BeforeEach
     fun fixture() {
@@ -67,7 +66,7 @@ class GamesControllerTest {
         town6 = Town.new("town6", 15.0, listOf("town5"))
         townNotInRepo = Town.new("not in repo", 16.0, listOf("town2"))
 
-        normalMode = gameModeService.getDifficultyMultipliers("NORMAL")
+        normalMode = GameMode("NORMAL", 10.0, 15.0, 1.25, 1.0)
 
         game1 = Game.new(listOf(user1, user3), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy()))), normalMode)
         game2 = Game.new(users, Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy()))), normalMode)
