@@ -2,9 +2,7 @@ package com.grupox.wololo.controller_tests
 
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.helpers.AttackForm
-import com.grupox.wololo.model.helpers.DTO
-import com.grupox.wololo.model.helpers.MovementForm
+import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
@@ -49,6 +47,8 @@ class GamesControllerTest {
     private lateinit var game4: Game
     private lateinit var gameNotInRepo: Game
     private lateinit var games: List<Game>
+    private lateinit var normalMode: GameMode
+
 
     @BeforeEach
     fun fixture() {
@@ -66,12 +66,15 @@ class GamesControllerTest {
         town6 = Town.new("town6", 15.0, listOf("town5"))
         townNotInRepo = Town.new("not in repo", 16.0, listOf("town2"))
 
-        game1 = Game.new(listOf(user1, user3), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy()))))
-        game2 = Game.new(users, Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy()))))
-        game3 = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy()))))
-        game4 = Game.new(listOf(user2, user3), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy(), town6.copy()))))
-        gameNotInRepo = Game.new(listOf(user1, user3), Province("another_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy(), town6.copy()))))
+        normalMode = GameMode("NORMAL", 10.0, 15.0, 1.25, 1.0)
+
+        game1 = Game.new(listOf(user1, user3), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy()))), normalMode)
+        game2 = Game.new(users, Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy()))), normalMode)
+        game3 = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy()))), normalMode)
+        game4 = Game.new(listOf(user2, user3), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy(), town6.copy()))), normalMode)
+        gameNotInRepo = Game.new(listOf(user1, user3), Province("another_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy(), town6.copy()))), normalMode)
         games = listOf(game2, game3, game1, game4)
+
 
         doReturn(games).`when`(repoGames).findAll()
         doReturn(users).`when`(repoUsers).findAllByIsAdminFalse()

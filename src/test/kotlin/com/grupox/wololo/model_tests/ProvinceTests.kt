@@ -3,6 +3,8 @@ package com.grupox.wololo.model_tests
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.AttackForm
+import com.grupox.wololo.model.helpers.GameMode
+import com.grupox.wololo.model.helpers.GameModeService
 import com.grupox.wololo.model.helpers.MovementForm
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
@@ -11,9 +13,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.function.Executable
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import kotlin.math.round
 
 class ProvinceTests {
+
     private lateinit var user1: User
     private lateinit var user2: User
     private lateinit var town1: Town
@@ -21,6 +26,7 @@ class ProvinceTests {
     private lateinit var townThatDoesntExists: Town
     private lateinit var towns: List<Town>
     private lateinit var province: Province
+    private lateinit var normalMode: GameMode
 
     @BeforeEach
     fun fixture() {
@@ -33,6 +39,8 @@ class ProvinceTests {
         town2.gauchos = 20
         towns = listOf(town1, town2)
         province = Province("a_province", ArrayList(towns))
+        normalMode = GameMode("NORMAL", 10.0, 15.0, 1.25, 1.0)
+
     }
 
     @Nested
@@ -146,20 +154,20 @@ class ProvinceTests {
 
         @Test
         fun `trying to attack from a Town that doesnt exist throws TownNotFoundException`() {
-            assertThrows<CustomException.NotFound.TownNotFoundException> { province.attackTown(user1, AttackForm(townThatDoesntExists.id, town1.id)) }
+            assertThrows<CustomException.NotFound.TownNotFoundException> { province.attackTown(user1, AttackForm(townThatDoesntExists.id, town1.id), normalMode) }
         }
 
         @Test
         fun `trying to attack a Town that doesnt exist throws TownNotFoundException`() {
             assertThrows<CustomException.NotFound.TownNotFoundException>
-            { province.attackTown(user1, AttackForm(town1.id, townThatDoesntExists.id)) }
+            { province.attackTown(user1, AttackForm(town1.id, townThatDoesntExists.id), normalMode) }
         }
 
         @Test
         fun `user1 cannot attack from a town to itself`() {
             town1.owner = user1
             assertThrows<CustomException.Forbidden.IllegalAttack>
-            { province.attackTown(user1, AttackForm(town1.id, town1.id)) }
+            { province.attackTown(user1, AttackForm(town1.id, town1.id), normalMode) }
         }
 
         @Test
@@ -167,7 +175,7 @@ class ProvinceTests {
             town1.owner = user2
             town2.owner = user2
             assertThrows<CustomException.Forbidden.IllegalAttack>
-            { province.attackTown(user1, AttackForm(town1.id, town2.id)) }
+            { province.attackTown(user1, AttackForm(town1.id, town2.id), normalMode) }
         }
 
         @Test
@@ -175,13 +183,13 @@ class ProvinceTests {
             town1.owner = user1
             town2.owner = user1
             assertThrows<CustomException.Forbidden.IllegalAttack>
-            { province.attackTown(user1, AttackForm(town1.id, town2.id)) }
+            { province.attackTown(user1, AttackForm(town1.id, town2.id), normalMode) }
         }
 
         @Test
         fun `user1 cannot attack from a town that doesnt belong to someone`() {
             assertThrows<CustomException.Forbidden.IllegalAttack>
-            { province.attackTown(user1, AttackForm(town1.id, town2.id)) }
+            { province.attackTown(user1, AttackForm(town1.id, town2.id), normalMode) }
         }
 
         @Test
@@ -223,14 +231,14 @@ class ProvinceTests {
             abraPampa.gauchos = 4
             yavi.borderingTowns = listOf()
             abraPampa.borderingTowns = listOf()
-            assertThrows<CustomException.Forbidden.IllegalAttack>{ jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id)) }
+            assertThrows<CustomException.Forbidden.IllegalAttack>{ jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id), normalMode) }
         }
 
         @Test
         fun `Attack from Yavi (user1 town, 5 gauchos, Production) to AbraPampa (rebel town, 4 gauchos, Production) = Yavi (0 gauchos, user1), AbraPampa (2 gauchos, rebel)`() {
             yavi.gauchos = 5
             abraPampa.gauchos = 4
-            jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id))
+            jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id), normalMode)
             assertAll(
                     Executable { assertThat(yavi.owner).isEqualTo(user1) },
                     Executable { assertThat(abraPampa.owner).isNull() },
@@ -243,7 +251,7 @@ class ProvinceTests {
         fun `Attack from Yavi (user1 town, 10 gauchos, Production) to AbraPampa (rebel town, 4 gauchos, Production) = Yavi (0 gauchos, user1), AbraPampa (0 gauchos, user1)`() {
             yavi.gauchos = 10
             abraPampa.gauchos = 4
-            jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id))
+            jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id), normalMode)
             assertAll(
                     Executable { assertThat(yavi.owner).isEqualTo(user1) },
                     Executable { assertThat(abraPampa.owner).isEqualTo(user1) },
@@ -257,7 +265,7 @@ class ProvinceTests {
             yavi.gauchos = 10
             abraPampa.gauchos = 4
             abraPampa.specialization = Defense()
-            jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id))
+            jujuy.attackTown(user1, AttackForm(yavi.id, abraPampa.id), normalMode)
             assertAll(
                     Executable { assertThat(yavi.owner).isEqualTo(user1) },
                     Executable { assertThat(abraPampa.owner).isNull() },
@@ -271,7 +279,7 @@ class ProvinceTests {
             yavi.gauchos = 153
             cangrejillos.gauchos = 201
             yavi.specialization = Defense()
-            jujuy.attackTown(user1, AttackForm(yavi.id, cangrejillos.id))
+            jujuy.attackTown(user1, AttackForm(yavi.id, cangrejillos.id), normalMode)
             assertAll(
                     Executable { assertThat(yavi.owner).isEqualTo(user1) },
                     Executable { assertThat(cangrejillos.owner).isEqualTo(user2) },
