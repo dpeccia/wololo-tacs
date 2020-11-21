@@ -103,18 +103,12 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     fun createGame(userId: ObjectId, form: GameForm): DTO.GameDTO {
         if(form.townAmount > 100) throw CustomException.BadRequest.IllegalGameException("Max quantity of towns is 100") // limitante de topodata
 
-        lateinit var gameMode: GameMode
-        when (form.difficulty) {
-            "EASY" -> gameMode = gameModeService.getDifficultyMultipliers("EASY")
-            "NORMAL" -> gameMode = gameModeService.getDifficultyMultipliers("NORMAL")
-            "HARD" -> gameMode = gameModeService.getDifficultyMultipliers("HARD")
-        }
-
         val game: Game = Either.fx<CustomException, Game> {
             val users = userId.toString().cons(form.participantsIds).distinct()
                     .map { repoUsers.findByIsAdminFalseAndId(ObjectId(it)).orElseThrow { CustomException.NotFound.UserNotFoundException() } }
             val towns = !getRandomTowns(form)
             val province = Province(formatTownName(form.provinceName), ArrayList(towns), provincesService.getUrl(form.provinceName))
+            val gameMode: GameMode = gameModeService.getDifficultyMultipliers(form.difficulty)
             Game.new(users, province, gameMode)
         }.getOrThrow()
 

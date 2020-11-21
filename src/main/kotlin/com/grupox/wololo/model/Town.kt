@@ -31,7 +31,7 @@ data class Town(val id: Int, val name: String, val coordinates: Coordinates, val
         isLocked = false
     }
 
-    fun multDefense( gameMode: GameMode): Double = specialization.multDefense(gameMode = gameMode)
+    private fun multDefense(gameMode: GameMode): Double = specialization.multDefense(gameMode)
 
     fun addGauchos(maxAltitude: Double, minAltitude: Double, gameMode: GameMode) {
         val gauchosAmount: Int = specialization.gauchos(gameMode, elevation, maxAltitude, minAltitude)
