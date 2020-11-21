@@ -43,7 +43,6 @@ class GamesControllerTest {
     private lateinit var town5: Town
     private lateinit var town6: Town
     private lateinit var townNotInRepo: Town
-    private lateinit var towns: List<Town>
     private lateinit var game1: Game
     private lateinit var game2: Game
     private lateinit var game3: Game
@@ -94,6 +93,7 @@ class GamesControllerTest {
         doReturn(user2).`when`(repoUsers).save(user2)
         doReturn(user3).`when`(repoUsers).save(user3)
         doReturn(games.filter { it.isParticipating(user1) }).`when`(repoGames).findAllByPlayersContains(user1)
+        doReturn(games.filter { it.isParticipating(user2) }).`when`(repoGames).findAllByPlayersContains(user2)
         doReturn(Optional.empty<Game>()).`when`(repoGames).findById(gameNotInRepo.id)
         doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminFalseAndId(userNotInRepo.id)
     }
