@@ -1,31 +1,37 @@
 package com.grupox.wololo.model
 
 import arrow.core.Either
+import arrow.core.extensions.list.functorFilter.filter
 import arrow.core.rightIfNotNull
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.*
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.PersistenceConstructor
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.Instant
+import java.time.*
+import java.time.Instant.now
+import java.time.temporal.TemporalAccessor
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 
 @Document(collection = "Games")
-class Game(@DBRef var players: List<User>, val province: Province, var status: Status) : Requestable {
+class Game(@DBRef var players: List<User>, val province: Province, @Indexed var status: Status) : Requestable {
     @Id
     var id: ObjectId = ObjectId.get()
 
-    var townsAmount: Int = province.towns.size
+    val townsAmount: Int get() = province.towns.size
 
-    var playerAmount: Int = players.size
+    val playerAmount: Int get() = players.size
 
-    @DBRef
-    lateinit var turn: User
+    private var turnManager: TurnManager<ObjectId> = TurnManager(this.players.map { it.id }.shuffled())
 
-    var date: Date = Date.from(Instant.now())
+    var turn: User
+        get() = this.players.find { it.id == turnManager.current }!!
+        set(value) { this.turnManager.current = value.id }
+
+    @Indexed
+    var date: Date = Date.from(now())
 
     companion object {
         fun new(_players: List<User>, _province: Province, _status: Status = Status.NEW): Game {
@@ -49,18 +55,13 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
     }
 
     private fun startGame() {
-        turn = players.shuffled().first()
         province.addGauchosToAllTowns()
         status = Status.ONGOING
     }
 
     private fun changeTurn() {
-        val playersIterator = players.listIterator(players.indexOf(turn) + 1)
-        turn = if(playersIterator.hasNext())
-            playersIterator.next()
-        else
-            players.first()
-        province.addGauchosToAllTownsFrom(turn)
+        this.turnManager.changeTurn()
+        province.addGauchosToAllTownsFrom(this.turn)
     }
 
     private fun checkForbiddenAction(user: User) {
@@ -74,7 +75,7 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
     private fun updateStats(winner: User) {
         status = Status.FINISHED
         winner.updateGamesWonStats()
-        players.filter { it.id.toString() != winner.id.toString() }.forEach { it.updateGamesLostStats() }
+        players.filter { it.id != winner.id }.forEach { it.updateGamesLostStats() }
     }
 
     fun getMember(userId: ObjectId): Either<CustomException.NotFound, User> =
@@ -89,6 +90,7 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
         province.unlockAllTownsFrom(user)
         if(userWon(user)) updateStats(user) else changeTurn()
     }
+
 
     fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {
         checkForbiddenAction(user)
@@ -107,6 +109,21 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
         province.attackTown(user, attackForm)
     }
 
+    fun surrender(user: User) {
+        if (status == Status.FINISHED || status == Status.CANCELED) throw CustomException.Forbidden.FinishedGameException()
+        if (!isParticipating(user)) throw CustomException.Forbidden.NotAMemberException()
+
+        user.updateGamesLostStats()
+        if (this.playerAmount == 2) {
+            this.players.filter { it.id != user.id }.map { it.updateGamesWonStats() }
+            this.status = Status.CANCELED
+        } else {
+            province.townsFrom(user).forEach { it.neutralize() }
+            this.players = this.players.filter { it.id != user.id }
+            this.turnManager.removeParticipant(user.id)
+        }
+    }
+
     override fun dto(): DTO.GameDTO =
         DTO.GameDTO(
             id = id.toString(),
@@ -116,4 +133,15 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
             playerIds = players.map { it.dto() },
             province = province.dto()
         )
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Game) {
+            return false
+        }
+        return id == other.id
+    }
 }

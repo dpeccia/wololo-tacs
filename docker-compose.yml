@@ -1,6 +1,30 @@
-version: '2'
+version: '3'
 services:
-    wololo:
-        image: wololo
+    wololo-backend:
+        build: .
+        container_name: 'wololo-backend'
         ports: 
             - 8080:8080
+        depends_on:
+            - mongodb
+        networks:
+            - backend
+            - db
+        environment:
+            - SPRING_DATA_MONGODB_HOST=mongodb
+            - SPRING_DATA_MONGODB_PORT=27017
+            - SPRING_DATA_MONGODB_DATABASE=wololo-tacs
+    mongodb:
+        image: mongo:latest
+        container_name: 'mongodb-container'
+        environment:
+            - MONGO_INITDB_DATABASE=wololo-tacs
+        volumes:
+            - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+        ports:
+            - 27017:27017
+        networks:
+            - db
+networks:
+    db:
+    backend:

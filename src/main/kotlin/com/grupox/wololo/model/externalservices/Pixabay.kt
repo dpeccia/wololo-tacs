@@ -10,25 +10,19 @@ import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Service
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ImageQueryResponse(val totalHits: Int, val hits: List<HitInfo>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class ImageQueryResponse (
-    val totalHits: Int,
-    val hits: List<HitInfo>
-)
+data class HitInfo(val webformatURL: String)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class HitInfo (
-    val webformatURL: String
-)
-
-interface IPixabay{
+interface IPixabay {
     fun requestTownImage(townName: String): Either<CustomException, String>
 }
 
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-class Pixabay : HttpService(apiName = "Pixabay"), IPixabay{
+class Pixabay : IPixabay {
     @Autowired
     lateinit var pixabayProperties: PixabayProperties
 
@@ -38,7 +32,7 @@ class Pixabay : HttpService(apiName = "Pixabay"), IPixabay{
     @Cacheable("withTimeToLive")
     override fun requestTownImage(townName: String): Either<CustomException, String> {
         val query = formatString(townName)
-        val response = requestData<ImageQueryResponse>(baseUrl, mapOf("key" to pixabayProperties.apiKey, "category" to category, "q" to query))
+        val response = HttpService("Pixabay").requestData<ImageQueryResponse>(baseUrl, mapOf("key" to pixabayProperties.apiKey, "category" to category, "q" to query))
 
         return response.map {
             if (it.totalHits <= 0)
@@ -48,6 +42,5 @@ class Pixabay : HttpService(apiName = "Pixabay"), IPixabay{
         }
     }
 
-    private fun formatString(str: String): String =
-        str.replace(' ', '+')
+    private fun formatString(str: String): String = str.replace(' ', '+')
 }

@@ -1,12 +1,13 @@
 package com.grupox.wololo.model.externalservices
 
-import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.grupox.wololo.configs.properties.PixabayProperties
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.formatLine
+import com.grupox.wololo.model.helpers.formatTownName
+import com.grupox.wololo.model.helpers.unaccent
 import org.geojson.FeatureCollection
 import org.geojson.GeoJsonObject
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +30,7 @@ class ProvincesService {
     @Autowired
     private lateinit var env: Environment
 
-    private lateinit var _townsGeoJSONs: List<TownGeoJSON>
+    lateinit var _townsGeoJSONs: List<TownGeoJSON>
 
     init {
         val jsonString: String = File("src/main/resources/departamentos-argentina.json").readText(Charsets.UTF_8)
@@ -42,8 +43,9 @@ class ProvincesService {
                     TownGeoJSONInfo(
                         type = "Feature",
                         properties = TownGeoJSONProperties(
-                            province = it.properties["provincia"] as String,
-                            town = it.properties["departamento"] as String
+                                province = it.properties["provincia"] as String,
+                                town = it.properties["departamento"] as String,
+                                bordering = it.properties["limitrofes"] as List<String>
                         ),
                         geometry = it.geometry
                     )
@@ -71,41 +73,40 @@ class ProvincesService {
         return byProvince.filter { json -> json.features.any { formattedTownNames.contains(it.properties.town) } }
     }
 
-    private fun formatLine(line: String): String =
-            line.substringBefore('.')
-                    .removeSurrounding(" ")
-                    .replace('_', ' ')
-                    .toLowerCase()
-                    .split(' ')
-                    .joinToString(" ") { if (it.length > 3) it.capitalize() else it }
-                    .capitalize()
-
-    private fun unaccent(str: String): String {
-        return str.map { unaccentChar(it) }.joinToString("")
+    fun getRandomBorderingTowns(provinceName: String, townAmount: Int): Either<CustomException, List<TownGeoJSONWithBordering>> {
+        val formattedProvinceName = unaccent(provinceName).toUpperCase()
+        val byProvince = _townsGeoJSONs
+                .filter { json -> json.features.any { it.properties.province == formattedProvinceName } }
+                .map { TownGeoJSONProperties(formattedProvinceName, formatTownName(it.features.first().properties.town),
+                        it.features.first().properties.bordering.map { b -> formatTownName(b) }) }
+        if(byProvince.size < townAmount) return Left(CustomException.BadRequest.NotEnoughTownsException(provinceName, townAmount, byProvince.size))
+        val randomTown = byProvince.shuffled().first()
+        val towns = listOf(TownGeoJSONWithBordering(randomTown.town, randomTown.bordering, true))
+        val result = getTownsRecursive(towns.first(), byProvince, towns, townAmount - 1)
+        val resultAsStrings = result.map { it.town }
+        result.forEach { t -> t.borderingTowns = t.borderingTowns.filter { resultAsStrings.contains(it) } }
+        return Right(result)
     }
 
-    private fun unaccentChar(char: Char): Char {
-        val escapeRegex = "[ñÑ]".toRegex()
-        val asString = char.toString()
-
-        if(asString.matches(escapeRegex))
-            return char
-
-        val regexUnaccent = "\\p{InCombiningDiacriticalMarks}+".toRegex()
-        val temp = Normalizer.normalize(asString, Normalizer.Form.NFD)
-        return regexUnaccent.replace(temp, "")[0]
+    private fun getTownsRecursive(seed: TownGeoJSONWithBordering, towns: List<TownGeoJSONProperties>, result: List<TownGeoJSONWithBordering>, townAmount: Int): List<TownGeoJSONWithBordering> {
+        val borderingTownsStrings = seed.borderingTowns
+        val resultStrings = result.map { it.town }
+        var townsToAdd = borderingTownsStrings - resultStrings.intersect(borderingTownsStrings)
+        if(townsToAdd.size > townAmount)
+            townsToAdd = townsToAdd.take(townAmount)
+        val res = result + townsToAdd.map { btown -> TownGeoJSONWithBordering(btown, towns.find { it.town == btown }!!.bordering) }
+        val townQty = townAmount - townsToAdd.size
+        if(townQty == 0) return res
+        val nextSeed = res.shuffled().find { t -> !t.wasSeed && t.borderingTowns.any { !res.map{ r -> r.town}.contains(it) } }!!
+        nextSeed.wasSeed = true
+        return getTownsRecursive(nextSeed, towns, res, townQty)
     }
-
-    private fun unpunctuate(str: String): String {
-        val regexPunctuation = "[.,;]".toRegex()
-        return regexPunctuation.replace(str, "")
-    }
-
-    private fun formatTownName(townName: String) = unpunctuate(unaccent(townName)).toUpperCase()
 }
 
-data class TownGeoJSONProperties(val province: String, val town: String)
+data class TownGeoJSONProperties(val province: String, val town: String, val bordering: List<String>)
 
 data class TownGeoJSONInfo(val type: String, val properties: TownGeoJSONProperties, val geometry: GeoJsonObject)
 
 data class TownGeoJSON(val type: String, val features: List<TownGeoJSONInfo>)
+
+data class TownGeoJSONWithBordering(val town: String, var borderingTowns: List<String>, var wasSeed: Boolean = false)

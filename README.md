@@ -1,21 +1,16 @@
-# TP-TACS
+# Wololo - Backend
 [![Build Status](https://travis-ci.com/Tp-Tacs/TP-TACS.svg?token=4w7szGidZvKbpas7n4iA&branch=master)](https://travis-ci.com/Tp-Tacs/TP-TACS) [![codecov](https://codecov.io/gh/Tp-Tacs/TP-TACS/branch/master/graph/badge.svg)](https://codecov.io/gh/Tp-Tacs/TP-TACS) [![BCH compliance](https://bettercodehub.com/edge/badge/Tp-Tacs/TP-TACS?branch=master)](https://bettercodehub.com/)
 
-Tp de la materia cuatrimestral Tecnicas Avanzadas en la Construccion de Software
+Trabajo Práctico de la materia cuatrimestral _Tecnologías Avanzadas en la Construcción de Software_
 
-## Como correr con Docker
+Usuario Administrador:
+* mail: admin@wololo.com
+* password: 12345678
 
-```
-$ docker build -t wololo . && docker run -p 8081:8080 wololo
-Opcional pasarle como ultimo parametro el -d para detach
-$ docker build -t wololo . && docker run -p 8081:8080 -d wololo
-```
-
-## Correr docker-compose
+## Como ejecutarlo
 ```
 $ docker-compose build && docker-compose up -d
 ```
 
-## API
-
+## API REST
 [http://localhost:8080/swagger-ui.html#/](http://localhost:8080/swagger-ui.html#/)

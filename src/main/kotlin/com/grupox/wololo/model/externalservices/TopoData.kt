@@ -14,24 +14,24 @@ import org.springframework.stereotype.Service
 private data class TopoDataResponse(val results: List<ElevationData>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-private data class ElevationData(val elevation: Double)
+data class ElevationData(val elevation: Double, val location: LocationData)
 
-interface ITopoData {
-    fun requestElevation(coordinates: Coordinates): Either<CustomException, Double>
-}
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class LocationData(val lat: Float, val lng: Float)
 
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-class TopoData : HttpService("TopoData"), ITopoData {
-    private val baseUrl: String = "http://api.opentopodata.org/v1/test-dataset"
+class TopoData {
+    private val baseUrl: String = "https://api.opentopodata.org/v1/test-dataset"
+    var httpService = HttpService("TopoData")
 
     @Cacheable("withTimeToLive")
-    override fun requestElevation(coordinates: Coordinates): Either<CustomException, Double> {
-        val queryResponse: Either<CustomException, TopoDataResponse> =
-            requestData(baseUrl, mapOf("locations" to "${coordinates.latitude},${coordinates.longitude}"))
+    fun requestElevation(coordinatesList: List<Coordinates>): Either<CustomException, List<ElevationData>> {
+        val coordinates = coordinatesList.joinToString("|") { "${it.latitude},${it.longitude}" }
+        val queryResponse: Either<CustomException, TopoDataResponse> = httpService.requestData(baseUrl, mapOf("locations" to coordinates))
 
         return queryResponse
-                .filterOrOther({ it.results.isNotEmpty() }, { CustomException.Service.InvalidExternalResponseException("Theres is no data for coordinates: $coordinates in $apiName API") })
-                .map { it.results.first().elevation }
+                .filterOrOther({ it.results.isNotEmpty() }, { CustomException.Service.InvalidExternalResponseException("Theres is no data for coordinates: $coordinates in TopoData API") })
+                .map { it.results }
     }
 }
