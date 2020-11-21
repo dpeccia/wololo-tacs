@@ -17,9 +17,15 @@ import java.time.temporal.TemporalAccessor
 import java.util.*
 
 @Document(collection = "Games")
-class Game(@DBRef var players: List<User>, val province: Province, @Transient val gameMode: GameMode, @Indexed var status: Status) : Requestable {
+class Game(@DBRef var players: List<User>, val province: Province, @Transient val gameMode: GameMode, @Transient val mailSender: MailSender, @Indexed var status: Status) : Requestable {
     @Id
     var id: ObjectId = ObjectId.get()
+
+    @Transient
+    var mailManager : MailManager = MailManager(mailSender)
+
+    @Transient
+    lateinit var mailTask: TimerTask
 
     val townsAmount: Int get() = province.towns.size
 
@@ -35,8 +41,8 @@ class Game(@DBRef var players: List<User>, val province: Province, @Transient va
     var date: Date = Date.from(now())
 
     companion object {
-        fun new(_players: List<User>, _province: Province, _mode: GameMode, _status: Status = Status.NEW): Game {
-            val newGame = Game(_players, _province, _mode, _status)
+        fun new(_players: List<User>, _province: Province, _mode: GameMode,_sender: MailSender, _status: Status = Status.NEW): Game {
+            val newGame = Game(_players, _province, _mode,_sender, _status)
             newGame.checkIfIllegal()
             newGame.assignTowns()
             newGame.startGame()
@@ -56,13 +62,16 @@ class Game(@DBRef var players: List<User>, val province: Province, @Transient va
     }
 
     private fun startGame() {
+        mailTask = mailManager.setTimerForUser(this.turn.mail)
         province.addGauchosToAllTowns(gameMode)
         status = Status.ONGOING
     }
 
     private fun changeTurn() {
+        mailManager.cancel(mailTask)
         this.turnManager.changeTurn()
         province.addGauchosToAllTownsFrom(this.turn, gameMode)
+        mailTask = mailManager.setTimerForUser(this.turn.mail)
     }
 
     private fun checkForbiddenAction(user: User) {
@@ -89,7 +98,11 @@ class Game(@DBRef var players: List<User>, val province: Province, @Transient va
     fun finishTurn(user: User) {
         checkForbiddenAction(user)
         province.unlockAllTownsFrom(user)
-        if(userWon(user)) updateStats(user) else changeTurn()
+        if(userWon(user)) {
+            updateStats(user)
+            mailManager.cancel(mailTask) }
+        else{
+            changeTurn()}
     }
 
 

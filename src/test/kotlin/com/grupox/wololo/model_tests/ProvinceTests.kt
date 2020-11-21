@@ -2,10 +2,7 @@ package com.grupox.wololo.model_tests
 
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.helpers.AttackForm
-import com.grupox.wololo.model.helpers.GameMode
-import com.grupox.wololo.model.helpers.GameModeService
-import com.grupox.wololo.model.helpers.MovementForm
+import com.grupox.wololo.model.helpers.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -15,9 +12,12 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.function.Executable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.stereotype.Service
 import kotlin.math.round
-
+@SpringBootTest
 class ProvinceTests {
+    @Autowired
+    lateinit var mailSender: MailSender
 
     private lateinit var user1: User
     private lateinit var user2: User
