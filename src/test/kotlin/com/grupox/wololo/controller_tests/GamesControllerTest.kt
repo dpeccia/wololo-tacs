@@ -48,7 +48,7 @@ class GamesControllerTest {
     private lateinit var gameNotInRepo: Game
     private lateinit var games: List<Game>
     private lateinit var normalMode: GameMode
-    private lateinit var normalConfig: GameMode
+
 
     @BeforeEach
     fun fixture() {
