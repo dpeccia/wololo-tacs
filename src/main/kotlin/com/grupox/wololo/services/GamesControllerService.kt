@@ -29,7 +29,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     @Autowired
     lateinit var gameModeService: GameModeService
     @Autowired
-    lateinit var mailSender: MailSender
+    lateinit var mailSender: MailService
 
 
     fun surrender(gameId: ObjectId, userId: ObjectId): DTO.GameDTO =

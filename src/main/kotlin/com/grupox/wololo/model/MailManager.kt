@@ -1,11 +1,11 @@
 package com.grupox.wololo.model
 
-import com.grupox.wololo.model.helpers.MailSender
+import com.grupox.wololo.model.helpers.MailService
 import java.util.*
 import kotlin.concurrent.schedule
 
 
-class MailManager(val mailSender: MailSender){
+class MailManager(val mailSender: MailService){
     fun sendMail(sendTo: String){
         mailSender.sendMail(sendTo)
     }

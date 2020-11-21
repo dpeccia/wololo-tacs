@@ -11,7 +11,7 @@ import javax.mail.internet.MimeMessage
 
 
 @Service
-class MailSender {
+class MailService {
 
     @Autowired
     private lateinit var mailProperties: MailProperties

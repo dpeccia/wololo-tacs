@@ -11,13 +11,11 @@ import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.*
 import java.time.Instant.now
-import java.time.temporal.TemporalAccessor
 import java.util.*
 
 @Document(collection = "Games")
-class Game(@DBRef var players: List<User>, val province: Province, @Transient val gameMode: GameMode, @Transient val mailSender: MailSender, @Indexed var status: Status) : Requestable {
+class Game(@DBRef var players: List<User>, val province: Province, @Transient val gameMode: GameMode, @Transient val mailSender: MailService, @Indexed var status: Status) : Requestable {
     @Id
     var id: ObjectId = ObjectId.get()
 
@@ -41,7 +39,7 @@ class Game(@DBRef var players: List<User>, val province: Province, @Transient va
     var date: Date = Date.from(now())
 
     companion object {
-        fun new(_players: List<User>, _province: Province, _mode: GameMode,_sender: MailSender, _status: Status = Status.NEW): Game {
+        fun new(_players: List<User>, _province: Province, _mode: GameMode,_sender: MailService, _status: Status = Status.NEW): Game {
             val newGame = Game(_players, _province, _mode,_sender, _status)
             newGame.checkIfIllegal()
             newGame.assignTowns()

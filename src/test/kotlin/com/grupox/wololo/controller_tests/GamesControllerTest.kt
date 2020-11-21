@@ -5,7 +5,6 @@ import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
-import com.grupox.wololo.model.helpers.MailSender
 import com.grupox.wololo.services.GamesControllerService
 import com.grupox.wololo.services.UsersControllerService
 import org.assertj.core.api.Assertions.assertThat
@@ -25,7 +24,7 @@ class GamesControllerTest {
     @Autowired
     lateinit var usersControllerService: UsersControllerService
     @Autowired
-    lateinit var mailSender: com.grupox.wololo.model.helpers.MailSender
+    lateinit var mailSender: MailService
 
     @SpyBean
     lateinit var repoUsers: RepoUsers

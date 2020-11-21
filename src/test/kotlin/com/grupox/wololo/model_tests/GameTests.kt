@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 @SpringBootTest
 class GameTests {
     @Autowired
-    lateinit var mailSender: MailSender
+    lateinit var mailSender: MailService
 
     private lateinit var user1: User
     private lateinit var user2: User
