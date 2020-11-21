@@ -26,6 +26,8 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     lateinit var provincesService: ProvincesService
     @Autowired
     lateinit var pixabay: Pixabay
+    @Autowired
+    lateinit var gameModeService: GameModeService
     
     fun surrender(gameId: ObjectId, userId: ObjectId): DTO.GameDTO =
             this.play(gameId, userId) { game, user -> game.surrender(user) }
@@ -101,12 +103,19 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     fun createGame(userId: ObjectId, form: GameForm): DTO.GameDTO {
         if(form.townAmount > 100) throw CustomException.BadRequest.IllegalGameException("Max quantity of towns is 100") // limitante de topodata
 
+        lateinit var gameMode: GameMode
+        when (form.difficulty) {
+            "EASY" -> gameMode = gameModeService.getDifficultyMultipliers("EASY")
+            "NORMAL" -> gameMode = gameModeService.getDifficultyMultipliers("NORMAL")
+            "HARD" -> gameMode = gameModeService.getDifficultyMultipliers("HARD")
+        }
+
         val game: Game = Either.fx<CustomException, Game> {
             val users = userId.toString().cons(form.participantsIds).distinct()
                     .map { repoUsers.findByIsAdminFalseAndId(ObjectId(it)).orElseThrow { CustomException.NotFound.UserNotFoundException() } }
             val towns = !getRandomTowns(form)
             val province = Province(formatTownName(form.provinceName), ArrayList(towns), provincesService.getUrl(form.provinceName))
-            Game.new(users, province)
+            Game.new(users, province, gameMode)
         }.getOrThrow()
 
         val savedGame = repoGames.save(game)
