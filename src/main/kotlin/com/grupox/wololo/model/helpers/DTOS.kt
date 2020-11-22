@@ -18,7 +18,8 @@ sealed class DTO {
         val gauchos: Int,
         val isLocked: Boolean,
         val gauchosGeneratedByDefense : Int,
-        val gauchosGeneratedByProduction : Int
+        val gauchosGeneratedByProduction : Int,
+        val borderingTowns: List<String>
     ) : DTO()
 
     data class ProvinceDTO(
