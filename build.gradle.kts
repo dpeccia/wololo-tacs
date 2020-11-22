@@ -31,8 +31,6 @@ dependencies {
     
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR1")
-    implementation("org.springframework.cloud:spring-cloud-starter")
-    
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
