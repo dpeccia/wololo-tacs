@@ -15,13 +15,13 @@ import java.util.*
 @Document(collection = "Games")
 class Game(@DBRef var players: List<User>, val province: Province, var status: Status) : Requestable, ActionMutable {
     @Id
-    val id: ObjectId = ObjectId.get()
+    var id: ObjectId = ObjectId.get()
 
     val townsAmount: Int get() = province.towns.size
 
     val playerAmount: Int get() = players.size
 
-    private val turnManager: TurnManager<ObjectId> = TurnManager(this.players.map { it.id }.shuffled())
+    private var turnManager: TurnManager<ObjectId> = TurnManager(this.players.map { it.id }.shuffled())
 
     var turn: User
         get() = this.players.find { it.id == turnManager.current }!!

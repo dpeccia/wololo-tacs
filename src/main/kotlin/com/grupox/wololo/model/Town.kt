@@ -15,7 +15,7 @@ import kotlin.math.max
 
 class Town(val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats) : Requestable, ActionMutable {
     @Id
-    val id: ObjectId = ObjectId.get()
+    var id: ObjectId = ObjectId.get()
 
     @DBRef
     var owner: User? = null
@@ -76,7 +76,7 @@ class Town(val name: String, val coordinates: Coordinates, val elevation: Double
 
     override fun dto(): DTO.TownDTO =
         DTO.TownDTO(
-            id = id,
+            id = id.toString(),
             name = name,
             coordinates = coordinates,
             elevation = elevation,

@@ -11,7 +11,6 @@ class TurnManager<T>(private var participantIds: List<T>) {
             this.currentIndex = this.participantIds.indexOf(value)
         }
 
-
     fun changeTurn() {
         this.currentIndex = if(this.currentIsLastElement()) 0 else this.currentIndex + 1
     }
