@@ -17,7 +17,7 @@ import java.time.temporal.TemporalAccessor
 import java.util.*
 
 @Document(collection = "Games")
-class Game(@DBRef var players: List<User>, val province: Province, @Transient val gameMode: GameMode, @Indexed var status: Status) : Requestable {
+class Game(@DBRef var players: List<User>, val province: Province, val gameMode: GameMode, @Indexed var status: Status) : Requestable {
     @Id
     var id: ObjectId = ObjectId.get()
 
