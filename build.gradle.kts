@@ -29,9 +29,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework:spring-context-support")
     
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-actuator:2.4.0")
     implementation("org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR1")
-    implementation("org.springframework.cloud:spring-cloud-starter")
+    implementation("org.springframework.cloud:spring-cloud-starter:2.2.6.RELEASE")
     
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
