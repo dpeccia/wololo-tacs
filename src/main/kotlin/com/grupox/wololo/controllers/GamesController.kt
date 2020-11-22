@@ -1,6 +1,7 @@
 package com.grupox.wololo.controllers
 
 import com.grupox.wololo.model.Status
+import com.grupox.wololo.model.externalservices.ProvinceGeoJSON
 import com.grupox.wololo.model.externalservices.TownGeoJSON
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.services.GamesControllerService
@@ -133,7 +134,7 @@ class GamesController : BaseController() {
 
     @GetMapping("/provinces")
     @ApiOperation(value = "Gets all provinces")
-    fun getProvinces(request: HttpServletRequest) : List<String> {
+    fun getProvinces(request: HttpServletRequest) : List<ProvinceGeoJSON> {
         checkAndGetUserId(request)
         return gamesControllerService.getProvinces()
     }

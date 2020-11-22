@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Service
 import java.io.File
+import java.lang.Math.min
 
 @Service
 @PropertySource("classpath:provinces.properties")
@@ -44,12 +45,10 @@ class ProvincesService {
         }
     }
 
-    @Cacheable("withTimeToLive")
-    fun availableProvinces(): Either<CustomException, List<String>> {
-        val eitherFile = runCatching { File("src/main/resources/provinces.properties") }
-                    .fold({ it.right() }, { CustomException.Service.ProvincePropertiesNotAvailableException().left() })
-
-        return eitherFile.map { file -> file.readLines().filter { it.isNotBlank() }.map { formatLine(it) } }
+    fun getProvinces(): List<ProvinceGeoJSON> {
+        val provincesAndTowns = _townsGeoJSONs.map { ProvinceAndTown(it.features[0].properties.province, it.features[0].properties.town) }
+        val provinces = provincesAndTowns.map { it.province }.toSet()
+        return provinces.map { province -> ProvinceGeoJSON(province, provincesAndTowns.filter { it.province == province }.size.coerceAtMost(100)) }
     }
 
     fun townsGeoJSONs(provinceName: String, townNames: List<String>): List<TownGeoJSON> {
@@ -96,3 +95,7 @@ data class TownGeoJSONInfo(val type: String, val properties: TownGeoJSONProperti
 data class TownGeoJSON(val type: String, val features: List<TownGeoJSONInfo>)
 
 data class TownGeoJSONWithBordering(val town: String, var borderingTowns: List<String>, var wasSeed: Boolean = false)
+
+data class ProvinceGeoJSON(val name: String, val qty: Int)
+
+data class ProvinceAndTown(val province: String, val town: String)
