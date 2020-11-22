@@ -5,25 +5,25 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.Status
 import org.bson.types.ObjectId
 
-sealed class State(val id: ObjectId) {
-    class GameState(id: ObjectId, val turnId: ObjectId, val status: Status, val towns: List<TownState>) : State(id) {
+sealed class State {
+    class GameState(val id: ObjectId, val turnUsername: String?, val status: Status, val towns: List<TownState>) : State() {
         override fun diff(other: State): Change.GameChange {
             if (other !is GameState || this.id != other.id) throw CustomException.InternalServer.DiffException()
             return Change.GameChange(
-                    id = this.id,
-                    deltaTurnId = this.differentiate(this.turnId, other.turnId),
+                    id = this.id.toHexString(),
+                    deltaTurnUsername = this.differentiate(this.turnUsername, other.turnUsername),
                     deltaStatus = this.differentiate(this.status, other.status),
-                    deltaTowns = this.towns.zipWith(other.towns) { t, ot -> t.diff(ot) }.filter { it.deltaGauchos != 0 || it.deltaOwnerId != null || it.deltaSpecialization != null }
+                    deltaTowns = this.towns.zipWith(other.towns) { t, ot -> t.diff(ot) }.filter { it.deltaGauchos != 0 || it.deltaOwnerUsername != null || it.deltaSpecialization != null }
             )
         }
     }
 
-    class TownState(id: ObjectId, val ownerId: ObjectId?, val gauchos: Int, val specialization: String) : State(id) {
+    class TownState(val name: String, val ownerUsername: String?, val gauchos: Int, val specialization: String) : State() {
         override fun diff(other: State): Change.TownChange {
-            if (other !is TownState || this.id != other.id) throw CustomException.InternalServer.DiffException()
+            if (other !is TownState || this.name != other.name) throw CustomException.InternalServer.DiffException()
             return Change.TownChange(
-                    id = this.id,
-                    deltaOwnerId = this.differentiate(this.ownerId, other.ownerId),
+                    townName = this.name,
+                    deltaOwnerUsername = this.differentiate(this.ownerUsername, other.ownerUsername),
                     deltaSpecialization = this.differentiate(this.specialization, other.specialization),
                     deltaGauchos = this.gauchos - other.gauchos
             )

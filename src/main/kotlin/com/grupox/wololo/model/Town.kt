@@ -8,7 +8,6 @@ import com.grupox.wololo.model.helpers.State
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.DBRef
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
@@ -91,8 +90,8 @@ class Town(val name: String, val coordinates: Coordinates, val elevation: Double
 
     override fun state(): State.TownState =
             State.TownState(
-                id = this.id,
-                ownerId = this.owner?.id,
+                name = this.name,
+                ownerUsername = this.owner?.username,
                 specialization = this.specialization.toString(),
                 gauchos = this.gauchos
             )

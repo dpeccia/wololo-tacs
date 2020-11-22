@@ -132,7 +132,7 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
         State.GameState(
                 id = this.id,
                 status = this.status,
-                turnId = this.turn.id,
+                turnUsername = this.turn.username,
                 towns = this.province.towns.map { it.state() }
         )
 }

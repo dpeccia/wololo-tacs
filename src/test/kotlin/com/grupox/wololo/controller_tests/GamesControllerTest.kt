@@ -94,7 +94,7 @@ class GamesControllerTest {
             val initialPlayer = user3
             game1.turn = initialPlayer
             val gameChange = gamesControllerService.finishTurn(initialPlayer.id, game1.id)
-            assertThat(gameChange.deltaTurnId).isEqualTo(user1.id)
+            assertThat(gameChange.deltaTurnUsername).isEqualTo(user1.username)
         }
 
         @Test
@@ -103,7 +103,7 @@ class GamesControllerTest {
             val initialPlayer = twoPlayerGame.turn
             gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
             val gameChange = gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
-            assertThat(initialPlayer.id).isEqualTo(gameChange.deltaTurnId)
+            assertThat(initialPlayer.username).isEqualTo(gameChange.deltaTurnUsername)
         }
 
         @Test
@@ -113,7 +113,7 @@ class GamesControllerTest {
             gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
             gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
             val gameChange = gamesControllerService.finishTurn(twoPlayerGame.turn.id, twoPlayerGame.id)
-            assertThat(initialPlayer.id.toHexString()).isNotEqualTo(gameChange.deltaTurnId)
+            assertThat(initialPlayer.username).isNotEqualTo(gameChange.deltaTurnUsername)
         }
     }
 
