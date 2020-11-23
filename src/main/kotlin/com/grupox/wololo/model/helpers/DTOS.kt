@@ -3,8 +3,6 @@ package com.grupox.wololo.model.helpers
 import com.grupox.wololo.model.Coordinates
 import com.grupox.wololo.model.Stats
 import com.grupox.wololo.model.Status
-import org.bson.types.ObjectId
-import java.time.LocalDate
 import java.util.*
 
 sealed class DTO {
@@ -15,18 +13,17 @@ sealed class DTO {
         val name: String,
         val coordinates: Coordinates,
         val elevation: Double,
-        val imageUrl: String,
         val ownerId: String?,
         val specialization: String,
         val gauchos: Int,
         val isLocked: Boolean,
         val gauchosGeneratedByDefense : Int,
-        val gauchosGeneratedByProduction : Int
+        val gauchosGeneratedByProduction : Int,
+        val borderingTowns: List<String>
     ) : DTO()
 
     data class ProvinceDTO(
             val name: String,
-            val imageUrl: String,
             val centroid: Coordinates,
             val towns: List<TownDTO>
     ) : DTO()
