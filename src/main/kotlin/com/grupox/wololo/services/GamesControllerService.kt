@@ -6,10 +6,7 @@ import arrow.core.extensions.list.functorFilter.filter
 import arrow.optics.extensions.list.cons.cons
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.externalservices.GeoRef
-import com.grupox.wololo.model.externalservices.ProvincesService
-import com.grupox.wololo.model.externalservices.TopoData
-import com.grupox.wololo.model.externalservices.TownGeoJSON
+import com.grupox.wololo.model.externalservices.*
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
@@ -39,7 +36,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     fun attackTown(userId: ObjectId, gameId: ObjectId, attackData: AttackForm): Change.GameChange =
             this.play(gameId, userId) { game, user -> game.attackTown(user, attackData) }
 
-    fun getProvinces(): List<String> = provincesService.availableProvinces().getOrThrow()
+    fun getProvinces(): List<ProvinceGeoJSON> = provincesService.getProvinces()
 
     fun getTownsGeoJSONs(province: String, towns: String): List<TownGeoJSON> {
         val townNames: List<String> = towns.split('|').map { it.trim() }

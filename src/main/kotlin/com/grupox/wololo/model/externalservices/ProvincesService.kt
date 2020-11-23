@@ -1,15 +1,15 @@
 package com.grupox.wololo.model.externalservices
 
-import arrow.core.*
+import arrow.core.Either
+import arrow.core.Left
+import arrow.core.Right
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.grupox.wololo.errors.CustomException
-import com.grupox.wololo.model.helpers.formatLine
 import com.grupox.wololo.model.helpers.formatTownName
 import com.grupox.wololo.model.helpers.unaccent
 import org.geojson.FeatureCollection
 import org.geojson.GeoJsonObject
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
@@ -44,12 +44,10 @@ class ProvincesService {
         }
     }
 
-    @Cacheable("withTimeToLive")
-    fun availableProvinces(): Either<CustomException, List<String>> {
-        val eitherFile = runCatching { File("src/main/resources/provinces.properties") }
-                    .fold({ it.right() }, { CustomException.Service.ProvincePropertiesNotAvailableException().left() })
-
-        return eitherFile.map { file -> file.readLines().filter { it.isNotBlank() }.map { formatLine(it) } }
+    fun getProvinces(): List<ProvinceGeoJSON> {
+        val provincesAndTowns = _townsGeoJSONs.map { ProvinceAndTown(it.features[0].properties.province, it.features[0].properties.town) }
+        val provinces = provincesAndTowns.map { it.province }.toSet()
+        return provinces.map { province -> ProvinceGeoJSON(province, provincesAndTowns.filter { it.province == province }.size.coerceAtMost(100)) }
     }
 
     fun townsGeoJSONs(provinceName: String, townNames: List<String>): List<TownGeoJSON> {
@@ -96,3 +94,7 @@ data class TownGeoJSONInfo(val type: String, val properties: TownGeoJSONProperti
 data class TownGeoJSON(val type: String, val features: List<TownGeoJSONInfo>)
 
 data class TownGeoJSONWithBordering(val town: String, var borderingTowns: List<String>, var wasSeed: Boolean = false)
+
+data class ProvinceGeoJSON(val name: String, val qty: Int)
+
+data class ProvinceAndTown(val province: String, val town: String)

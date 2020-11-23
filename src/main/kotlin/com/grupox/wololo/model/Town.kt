@@ -72,17 +72,17 @@ data class Town(val id: Int, val name: String, val coordinates: Coordinates, val
 
     override fun dto(): DTO.TownDTO =
         DTO.TownDTO(
-            id = id,
-            name = name,
-            coordinates = coordinates,
-            elevation = elevation,
-            ownerId = owner?.id?.toString(),
-            specialization = specialization.toString(),
-            gauchos = gauchos,
-            isLocked = isLocked,
-            gauchosGeneratedByDefense = stats.gauchosGeneratedByDefense,
-            gauchosGeneratedByProduction = stats.gauchosGeneratedByProduction,
-            borderingTowns = borderingTowns
+                id = id, 
+                name = name,
+                coordinates = coordinates,
+                elevation = elevation,
+                ownerId = owner?.id?.toString(),
+                specialization = specialization.toString(),
+                gauchos = gauchos,
+                isLocked = isLocked,
+                gauchosGeneratedByDefense = stats.gauchosGeneratedByDefense,
+                gauchosGeneratedByProduction = stats.gauchosGeneratedByProduction,
+                borderingTowns = borderingTowns
         )
 
     override fun state(): State.TownState =
