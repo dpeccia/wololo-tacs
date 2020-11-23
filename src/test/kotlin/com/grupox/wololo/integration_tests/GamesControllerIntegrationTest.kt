@@ -249,6 +249,27 @@ class GamesControllerIntegrationTest {
 
             assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
         }
+
+        @Test
+        fun `can get scoreboard w`() {
+            val loginResponse = webClient.post().uri("/users/tokens")
+                    .bodyValue(LoginForm("example_not_admin", "example_not_admin")).exchange()
+                    .block() ?: throw RuntimeException("Should have gotten a response")
+            val responseCookies = loginResponse.cookies()
+                    .map { it.key to it.value.map { cookie -> cookie.value } }
+                    .toMap()
+
+            val multiplier: String = "multGauchosForProductionNormalMode"
+            val value: String = "15.0"
+
+            val response = webClient.get().uri("/games/configuration?multiplier=$multiplier&value=$value").cookies { it.addAll(LinkedMultiValueMap(responseCookies)) }
+                    .exchange().block()
+
+            assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
+        }
+
+
+
     }
 
 

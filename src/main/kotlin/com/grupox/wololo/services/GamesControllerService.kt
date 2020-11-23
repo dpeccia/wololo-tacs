@@ -13,6 +13,10 @@ import com.grupox.wololo.model.repos.RepoUsers
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.nio.file.FileSystems
+import java.nio.file.Paths
 import java.time.LocalDate
 import java.util.*
 
@@ -123,6 +127,23 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
                     "DEFENSE"    -> game.changeTownSpecialization(user, townId, Defense())
                 }
             }
+
+    fun updateGameMode(multiplier: String, value: String){
+        val absolutePath = FileSystems.getDefault().getPath("").toAbsolutePath().toString()
+        val filePath = Paths.get(absolutePath, "src", "main", "resources", "application.properties").toString()
+        val propFile= "game."
+
+        val inp = FileInputStream(filePath)
+        val props = Properties()
+        props.load(inp)
+        inp.close()
+
+        val out = FileOutputStream(filePath)
+        props.setProperty(propFile + multiplier, value)
+        props.store(out, null)
+        out.close()
+
+    }
 
     private fun getRandomTowns(form: GameForm): Either<CustomException, List<Town>> {
         return Either.fx {

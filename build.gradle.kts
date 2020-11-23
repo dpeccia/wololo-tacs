@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    //2.3.4.RELEASE
     id("org.springframework.boot") version "2.3.4.RELEASE"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
     kotlin("jvm") version "1.3.72"
@@ -29,8 +30,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework:spring-context-support")
     
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-actuator:2.4.0")
     implementation("org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR1")
+    implementation("org.springframework.cloud:spring-cloud-starter:2.2.6.RELEASE")
+    
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

@@ -1,5 +1,6 @@
 package com.grupox.wololo.controllers
 
+import com.grupox.wololo.model.Difficulty
 import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.externalservices.TownGeoJSON
 import com.grupox.wololo.model.helpers.*
@@ -18,6 +19,9 @@ import javax.servlet.http.HttpServletRequest
 class GamesController : BaseController() {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
+
+    @Autowired
+    lateinit var gameModeService: GameModeService
 
     @Autowired
     lateinit var usersControllerService: UsersControllerService
@@ -147,4 +151,25 @@ class GamesController : BaseController() {
         checkAndGetUserId(request)
         return gamesControllerService.getTownsGeoJSONs(province, towns)
     }
+
+    @PostMapping("/configuration")
+    @ApiOperation(value = "Changes the difficulty multipliers")
+    fun changeGameModeConfiguration(
+            @RequestBody modeData: ModeForm,
+            request: HttpServletRequest){
+       //EJEMPLO: multiplier = 'multGauchosForDefenseEasyMode' '10.0'
+        checkAndGetUserId(request)
+        println("entré")
+        gamesControllerService.updateGameMode(modeData.multiplier, modeData.value)
+    }
+
+    @GetMapping("/getConfig")
+    @ApiOperation("de prueba")
+    fun getParam(request: HttpServletRequest) : GameMode{
+        checkAndGetUserId(request)
+        return gameModeService.getDifficultyMultipliers(Difficulty.EASY)
+    }
+
+
+
 }

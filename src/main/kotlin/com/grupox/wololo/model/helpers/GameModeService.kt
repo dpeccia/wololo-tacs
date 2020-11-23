@@ -3,6 +3,8 @@ package com.grupox.wololo.model.helpers
 import com.grupox.wololo.configs.properties.GameProperties
 import com.grupox.wololo.model.Difficulty
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cloud.context.config.annotation.RefreshScope
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 
 @Service

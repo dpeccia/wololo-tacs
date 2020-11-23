@@ -2,7 +2,10 @@ package com.grupox.wololo.controller_tests
 
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
-import com.grupox.wololo.model.helpers.*
+import com.grupox.wololo.model.helpers.AttackForm
+import com.grupox.wololo.model.helpers.DTO
+import com.grupox.wololo.model.helpers.GameMode
+import com.grupox.wololo.model.helpers.MovementForm
 import com.grupox.wololo.model.repos.RepoGames
 import com.grupox.wololo.model.repos.RepoUsers
 import com.grupox.wololo.services.GamesControllerService
@@ -13,9 +16,15 @@ import org.mockito.Mockito.doReturn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.nio.file.FileSystems
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.Duration
 import java.time.Instant
 import java.util.*
+
 
 @SpringBootTest
 class GamesControllerTest {
@@ -378,5 +387,16 @@ class GamesControllerTest {
             val filteredGames = gamesControllerService.getAllGamesDTO()
             assertThat(gamesControllerService.getGamesStats(filteredGames)).isEqualTo(gamesControllerService.getGamesStats(games.map{it.dto()}))
         }
+
     }
+
+    @Nested
+    inner class Config {
+        @Test
+        fun `Change config values`() {
+        gamesControllerService.updateGameMode("multGauchosForProductionEasyMode", "15.0")
+
+       }
+    }
+
 }
