@@ -30,8 +30,6 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     lateinit var provincesService: ProvincesService
     @Autowired
     lateinit var pixabay: Pixabay
-    @Autowired
-    lateinit var gameModeService: GameModeService
     
     fun surrender(gameId: ObjectId, userId: ObjectId): DTO.GameDTO =
             this.play(gameId, userId) { game, user -> game.surrender(user) }
@@ -112,7 +110,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
                     .map { repoUsers.findByIsAdminFalseAndId(ObjectId(it)).orElseThrow { CustomException.NotFound.UserNotFoundException() } }
             val towns = !getRandomTowns(form)
             val province = Province(formatTownName(form.provinceName), ArrayList(towns), provincesService.getUrl(form.provinceName))
-            val gameMode: GameMode = gameModeService.getDifficultyMultipliers(form.difficulty)
+            val gameMode: GameMode = GamesConfigHelper.getDifficultyMultipliers(form.difficulty)
             Game.new(users, province, gameMode)
         }.getOrThrow()
 
@@ -127,23 +125,6 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
                     "DEFENSE"    -> game.changeTownSpecialization(user, townId, Defense())
                 }
             }
-
-    fun updateGameMode(multiplier: String, value: String){
-        val absolutePath = FileSystems.getDefault().getPath("").toAbsolutePath().toString()
-        val filePath = Paths.get(absolutePath, "src", "main", "resources", "application.properties").toString()
-        val propFile= "game."
-
-        val inp = FileInputStream(filePath)
-        val props = Properties()
-        props.load(inp)
-        inp.close()
-
-        val out = FileOutputStream(filePath)
-        props.setProperty(propFile + multiplier, value)
-        props.store(out, null)
-        out.close()
-
-    }
 
     private fun getRandomTowns(form: GameForm): Either<CustomException, List<Town>> {
         return Either.fx {

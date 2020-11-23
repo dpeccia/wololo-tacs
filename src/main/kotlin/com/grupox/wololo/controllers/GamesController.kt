@@ -1,6 +1,5 @@
 package com.grupox.wololo.controllers
 
-import com.grupox.wololo.model.Difficulty
 import com.grupox.wololo.model.Status
 import com.grupox.wololo.model.externalservices.TownGeoJSON
 import com.grupox.wololo.model.helpers.*
@@ -19,9 +18,6 @@ import javax.servlet.http.HttpServletRequest
 class GamesController : BaseController() {
     @Autowired
     lateinit var gamesControllerService: GamesControllerService
-
-    @Autowired
-    lateinit var gameModeService: GameModeService
 
     @Autowired
     lateinit var usersControllerService: UsersControllerService
@@ -152,22 +148,19 @@ class GamesController : BaseController() {
         return gamesControllerService.getTownsGeoJSONs(province, towns)
     }
 
-    @PostMapping("/configuration")
-    @ApiOperation(value = "Changes the difficulty multipliers")
-    fun changeGameModeConfiguration(
-            @RequestBody modeData: ModeForm,
-            request: HttpServletRequest){
-        checkAndGetUserId(request)
-        gamesControllerService.updateGameMode(modeData.multiplier, modeData.value)
+    @PatchMapping("/configuration")
+    @ApiOperation(value = "Changes a value of a configuration item")
+    fun changeGameModeConfiguration(@RequestBody changes: Map<String, Double>, request: HttpServletRequest) {
+        val userId = checkAndGetUserId(request)
+        usersControllerService.throwIfNotAllowed(userId)
+        GamesConfigHelper.updateValues(changes)
     }
 
-    @GetMapping("/getConfig")
-    @ApiOperation("de prueba")
-    fun getParam(request: HttpServletRequest) : GameMode{
-        checkAndGetUserId(request)
-        return gameModeService.getDifficultyMultipliers(Difficulty.EASY)
+    @GetMapping("/configuration")
+    @ApiOperation("Gets the games configuration values")
+    fun getConfigurationValues(request: HttpServletRequest): Map<String, Double> {
+        val userId = checkAndGetUserId(request)
+        usersControllerService.throwIfNotAllowed(userId)
+        return GamesConfigHelper.getAllConfigurationValues()
     }
-
-
-
 }

@@ -385,18 +385,7 @@ class GamesControllerTest {
         @Test
         fun `Gets all games stats when not specifying a date range`() {
             val filteredGames = gamesControllerService.getAllGamesDTO()
-            assertThat(gamesControllerService.getGamesStats(filteredGames)).isEqualTo(gamesControllerService.getGamesStats(games.map{it.dto()}))
+            assertThat(gamesControllerService.getGamesStats(filteredGames)).isEqualTo(gamesControllerService.getGamesStats(games.map { it.dto() }))
         }
-
     }
-
-    @Nested
-    inner class Config {
-        @Test
-        fun `Change config values`() {
-        gamesControllerService.updateGameMode("multGauchosForProductionEasyMode", "15.0")
-
-       }
-    }
-
 }
