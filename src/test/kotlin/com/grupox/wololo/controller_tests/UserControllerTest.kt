@@ -50,6 +50,10 @@ class UserControllerTest {
         doReturn(Optional.of(users[1])).`when`(repoUsers).findByIsAdminFalseAndMail("example_normal_user")
         doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminFalseAndMail("new_user")
         doReturn(null).`when`(repoUsers).save(MockitoHelper.anyObject())
+        doReturn(Optional.empty<User>()).`when`(repoUsers).findByMailAndPassword("example_admin", sha512.getSHA512("wrong_password"))
+        doReturn(Optional.empty<User>()).`when`(repoUsers).findByMailAndPassword("wrong_name", sha512.getSHA512("example_admin"))
+        doReturn(listOf<User>()).`when`(repoUsers).findAllByIsAdminFalseAndUsernameLike("example_admin")
+        doReturn(listOf<User>()).`when`(repoUsers).findAllByIsAdminFalseAndUsernameLike("example_no_user")
     }
 
     @Nested

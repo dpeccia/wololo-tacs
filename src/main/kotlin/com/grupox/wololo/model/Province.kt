@@ -7,12 +7,11 @@ import com.grupox.wololo.errors.CustomException.Forbidden.IllegalGauchoMovement
 import com.grupox.wololo.errors.CustomException.NotFound
 import com.grupox.wololo.errors.CustomException.NotFound.TownNotFoundException
 import com.grupox.wololo.model.helpers.*
-import org.bson.types.ObjectId
 import kotlin.math.*
 
-class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: String = "") : Requestable {
+class Province(val name: String, val towns: ArrayList<Town>) : Requestable {
 
-    fun getTownById(id: ObjectId): Either<NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { TownNotFoundException() }
+    fun getTownById(id: Int): Either<NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { TownNotFoundException() }
 
     private fun altitudes() = towns.map { it.elevation }
 
@@ -69,11 +68,21 @@ class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: Strin
         townsFrom(user).forEach { it.unlock() }
     }
 
+    private fun areNotBorderingTowns(town: Town, otherTown: Town) = !town.borderingTowns.contains(otherTown.name)
+
     private fun checkIllegalMovements(user: User, fromTown: Town, toTown: Town) {
         when {
             toTown.id == fromTown.id -> throw IllegalGauchoMovement("You can´t move gauchos from a town to itself")
             !fromTown.isFrom(user) || !toTown.isFrom(user) -> throw IllegalGauchoMovement("You only can move gauchos between your current towns")
+            areNotBorderingTowns(fromTown, toTown) -> throw IllegalGauchoMovement("You only can move gauchos between towns that are bordering")
             toTown.isLocked -> throw IllegalGauchoMovement("You only can move gauchos to a town that is unlocked")
+        }
+    }
+
+    private fun checkIllegalAttacks(user: User, attacker: Town, defender: Town) {
+        when {
+            !attacker.isFrom(user) || defender.isFrom(user) -> throw IllegalAttack("You only can attack from your town to an enemy town")
+            areNotBorderingTowns(attacker, defender) -> throw IllegalAttack("You only can attack a bordering town")
         }
     }
 
@@ -88,8 +97,7 @@ class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: Strin
     fun attackTown(user: User, attackForm: AttackForm) {
         val attacker = this.getTownById(attackForm.from).getOrThrow()
         val defender = this.getTownById(attackForm.to).getOrThrow()
-        if(!attacker.isFrom(user) || defender.isFrom(user))
-            throw IllegalAttack("You only can attack from your town to an enemy town")
+        checkIllegalAttacks(user, attacker, defender)
         val attackerQtyBeforeAttack = attacker.gauchos
         val multDist = multDistance(attacker, defender)
         val multAlt = multAltitude(defender)
@@ -107,7 +115,6 @@ class Province(val name: String, val towns: ArrayList<Town>, val imageUrl: Strin
     override fun dto(): DTO.ProvinceDTO =
         DTO.ProvinceDTO(
             name = name,
-            imageUrl = imageUrl,
             centroid = calculateCentroid(),
             towns = towns.map { it.dto() }
         )

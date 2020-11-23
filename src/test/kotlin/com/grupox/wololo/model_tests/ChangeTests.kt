@@ -11,11 +11,12 @@ class ChangeTests {
     val user2: User = User("other_user", "other_mail", "other_password")
     val twoUserList = arrayListOf(user1, user2)
 
-    val town1: Town = Town.new("town1", 11.0, Coordinates((-65.3).toFloat(), (-22.4).toFloat()))
-    val town2: Town = Town.new("town2", 12.0, Coordinates((-66.2).toFloat(), (2.0).toFloat()))
-    val town3: Town = Town.new("town3", 13.0)
-    val town4: Town = Town.new("town4", 14.0)
-    val town5: Town = Town.new("town5", 15.0)
+    val townNames = listOf("town1, town2, town3, town4, town5")
+    val town1: Town = Town.new("town1", 11.0, townNames, Coordinates((-65.3).toFloat(), (-22.4).toFloat()))
+    val town2: Town = Town.new("town2", 12.0, townNames,Coordinates((-66.2).toFloat(), (2.0).toFloat()))
+    val town3: Town = Town.new("town3", 13.0, townNames)
+    val town4: Town = Town.new("town4", 14.0, townNames)
+    val town5: Town = Town.new("town5", 15.0, townNames)
     val towns = arrayListOf(town1, town2, town3, town4, town5)
 
     val game1: Game = Game.new(twoUserList, Province("a_province", towns))

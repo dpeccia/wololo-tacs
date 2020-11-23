@@ -7,27 +7,31 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.*
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.Instant
+import java.time.*
+import java.time.Instant.now
+import java.time.temporal.TemporalAccessor
 import java.util.*
 
 @Document(collection = "Games")
-class Game(@DBRef var players: List<User>, val province: Province, var status: Status) : Requestable, ActionMutable {
+class Game(@DBRef var players: List<User>, val province: Province, @Indexed var status: Status) : Requestable, ActionMutable {
     @Id
-    val id: ObjectId = ObjectId.get()
+    var id: ObjectId = ObjectId.get()
 
     val townsAmount: Int get() = province.towns.size
 
     val playerAmount: Int get() = players.size
 
-    private val turnManager: TurnManager<ObjectId> = TurnManager(this.players.map { it.id }.shuffled())
+    private var turnManager: TurnManager<ObjectId> = TurnManager(this.players.map { it.id }.shuffled())
 
     var turn: User
         get() = this.players.find { it.id == turnManager.current }!!
         set(value) { this.turnManager.current = value.id }
 
-    var date: Date = Date.from(Instant.now())
+    @Indexed
+    var date: Date = Date.from(now())
 
     companion object {
         fun new(_players: List<User>, _province: Province, _status: Status = Status.NEW): Game {
@@ -86,7 +90,7 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
         if(userWon(user)) updateStats(user) else changeTurn()
     }
 
-    fun changeTownSpecialization(user: User, townId: ObjectId, specialization: Specialization) {
+    fun changeTownSpecialization(user: User, townId: Int, specialization: Specialization) {
         checkForbiddenAction(user)
         val town = province.getTownById(townId).getOrThrow()
         if(!town.isFrom(user)) throw CustomException.Forbidden.NotYourTownException()
@@ -108,13 +112,13 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
         if (!isParticipating(user)) throw CustomException.Forbidden.NotAMemberException()
 
         user.updateGamesLostStats()
-        province.townsFrom(user).forEach { it.neutralize() }
-        this.players = this.players.filter { it.id != user.id }
-        this.turnManager.removeParticipant(user.id)
-
-        if (this.playerAmount <= 1) {
+        if (this.playerAmount == 2) {
             this.players.filter { it.id != user.id }.map { it.updateGamesWonStats() }
             this.status = Status.CANCELED
+        } else {
+            province.townsFrom(user).forEach { it.neutralize() }
+            this.players = this.players.filter { it.id != user.id }
+            this.turnManager.removeParticipant(user.id)
         }
     }
 
@@ -135,4 +139,15 @@ class Game(@DBRef var players: List<User>, val province: Province, var status: S
                 turnUsername = this.turn.username,
                 towns = this.province.towns.map { it.state() }
         )
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Game) {
+            return false
+        }
+        return id == other.id
+    }
 }

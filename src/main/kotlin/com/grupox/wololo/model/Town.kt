@@ -8,14 +8,13 @@ import com.grupox.wololo.model.helpers.State
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.DBRef
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-class Town(val name: String, val coordinates: Coordinates, val elevation: Double, val townImage: String, val stats: TownStats) : Requestable, ActionMutable {
-    @Id
-    val id: ObjectId = ObjectId.get()
 
+data class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double,  val stats: TownStats, var borderingTowns: List<String>) : Requestable, ActionMutable {
     @DBRef
     var owner: User? = null
 
@@ -24,9 +23,9 @@ class Town(val name: String, val coordinates: Coordinates, val elevation: Double
     var gauchos = 0
 
     companion object {
-        fun new(_name: String, _elevation: Double, _coordinates: Coordinates = Coordinates(0f,0f), _townImage: String = "",
-                _stats: TownStats = TownStats(0,0)): Town =
-                Town(_name, _coordinates, _elevation, _townImage, _stats)
+        private val idGenerator: AtomicInteger = AtomicInteger(0)
+        fun new(_name: String, _elevation: Double, _borderingTowns: List<String>, _coordinates: Coordinates = Coordinates(0f,0f), _stats: TownStats = TownStats(0,0)): Town =
+                Town(idGenerator.incrementAndGet(), _name, _coordinates, _elevation, _stats, _borderingTowns)
     }
 
     fun isFrom(user: User) = owner?.id.toString() == user.id.toString()
@@ -79,8 +78,7 @@ class Town(val name: String, val coordinates: Coordinates, val elevation: Double
             name = name,
             coordinates = coordinates,
             elevation = elevation,
-            imageUrl = townImage,
-            ownerId = owner?.id.toString(),
+            ownerId = owner?.id?.toString(),
             specialization = specialization.toString(),
             gauchos = gauchos,
             isLocked = isLocked,
