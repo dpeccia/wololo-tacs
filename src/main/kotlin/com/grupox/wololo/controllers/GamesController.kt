@@ -157,9 +157,7 @@ class GamesController : BaseController() {
     fun changeGameModeConfiguration(
             @RequestBody modeData: ModeForm,
             request: HttpServletRequest){
-       //EJEMPLO: multiplier = 'multGauchosForDefenseEasyMode' '10.0'
         checkAndGetUserId(request)
-        println("entré")
         gamesControllerService.updateGameMode(modeData.multiplier, modeData.value)
     }
 
