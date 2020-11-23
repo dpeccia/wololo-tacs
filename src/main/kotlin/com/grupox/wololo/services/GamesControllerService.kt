@@ -107,7 +107,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
             val users = userId.toString().cons(form.participantsIds).distinct()
                     .map { repoUsers.findByIsAdminFalseAndId(ObjectId(it)).orElseThrow { CustomException.NotFound.UserNotFoundException() } }
             val towns = !getRandomTowns(form)
-            val province = Province(formatTownName(form.provinceName), ArrayList(towns), provincesService.getUrl(form.provinceName))
+            val province = Province(formatTownName(form.provinceName), ArrayList(towns))
             val gameMode: GameMode = GamesConfigHelper.getDifficultyMultipliers(form.difficulty)
             Game.new(users, province, gameMode)
         }.getOrThrow()
