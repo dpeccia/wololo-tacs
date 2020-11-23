@@ -5,8 +5,6 @@ import com.grupox.wololo.model.helpers.ActionMutable
 import com.grupox.wololo.model.helpers.DTO
 import com.grupox.wololo.model.helpers.Requestable
 import com.grupox.wololo.model.helpers.State
-import org.bson.types.ObjectId
-import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.DBRef
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
@@ -83,7 +81,8 @@ data class Town(val id: Int, val name: String, val coordinates: Coordinates, val
             gauchos = gauchos,
             isLocked = isLocked,
             gauchosGeneratedByDefense = stats.gauchosGeneratedByDefense,
-            gauchosGeneratedByProduction = stats.gauchosGeneratedByProduction
+            gauchosGeneratedByProduction = stats.gauchosGeneratedByProduction,
+            borderingTowns = borderingTowns
         )
 
     override fun state(): State.TownState =
