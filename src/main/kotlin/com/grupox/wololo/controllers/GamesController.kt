@@ -148,4 +148,20 @@ class GamesController : BaseController() {
         checkAndGetUserId(request)
         return gamesControllerService.getTownsGeoJSONs(province, towns)
     }
+
+    @PatchMapping("/configuration")
+    @ApiOperation(value = "Changes a value of a configuration item")
+    fun changeGameModeConfiguration(@RequestBody changes: Map<String, Double>, request: HttpServletRequest) {
+        val userId = checkAndGetUserId(request)
+        usersControllerService.throwIfNotAllowed(userId)
+        GamesConfigHelper.updateValues(changes)
+    }
+
+    @GetMapping("/configuration")
+    @ApiOperation("Gets the games configuration values")
+    fun getConfigurationValues(request: HttpServletRequest): Map<String, Double> {
+        val userId = checkAndGetUserId(request)
+        usersControllerService.throwIfNotAllowed(userId)
+        return GamesConfigHelper.getAllConfigurationValues()
+    }
 }

@@ -56,12 +56,12 @@ class Province(val name: String, val towns: ArrayList<Town>) : Requestable {
     fun allOccupiedTownsAreFrom(user: User): Boolean =
             towns.filter { it.owner != null }.all { it.isFrom(user) }
 
-    fun addGauchosToAllTowns() {
-        towns.forEach { it.addGauchos(maxAltitude!!, minAltitude!!) }
+    fun addGauchosToAllTowns(gameMode: GameMode) {
+        towns.forEach { it.addGauchos(maxAltitude!!, minAltitude!!, gameMode) }
     }
 
-    fun addGauchosToAllTownsFrom(user: User) {
-        townsFrom(user).forEach { it.addGauchos(maxAltitude!!, minAltitude!!) }
+    fun addGauchosToAllTownsFrom(user: User, gameMode: GameMode) {
+        townsFrom(user).forEach { it.addGauchos(maxAltitude!!, minAltitude!!, gameMode) }
     }
 
     fun unlockAllTownsFrom(user: User) {
@@ -94,15 +94,15 @@ class Province(val name: String, val towns: ArrayList<Town>) : Requestable {
         toTown.receiveGauchos(movementForm.gauchosQty)
     }
 
-    fun attackTown(user: User, attackForm: AttackForm) {
+    fun attackTown(user: User, attackForm: AttackForm, gameMode: GameMode) {
         val attacker = this.getTownById(attackForm.from).getOrThrow()
         val defender = this.getTownById(attackForm.to).getOrThrow()
         checkIllegalAttacks(user, attacker, defender)
         val attackerQtyBeforeAttack = attacker.gauchos
         val multDist = multDistance(attacker, defender)
         val multAlt = multAltitude(defender)
-        attacker.attack(defender.gauchos, multDist, multAlt)
-        defender.defend(attacker.owner!!, attackerQtyBeforeAttack, multDist, multAlt)
+        attacker.attack(defender.gauchos, multDist, multAlt, gameMode)
+        defender.defend(attacker.owner!!, attackerQtyBeforeAttack, multDist, multAlt, gameMode)
     }
 
     private fun calculateCentroid(): Coordinates {

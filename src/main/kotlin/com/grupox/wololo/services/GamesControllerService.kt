@@ -13,6 +13,11 @@ import com.grupox.wololo.model.repos.RepoUsers
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.nio.file.FileSystems
+import java.nio.file.Paths
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -103,7 +108,8 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
                     .map { repoUsers.findByIsAdminFalseAndId(ObjectId(it)).orElseThrow { CustomException.NotFound.UserNotFoundException() } }
             val towns = !getRandomTowns(form)
             val province = Province(formatTownName(form.provinceName), ArrayList(towns))
-            Game.new(users, province)
+            val gameMode: GameMode = GamesConfigHelper.getDifficultyMultipliers(form.difficulty)
+            Game.new(users, province, gameMode)
         }.getOrThrow()
 
         val savedGame = repoGames.save(game)
