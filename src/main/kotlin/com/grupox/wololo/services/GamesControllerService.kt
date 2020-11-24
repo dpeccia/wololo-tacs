@@ -35,7 +35,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
             this.play(gameId, userId) { game, user -> game.surrender(user) }
 
     fun finishTurn(userId: ObjectId, gameId: ObjectId): Change.GameChange =
-            this.play(gameId, userId) { game, user -> game.finishTurn(user) }
+            this.play(gameId, userId) { game, user -> game.finishTurn(user, mailSender) }
 
     fun moveGauchosBetweenTowns(userId: ObjectId, gameId: ObjectId, movementData: MovementForm): Change.GameChange =
             this.play(gameId, userId) { game, user -> game.moveGauchosBetweenTowns(user, movementData) }
