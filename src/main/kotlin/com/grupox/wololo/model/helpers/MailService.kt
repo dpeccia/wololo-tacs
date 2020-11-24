@@ -34,8 +34,8 @@ class MailService {
         val mimeMessage = MimeMessage(session)
 
         mimeMessage.addRecipient(Message.RecipientType.TO, InternetAddress(sendTo))
-        mimeMessage.subject = "It's your turn!"
-        mimeMessage.setText("You've been out of the game for 30 minutes")
+        mimeMessage.subject = "It's your turn to play! ⚔"
+        mimeMessage.setText("Come back to Wololo, your gauchos need you!")
 
         val transport = session.getTransport("smtp")
         transport.connect("smtp.gmail.com", mailProperties.sender, mailProperties.password)

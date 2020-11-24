@@ -6,6 +6,7 @@ import java.io.FileOutputStream
 import java.nio.file.FileSystems
 import java.nio.file.Paths
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 object GamesConfigHelper {
     private fun getGamesConfigFilePath(): String {
@@ -36,6 +37,8 @@ object GamesConfigHelper {
             Difficulty.HARD -> GameMode("HARD", config["multGauchosForDefenseHardMode"]!!, config["multGauchosForProductionHardMode"]!!, config["multDefenseForDefenseHardMode"]!!, config["multDefenseForProductionHardMode"]!!)
         }
     }
+
+    fun getTimeToSendMail() = TimeUnit.MINUTES.toMillis(getAllConfigurationValues()["minutesToSendMail"]!!.toLong())
 
     fun updateValues(changes: Map<String, Double>) {
         val props = getProperties()
