@@ -1,9 +1,15 @@
 package com.grupox.wololo.model
 
 import com.grupox.wololo.errors.CustomException
+import com.grupox.wololo.model.helpers.MailService
+import org.springframework.beans.factory.annotation.Autowired
 
 class TurnManager<T>(private var participantIds: List<T>) {
+    @Autowired
+    lateinit var mailSender: MailService
+
     private var currentIndex: Int = 0
+
     var current
         get() = this.participantIds[currentIndex]
         set(value) {

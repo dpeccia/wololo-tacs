@@ -28,6 +28,8 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     lateinit var topoData: TopoData
     @Autowired
     lateinit var provincesService: ProvincesService
+    @Autowired
+    lateinit var mailSender: MailService
 
     fun surrender(gameId: ObjectId, userId: ObjectId): Change.GameChange =
             this.play(gameId, userId) { game, user -> game.surrender(user) }
@@ -107,9 +109,11 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
             val users = userId.toString().cons(form.participantsIds).distinct()
                     .map { repoUsers.findByIsAdminFalseAndId(ObjectId(it)).orElseThrow { CustomException.NotFound.UserNotFoundException() } }
             val towns = !getRandomTowns(form)
+
             val province = Province(formatTownName(form.provinceName), ArrayList(towns))
             val gameMode: GameMode = GamesConfigHelper.getDifficultyMultipliers(form.difficulty)
-            Game.new(users, province, gameMode)
+            Game.new(users, province, gameMode, mailSender)
+
         }.getOrThrow()
 
         val savedGame = repoGames.save(game)
