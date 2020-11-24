@@ -389,15 +389,4 @@ class GamesControllerTest {
             assertThat(gamesControllerService.getGamesStats(filteredGames)).isEqualTo(gamesControllerService.getGamesStats(games.map { it.dto() }))
         }
     }
-    @Nested
-    inner class MailSender {
-        @BeforeEach
-        fun fixtureMailSender() {
-            mailManager = MailManager(mailSender)
-        }
-        @Test
-        fun `Send mail`() {
-            mailManager.sendMail("wololotacs@gmail.com")
-      }
-    }
 }

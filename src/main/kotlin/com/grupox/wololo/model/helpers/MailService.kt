@@ -21,9 +21,6 @@ class MailService {
         return mailProperties.sender
     }
     fun sendMail(sendTo: String) {
-
-        val sendTo = sendTo
-
         val properties = Properties()
         properties["mail.smtp.host"] = "smtp.gmail.com"
         properties["mail.smtp.port"] = "587"
@@ -37,7 +34,7 @@ class MailService {
         val mimeMessage = MimeMessage(session)
 
         mimeMessage.addRecipient(Message.RecipientType.TO, InternetAddress(sendTo))
-        mimeMessage.setSubject("It's your turn!")
+        mimeMessage.subject = "It's your turn!"
         mimeMessage.setText("You've been out of the game for 30 minutes")
 
         val transport = session.getTransport("smtp")
