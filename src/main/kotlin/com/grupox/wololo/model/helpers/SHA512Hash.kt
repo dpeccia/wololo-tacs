@@ -20,9 +20,7 @@ class SHA512Hash {
     }
 
     private fun SHA512once(toHash: String): String {
-        val md: MessageDigest
-
-        md = MessageDigest.getInstance("SHA-512")
+        val md: MessageDigest = MessageDigest.getInstance("SHA-512")
         md.update(toHash.toByteArray())
         val mb = md.digest()
         var out = ""
@@ -37,5 +35,4 @@ class SHA512Hash {
         }
         return out
     }
-
 }

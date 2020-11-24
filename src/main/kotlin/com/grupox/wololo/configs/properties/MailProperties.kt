@@ -13,5 +13,4 @@ class MailProperties {
     lateinit var sender: String
     @Value("\${mail.password}")
     lateinit var password: String
-
 }

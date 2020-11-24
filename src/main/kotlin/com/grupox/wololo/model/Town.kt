@@ -12,7 +12,6 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 
-
 data class Town(val id: Int, val name: String, val coordinates: Coordinates, val elevation: Double,  val stats: TownStats, var borderingTowns: List<String>) : Requestable, ActionMutable {
     @DBRef
     var owner: User? = null

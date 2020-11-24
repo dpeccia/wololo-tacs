@@ -3,7 +3,6 @@ package com.grupox.wololo.model.helpers
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.grupox.wololo.model.Difficulty
 
-
 data class UserForm @JsonCreator constructor(val mail: String, val username: String, val password: String)
 data class LoginForm @JsonCreator constructor(val mail: String, val password: String)
 data class GameForm(val provinceName: String, val townAmount: Int, val participantsIds: List<String>, val difficulty: Difficulty)

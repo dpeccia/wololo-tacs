@@ -10,7 +10,6 @@ import com.grupox.wololo.model.helpers.*
 import kotlin.math.*
 
 class Province(val name: String, val towns: ArrayList<Town>) : Requestable {
-
     fun getTownById(id: Int): Either<NotFound, Town> = towns.find { it.id == id }.rightIfNotNull { TownNotFoundException() }
 
     private fun altitudes() = towns.map { it.elevation }

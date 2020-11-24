@@ -36,5 +36,6 @@ object JwtSigner {
                         .build()
                         .parseClaimsJws(jwt.getOrElse { throw CustomException.Unauthorized.TokenException("Token not found. Login Again") }))
             } catch (ex: ExpiredJwtException) { Left(CustomException.Unauthorized.TokenException("Token expired. Login Again"))
+            } catch (ex: Exception) { Left(CustomException.Unauthorized.TokenException("Token expired. Login Again"))
             } catch (ex: CustomException) { Left(ex) }
 }

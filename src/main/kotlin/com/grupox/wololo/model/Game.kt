@@ -90,9 +90,6 @@ class Game(@DBRef var players: List<User>, val province: Province, val gameMode:
         players.filter { it.id != winner.id }.forEach { it.updateGamesLostStats() }
     }
 
-    fun getMember(userId: ObjectId): Either<CustomException.NotFound, User> =
-            players.find { it.id.toString() == userId.toString() }.rightIfNotNull { CustomException.NotFound.MemberNotFoundException() }
-
     fun isParticipating(user: User): Boolean = players.map { it.id.toString() }.contains(user.id.toString())
 
     private fun isTurnOf(user: User): Boolean = turn.id.toString() == user.id.toString()

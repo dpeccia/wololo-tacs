@@ -9,17 +9,11 @@ import javax.mail.Session
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 
-
 @Service
 class MailService {
-
     @Autowired
     private lateinit var mailProperties: MailProperties
 
-
-    fun getSender() : String {
-        return mailProperties.sender
-    }
     fun sendMail(sendTo: String) {
         val properties = Properties()
         properties["mail.smtp.host"] = "smtp.gmail.com"
@@ -41,8 +35,5 @@ class MailService {
         transport.connect("smtp.gmail.com", mailProperties.sender, mailProperties.password)
         transport.sendMessage(mimeMessage, mimeMessage.allRecipients)
         transport.close()
-
     }
-
-
 }

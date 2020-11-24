@@ -5,7 +5,6 @@ import com.grupox.wololo.model.helpers.MailService
 import java.util.*
 import kotlin.concurrent.schedule
 
-
 class MailManager(val mailSender: MailService){
     fun sendMail(sendTo: String){
         mailSender.sendMail(sendTo)
@@ -17,5 +16,4 @@ class MailManager(val mailSender: MailService){
 
     fun setTimerForUser(sendTo: String): TimerTask =
             Timer("SettingUp", false).schedule(GamesConfigHelper.getTimeToSendMail()) { sendMail(sendTo) }
-
 }

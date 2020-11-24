@@ -34,7 +34,7 @@ abstract class BaseController {
     fun handleUnauthorizedException(exception: CustomException) = exception.dto()
 
     @ExceptionHandler(CustomException.Service::class)
-    @ResponseStatus(HttpStatus.FAILED_DEPENDENCY) // Revisar si es correcto esta http status
+    @ResponseStatus(HttpStatus.FAILED_DEPENDENCY)
     fun handleServiceException(exception: CustomException) = exception.dto()
 
     fun checkAndGetUserId(request: HttpServletRequest): ObjectId {
