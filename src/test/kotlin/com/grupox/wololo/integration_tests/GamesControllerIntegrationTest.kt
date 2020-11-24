@@ -250,6 +250,4 @@ class GamesControllerIntegrationTest {
             assertThat(response?.statusCode()).isEqualTo(HttpStatus.OK)
         }
     }
-
-
 }

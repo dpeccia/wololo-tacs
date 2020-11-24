@@ -1,6 +1,7 @@
 package com.grupox.wololo.controllers
 
 import com.grupox.wololo.model.Status
+import com.grupox.wololo.model.externalservices.ProvinceGeoJSON
 import com.grupox.wololo.model.externalservices.TownGeoJSON
 import com.grupox.wololo.model.helpers.*
 import com.grupox.wololo.services.GamesControllerService
@@ -133,7 +134,7 @@ class GamesController : BaseController() {
 
     @GetMapping("/provinces")
     @ApiOperation(value = "Gets all provinces")
-    fun getProvinces(request: HttpServletRequest) : List<String> {
+    fun getProvinces(request: HttpServletRequest) : List<ProvinceGeoJSON> {
         checkAndGetUserId(request)
         return gamesControllerService.getProvinces()
     }
@@ -146,5 +147,21 @@ class GamesController : BaseController() {
             request: HttpServletRequest) : List<TownGeoJSON> {
         checkAndGetUserId(request)
         return gamesControllerService.getTownsGeoJSONs(province, towns)
+    }
+
+    @PatchMapping("/configuration")
+    @ApiOperation(value = "Changes a value of a configuration item")
+    fun changeGameModeConfiguration(@RequestBody changes: Map<String, Double>, request: HttpServletRequest) {
+        val userId = checkAndGetUserId(request)
+        usersControllerService.throwIfNotAllowed(userId)
+        GamesConfigHelper.updateValues(changes)
+    }
+
+    @GetMapping("/configuration")
+    @ApiOperation("Gets the games configuration values")
+    fun getConfigurationValues(request: HttpServletRequest): Map<String, Double> {
+        val userId = checkAndGetUserId(request)
+        usersControllerService.throwIfNotAllowed(userId)
+        return GamesConfigHelper.getAllConfigurationValues()
     }
 }

@@ -13,6 +13,10 @@ import com.grupox.wololo.model.repos.RepoUsers
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.nio.file.FileSystems
+import java.nio.file.Paths
 import java.time.LocalDate
 import java.util.*
 
@@ -24,13 +28,9 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     lateinit var topoData: TopoData
     @Autowired
     lateinit var provincesService: ProvincesService
-    @Autowired
-    lateinit var pixabay: Pixabay
-    @Autowired
-    lateinit var gameModeService: GameModeService
+
     @Autowired
     lateinit var mailSender: MailService
-
 
     fun surrender(gameId: ObjectId, userId: ObjectId): DTO.GameDTO =
             this.play(gameId, userId) { game, user -> game.surrender(user) }
@@ -44,7 +44,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     fun attackTown(userId: ObjectId, gameId: ObjectId, attackData: AttackForm): DTO.GameDTO =
             this.play(gameId, userId) { game, user -> game.attackTown(user, attackData) }
 
-    fun getProvinces(): List<String> = provincesService.availableProvinces().getOrThrow()
+    fun getProvinces(): List<ProvinceGeoJSON> = provincesService.getProvinces()
 
     fun getTownsGeoJSONs(province: String, towns: String): List<TownGeoJSON> {
         val townNames: List<String> = towns.split('|').map { it.trim() }
@@ -106,19 +106,15 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
     fun createGame(userId: ObjectId, form: GameForm): DTO.GameDTO {
         if(form.townAmount > 100) throw CustomException.BadRequest.IllegalGameException("Max quantity of towns is 100") // limitante de topodata
 
-        lateinit var gameMode: GameMode
-        when (form.difficulty) {
-            "EASY" -> gameMode = gameModeService.getDifficultyMultipliers("EASY")
-            "NORMAL" -> gameMode = gameModeService.getDifficultyMultipliers("NORMAL")
-            "HARD" -> gameMode = gameModeService.getDifficultyMultipliers("HARD")
-        }
-
         val game: Game = Either.fx<CustomException, Game> {
             val users = userId.toString().cons(form.participantsIds).distinct()
                     .map { repoUsers.findByIsAdminFalseAndId(ObjectId(it)).orElseThrow { CustomException.NotFound.UserNotFoundException() } }
             val towns = !getRandomTowns(form)
-            val province = Province(formatTownName(form.provinceName), ArrayList(towns), provincesService.getUrl(form.provinceName))
+
+            val province = Province(formatTownName(form.provinceName), ArrayList(towns))
+            val gameMode: GameMode = GamesConfigHelper.getDifficultyMultipliers(form.difficulty)
             Game.new(users, province, gameMode, mailSender)
+
         }.getOrThrow()
 
         val savedGame = repoGames.save(game)
@@ -151,7 +147,7 @@ class GamesControllerService(@Autowired val repoUsers: RepoUsers, @Autowired val
 
             townsWithBorderingAndCoordinates.zip(townsWithElevationSortedByCoord) {
                 mergedTown, topoDataTown ->
-                    Town.new(mergedTown.name, topoDataTown.elevation, mergedTown.borderingTowns, mergedTown.coordinates, !pixabay.requestTownImage(mergedTown.name))
+                    Town.new(mergedTown.name, topoDataTown.elevation, mergedTown.borderingTowns, mergedTown.coordinates)
             }
         }
     }

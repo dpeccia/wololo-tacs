@@ -3,6 +3,11 @@ package com.grupox.wololo.model_tests
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.*
+
+import com.grupox.wololo.model.helpers.AttackForm
+import com.grupox.wololo.model.helpers.GameMode
+import com.grupox.wololo.model.helpers.MovementForm
+
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

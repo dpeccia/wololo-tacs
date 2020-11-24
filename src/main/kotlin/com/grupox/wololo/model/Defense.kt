@@ -7,7 +7,7 @@ import java.math.RoundingMode
 
 class Defense : Specialization {
     override fun gauchos(gameMode: GameMode, townAltitude: Double, maxAltitude: Double, minAltitude: Double): Int =
-            roundToInt(10 * this.gauchosBaseFormula(townAltitude, maxAltitude, minAltitude), RoundingMode.HALF_EVEN)
+            roundToInt(gameMode.multGauchosForDefense * this.gauchosBaseFormula(townAltitude, maxAltitude, minAltitude), RoundingMode.HALF_EVEN)
 
     override fun multDefense(gameMode: GameMode): Double = gameMode.multDefenseForDefense
 

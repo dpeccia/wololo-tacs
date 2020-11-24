@@ -3,19 +3,24 @@ package com.grupox.wololo.model
 import arrow.core.Either
 import arrow.core.extensions.list.functorFilter.filter
 import arrow.core.rightIfNotNull
+import com.grupox.wololo.WololoApplication
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.*
 import org.bson.types.ObjectId
+import org.springframework.boot.runApplication
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.mail.MailSender
 import java.time.Instant.now
 import java.util.*
+import kotlin.concurrent.schedule
 
 @Document(collection = "Games")
-class Game(@DBRef var players: List<User>, val province: Province, @Transient val gameMode: GameMode, @Transient val mailSender: MailService, @Indexed var status: Status) : Requestable {
+class Game(@DBRef var players: List<User>, val province: Province, val gameMode: GameMode, @Transient val mailSender: MailService, @Indexed var status: Status) : Requestable {
+
     @Id
     var id: ObjectId = ObjectId.get()
 

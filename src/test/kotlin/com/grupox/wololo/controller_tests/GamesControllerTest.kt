@@ -13,9 +13,15 @@ import org.mockito.Mockito.doReturn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.nio.file.FileSystems
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.Duration
 import java.time.Instant
 import java.util.*
+
 
 @SpringBootTest
 class GamesControllerTest {
@@ -50,7 +56,9 @@ class GamesControllerTest {
     private lateinit var gameNotInRepo: Game
     private lateinit var games: List<Game>
     private lateinit var normalMode: GameMode
+
     private lateinit var mailManager: MailManager
+
 
     @BeforeEach
     fun fixture() {
@@ -378,7 +386,7 @@ class GamesControllerTest {
         @Test
         fun `Gets all games stats when not specifying a date range`() {
             val filteredGames = gamesControllerService.getAllGamesDTO()
-            assertThat(gamesControllerService.getGamesStats(filteredGames)).isEqualTo(gamesControllerService.getGamesStats(games.map{it.dto()}))
+            assertThat(gamesControllerService.getGamesStats(filteredGames)).isEqualTo(gamesControllerService.getGamesStats(games.map { it.dto() }))
         }
     }
     @Nested
