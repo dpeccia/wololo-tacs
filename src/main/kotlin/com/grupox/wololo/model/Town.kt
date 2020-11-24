@@ -3,6 +3,7 @@ package com.grupox.wololo.model
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.ActionMutable
 import com.grupox.wololo.model.helpers.DTO
+import com.grupox.wololo.model.helpers.GameMode
 import com.grupox.wololo.model.helpers.Requestable
 import com.grupox.wololo.model.helpers.State
 import org.springframework.data.mongodb.core.mapping.DBRef
@@ -32,12 +33,12 @@ data class Town(val id: Int, val name: String, val coordinates: Coordinates, val
         isLocked = false
     }
 
-    fun multDefense(): Double = specialization.multDefense()
+    private fun multDefense(gameMode: GameMode): Double = specialization.multDefense(gameMode)
 
-    fun addGauchos(maxAltitude: Double, minAltitude: Double) {
-        val gauchosAmount: Int = specialization.gauchos(elevation, maxAltitude, minAltitude)
+    fun addGauchos(maxAltitude: Double, minAltitude: Double, gameMode: GameMode) {
+        val gauchosAmount: Int = specialization.gauchos(gameMode, elevation, maxAltitude, minAltitude)
         gauchos += gauchosAmount
-        specialization.updateStats(elevation, maxAltitude, minAltitude, this)
+        specialization.updateStats(gameMode, elevation, maxAltitude, minAltitude, this)
     }
 
     fun giveGauchos(qty: Int) {
@@ -52,14 +53,14 @@ data class Town(val id: Int, val name: String, val coordinates: Coordinates, val
         isLocked = true
     }
 
-    fun attack(defenderQty: Int, multDistance: Double, multAltitude: Double) {
-        val gauchosAttackFinal = floor(gauchos * multDistance - defenderQty * multAltitude * this.multDefense()).toInt()
+    fun attack(defenderQty: Int, multDistance: Double, multAltitude: Double, gameMode: GameMode) {
+        val gauchosAttackFinal = floor(gauchos * multDistance - defenderQty * multAltitude * this.multDefense(gameMode)).toInt()
         this.gauchos = max(gauchosAttackFinal, 0)
     }
 
-    fun defend(attackerOwner: User, attackerQty: Int, multDistance: Double, multAltitude: Double) {
+    fun defend(attackerOwner: User, attackerQty: Int, multDistance: Double, multAltitude: Double, gameMode: GameMode) {
         val gauchosDefenseFinal =
-                ceil((gauchos * multAltitude * this.multDefense() - attackerQty * multDistance) / (multAltitude * this.multDefense())).toInt()
+                ceil((gauchos * multAltitude * this.multDefense(gameMode) - attackerQty * multDistance) / (multAltitude * this.multDefense(gameMode))).toInt()
         if(gauchosDefenseFinal <= 0)
             this.owner = attackerOwner
         this.gauchos = max(gauchosDefenseFinal, 0)

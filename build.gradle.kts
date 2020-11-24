@@ -28,7 +28,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework:spring-context-support")
-
+    
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -46,6 +46,7 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine")
     implementation("io.github.microutils:kotlin-logging:1.6.26")
     implementation("de.grundid.opendatalab:geojson-jackson:1.14")
+    implementation ("com.sun.mail:javax.mail:1.5.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.1")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

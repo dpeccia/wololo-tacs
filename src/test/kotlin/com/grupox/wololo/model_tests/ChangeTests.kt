@@ -2,24 +2,43 @@ package com.grupox.wololo.model_tests
 
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
+import com.grupox.wololo.model.helpers.GameMode
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class ChangeTests {
-    val user1: User = User("a_user", "a_mail", "a_password")
-    val user2: User = User("other_user", "other_mail", "other_password")
-    val twoUserList = arrayListOf(user1, user2)
+    lateinit var user1: User
+    lateinit var user2: User
+    lateinit var twoUserList: List<User>
+    lateinit var townNames: List<String>
+    lateinit var town1: Town
+    lateinit var town2: Town
+    lateinit var town3: Town
+    lateinit var town4: Town
+    lateinit var town5: Town
+    lateinit var towns: ArrayList<Town>
+    lateinit var normalMode: GameMode
+    lateinit var game1: Game
 
-    val townNames = listOf("town1, town2, town3, town4, town5")
-    val town1: Town = Town.new("town1", 11.0, townNames, Coordinates((-65.3).toFloat(), (-22.4).toFloat()))
-    val town2: Town = Town.new("town2", 12.0, townNames,Coordinates((-66.2).toFloat(), (2.0).toFloat()))
-    val town3: Town = Town.new("town3", 13.0, townNames)
-    val town4: Town = Town.new("town4", 14.0, townNames)
-    val town5: Town = Town.new("town5", 15.0, townNames)
-    val towns = arrayListOf(town1, town2, town3, town4, town5)
+    @BeforeEach
+    fun fixture() {
+        user1 = User("a_user", "a_mail", "a_password")
+        user2 = User("other_user", "other_mail", "other_password")
+        twoUserList = arrayListOf(user1, user2)
 
-    val game1: Game = Game.new(twoUserList, Province("a_province", towns))
+        townNames = listOf("town1, town2, town3, town4, town5")
+        town1 = Town.new("town1", 11.0, townNames, Coordinates((-65.3).toFloat(), (-22.4).toFloat()))
+        town2 = Town.new("town2", 12.0, townNames,Coordinates((-66.2).toFloat(), (2.0).toFloat()))
+        town3 = Town.new("town3", 13.0, townNames)
+        town4 = Town.new("town4", 14.0, townNames)
+        town5 = Town.new("town5", 15.0, townNames)
+        towns = arrayListOf(town1, town2, town3, town4, town5)
+
+        normalMode = GameMode("NORMAL", 10.0, 15.0, 1.25, 1.0)
+        game1 = Game.new(twoUserList, Province("a_province", towns), normalMode)
+    }
 
     @Test
     fun `the difference between the same game without any changes returns an empty deltaTowns list`() {

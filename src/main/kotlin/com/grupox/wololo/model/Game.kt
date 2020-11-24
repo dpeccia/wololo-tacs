@@ -7,6 +7,7 @@ import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.helpers.*
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
@@ -16,7 +17,7 @@ import java.time.temporal.TemporalAccessor
 import java.util.*
 
 @Document(collection = "Games")
-class Game(@DBRef var players: List<User>, val province: Province, @Indexed var status: Status) : Requestable, ActionMutable {
+class Game(@DBRef var players: List<User>, val province: Province, val gameMode: GameMode, @Indexed var status: Status) : Requestable, ActionMutable {
     @Id
     var id: ObjectId = ObjectId.get()
 
@@ -34,8 +35,8 @@ class Game(@DBRef var players: List<User>, val province: Province, @Indexed var 
     var date: Date = Date.from(now())
 
     companion object {
-        fun new(_players: List<User>, _province: Province, _status: Status = Status.NEW): Game {
-            val newGame = Game(_players, _province, _status)
+        fun new(_players: List<User>, _province: Province, _mode: GameMode, _status: Status = Status.NEW): Game {
+            val newGame = Game(_players, _province, _mode, _status)
             newGame.checkIfIllegal()
             newGame.assignTowns()
             newGame.startGame()
@@ -54,13 +55,13 @@ class Game(@DBRef var players: List<User>, val province: Province, @Indexed var 
     }
 
     private fun startGame() {
-        province.addGauchosToAllTowns()
+        province.addGauchosToAllTowns(gameMode)
         status = Status.ONGOING
     }
 
     private fun changeTurn() {
         this.turnManager.changeTurn()
-        province.addGauchosToAllTownsFrom(this.turn)
+        province.addGauchosToAllTownsFrom(this.turn, gameMode)
     }
 
     private fun checkForbiddenAction(user: User) {
@@ -104,7 +105,7 @@ class Game(@DBRef var players: List<User>, val province: Province, @Indexed var 
 
     fun attackTown(user: User, attackForm: AttackForm) {
         checkForbiddenAction(user)
-        province.attackTown(user, attackForm)
+        province.attackTown(user, attackForm, gameMode)
     }
 
     fun surrender(user: User) {
