@@ -308,25 +308,25 @@ class GameTests {
         @Test
         fun `trying to finished turn from a finished game throws FinishedGameException`() {
             game1.status = Status.FINISHED
-            assertThrows<CustomException.Forbidden.FinishedGameException> { game1.finishTurn(user1) }
+            assertThrows<CustomException.Forbidden.FinishedGameException> { game1.finishTurn(user1, mailSender) }
         }
 
         @Test
         fun `trying to finished turn from a canceled game throws FinishedGameException`() {
             game1.status = Status.CANCELED
-            assertThrows<CustomException.Forbidden.FinishedGameException> { game1.finishTurn(user1) }
+            assertThrows<CustomException.Forbidden.FinishedGameException> { game1.finishTurn(user1, mailSender) }
         }
 
         @Test
         fun `trying to finished turn in a game that user doesnt participate throws NotAMemberException`() {
-            assertThrows<CustomException.Forbidden.NotAMemberException> { game1.finishTurn(user2) }
+            assertThrows<CustomException.Forbidden.NotAMemberException> { game1.finishTurn(user2, mailSender) }
         }
 
         @Test
         fun `trying to finished turn when it is not your turn throws NotYourTurnException`() {
             val game2 = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy()))), normalMode, mailSender)
             game2.turn = user1
-            assertThrows<CustomException.Forbidden.NotYourTurnException> { game2.finishTurn(user2) }
+            assertThrows<CustomException.Forbidden.NotYourTurnException> { game2.finishTurn(user2, mailSender) }
         }
 
         @Test
@@ -334,7 +334,7 @@ class GameTests {
             val game2 = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy()))), normalMode, mailSender)
             game2.turn = user1
             game2.province.towns.forEach { it.isLocked = true }
-            game2.finishTurn(user1)
+            game2.finishTurn(user1, mailSender)
             assertTrue(game2.province.towns.filter { it.owner == user1}.all { !it.isLocked })
         }
 
@@ -343,7 +343,7 @@ class GameTests {
             val game2 = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy()))), normalMode, mailSender)
             game2.turn = user1
             game2.province.towns.forEach { it.owner = user1 }
-            game2.finishTurn(user1)
+            game2.finishTurn(user1, mailSender)
             assertThat(game2.status).isEqualTo(Status.FINISHED)
         }
 
@@ -353,7 +353,7 @@ class GameTests {
             game2.turn = user1
             game2.province.towns.forEach { it.owner = user1 }
             game2.province.towns[0].owner = null // rebel town
-            game2.finishTurn(user1)
+            game2.finishTurn(user1, mailSender)
             assertThat(game2.status).isEqualTo(Status.FINISHED)
         }
 
@@ -362,7 +362,7 @@ class GameTests {
             val game2 = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy()))), normalMode, mailSender)
             game2.turn = user1
             game2.province.towns.forEach { it.owner = user1 }
-            game2.finishTurn(user1)
+            game2.finishTurn(user1, mailSender)
             assertAll(
                     Executable { assertThat(user1.stats.gamesWon).isEqualTo(1) },
                     Executable { assertThat(user1.stats.gamesLost).isEqualTo(0) }
@@ -374,7 +374,7 @@ class GameTests {
             val game2 = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy()))), normalMode, mailSender)
             game2.turn = user1
             game2.province.towns.forEach { it.owner = user1 }
-            game2.finishTurn(user1)
+            game2.finishTurn(user1, mailSender)
             assertAll(
                     Executable { assertThat(user2.stats.gamesWon).isEqualTo(0) },
                     Executable { assertThat(user2.stats.gamesLost).isEqualTo(1) }
@@ -385,7 +385,7 @@ class GameTests {
         fun `if the first player finishes his turn and he didnt win, turn is changed to next player`() {
             val game2 = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy()))), normalMode, mailSender)
             game2.turn = user1
-            game2.finishTurn(user1)
+            game2.finishTurn(user1, mailSender)
             assertThat(game2.turn).isEqualTo(user2)
         }
 
@@ -393,8 +393,8 @@ class GameTests {
         fun `in a 2 player game, finishing turn twice results in the initial player's turn`() {
             val twoPlayerGame = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy()))), normalMode, mailSender)
             val initialPlayer = twoPlayerGame.turn
-            twoPlayerGame.finishTurn(twoPlayerGame.turn)
-            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn, mailSender)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn, mailSender)
             assertEquals(initialPlayer, twoPlayerGame.turn)
         }
 
@@ -403,9 +403,9 @@ class GameTests {
         fun `in a 2 player me, finishing turn three times results in the second player's turn` () {
             val twoPlayerGame = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy()))), normalMode, mailSender)
             val initialPlayer = twoPlayerGame.turn
-            twoPlayerGame.finishTurn(twoPlayerGame.turn)
-            twoPlayerGame.finishTurn(twoPlayerGame.turn)
-            twoPlayerGame.finishTurn(twoPlayerGame.turn)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn, mailSender)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn, mailSender)
+            twoPlayerGame.finishTurn(twoPlayerGame.turn, mailSender)
             assertNotEquals(initialPlayer, twoPlayerGame.turn)
         }
 
@@ -414,10 +414,10 @@ class GameTests {
             val user3 = User("user3", "new_mail", "sdaddraf")
             val game2 = Game.new(listOf(user1, user2, user3), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy()))), normalMode, mailSender)
             val firstPlayer = game2.turn
-            game2.finishTurn(firstPlayer)
-            game2.finishTurn(game2.turn)
+            game2.finishTurn(firstPlayer, mailSender)
+            game2.finishTurn(game2.turn, mailSender)
             val lastPlayer = game2.turn
-            game2.finishTurn(lastPlayer)
+            game2.finishTurn(lastPlayer, mailSender)
             assertThat(game2.turn).isEqualTo(firstPlayer)
         }
 
@@ -426,7 +426,7 @@ class GameTests {
             val game2 = Game.new(listOf(user1, user2), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy(), town3.copy(), town4.copy(), town5.copy()))), normalMode, mailSender)
             game2.turn = user1
             val gauchosQtysOfUser2BeforeHisTurnStarts = game2.province.towns.filter { it.owner == user2 }.map { it.gauchos }
-            game2.finishTurn(user1)
+            game2.finishTurn(user1, mailSender)
             val gauchosQtysOfUser2AfterHisTurnStarts = game2.province.towns.filter { it.owner == user2 }.map { it.gauchos }
             assertThat(gauchosQtysOfUser2BeforeHisTurnStarts).isNotEqualTo(gauchosQtysOfUser2AfterHisTurnStarts)
         }

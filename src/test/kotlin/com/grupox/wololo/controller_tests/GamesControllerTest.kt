@@ -312,7 +312,7 @@ class GamesControllerTest {
             game1.turn = user
             game1.province.towns[0].owner = user1
             game1.province.towns[1].owner = user2
-            game1.finishTurn(user)
+            game1.finishTurn(user, mailSender)
             val playerGames = gamesControllerService.getGames(user.id, null, Status.FINISHED, null)
             assertThat(playerGames).allMatch { it.status == Status.FINISHED }
         }
