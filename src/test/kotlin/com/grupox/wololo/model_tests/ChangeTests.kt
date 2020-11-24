@@ -3,11 +3,17 @@ package com.grupox.wololo.model_tests
 import com.grupox.wololo.errors.CustomException
 import com.grupox.wololo.model.*
 import com.grupox.wololo.model.helpers.GameMode
+import com.grupox.wololo.model.helpers.MailService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.SpyBean
 
+@SpringBootTest
 class ChangeTests {
     lateinit var user1: User
     lateinit var user2: User
@@ -21,6 +27,10 @@ class ChangeTests {
     lateinit var towns: ArrayList<Town>
     lateinit var normalMode: GameMode
     lateinit var game1: Game
+
+    @SpyBean
+    @Autowired
+    lateinit var mailSender: MailService
 
     @BeforeEach
     fun fixture() {
@@ -37,7 +47,9 @@ class ChangeTests {
         towns = arrayListOf(town1, town2, town3, town4, town5)
 
         normalMode = GameMode("NORMAL", 10.0, 15.0, 1.25, 1.0)
-        game1 = Game.new(twoUserList, Province("a_province", towns), normalMode)
+        game1 = Game.new(twoUserList, Province("a_province", towns), normalMode, mailSender)
+        Mockito.doNothing().`when`(mailSender).sendMail("a_mail")
+        Mockito.doNothing().`when`(mailSender).sendMail("other_mail")
     }
 
     @Test

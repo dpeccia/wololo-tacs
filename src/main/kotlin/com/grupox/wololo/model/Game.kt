@@ -149,7 +149,7 @@ class Game(@DBRef var players: List<User>, val province: Province, val gameMode:
             province = province.dto()
         )
 
-    override fun state(): State.GameState =
+    fun state(): State.GameState =
         State.GameState(
                 id = this.id,
                 status = this.status,

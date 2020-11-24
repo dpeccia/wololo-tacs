@@ -15,12 +15,15 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.function.Executable
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.stereotype.Service
 
 @SpringBootTest
 class GameTests {
+    @SpyBean
     @Autowired
     lateinit var mailSender: MailService
 
@@ -58,6 +61,11 @@ class GameTests {
         twoPlayerList = listOf(user1, user2)
         fourPlayerList = listOf(user1, user2, user3, user4)
 
+        Mockito.doNothing().`when`(mailSender).sendMail("a_mail")
+        Mockito.doNothing().`when`(mailSender).sendMail("other_mail")
+        Mockito.doNothing().`when`(mailSender).sendMail("other_mail2")
+        Mockito.doNothing().`when`(mailSender).sendMail("other_mail3")
+        Mockito.doNothing().`when`(mailSender).sendMail("mail")
 
         game1 = Game.new(listOf(user1, user99), Province("a_province", ArrayList(listOf(town1.copy(), town2.copy()))), normalMode, mailSender)
         game1.turn = user1

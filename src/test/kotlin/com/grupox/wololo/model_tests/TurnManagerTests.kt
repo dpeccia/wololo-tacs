@@ -6,8 +6,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.boot.test.context.SpringBootTest
 
-
+@SpringBootTest
 class TurnManagerTests {
     private val ids: List<Int> = listOf(1,2,3,4,5,6,7)
     private val turnManager: TurnManager<Int> = TurnManager(this.ids)

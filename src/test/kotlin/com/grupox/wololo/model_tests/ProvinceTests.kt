@@ -22,9 +22,6 @@ import org.springframework.stereotype.Service
 import kotlin.math.round
 @SpringBootTest
 class ProvinceTests {
-    @Autowired
-    lateinit var mailSender: MailService
-
     private lateinit var user1: User
     private lateinit var user2: User
     private lateinit var town1: Town

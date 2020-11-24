@@ -9,6 +9,7 @@ import com.grupox.wololo.services.GamesControllerService
 import com.grupox.wololo.services.UsersControllerService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -29,6 +30,8 @@ class GamesControllerTest {
     lateinit var gamesControllerService: GamesControllerService
     @Autowired
     lateinit var usersControllerService: UsersControllerService
+
+    @SpyBean
     @Autowired
     lateinit var mailSender: MailService
 
@@ -56,9 +59,6 @@ class GamesControllerTest {
     private lateinit var gameNotInRepo: Game
     private lateinit var games: List<Game>
     private lateinit var normalMode: GameMode
-
-    private lateinit var mailManager: MailManager
-
 
     @BeforeEach
     fun fixture() {
@@ -105,6 +105,10 @@ class GamesControllerTest {
         doReturn(games.filter { it.isParticipating(user2) }).`when`(repoGames).findAllByPlayersContains(user2)
         doReturn(Optional.empty<Game>()).`when`(repoGames).findById(gameNotInRepo.id)
         doReturn(Optional.empty<User>()).`when`(repoUsers).findByIsAdminFalseAndId(userNotInRepo.id)
+        doNothing().`when`(mailSender).sendMail("a_mail")
+        doNothing().`when`(mailSender).sendMail("a_mail2")
+        doNothing().`when`(mailSender).sendMail("a_mail3")
+        doNothing().`when`(mailSender).sendMail("other_mail")
     }
 
     @Nested
