@@ -12,6 +12,8 @@ Nos repartimos entre el grupo mitad al Frontend (React) y mitad al Backend (Kotl
 
 El mapa y su información la obtenemos del [siguiente GeoJson](/src/main/resources/departamentos-argentina.json). La información de las coordenadas de cada municipio la obtenemos de la [API de GeoRef](https://apis.datos.gob.ar) y la elevación de la [API de TopoData](https://www.opentopodata.org/)
 
+Enunciado del trabajo práctico [acá](/Enunciado.pdf)
+
 ## Que se puede hacer en Wololo?
 * **Log In, Sign Up y Log Out:** la aplicación permite login con Google y sistema propio
 * **Crear una partida:** implica seleccionar en qué provincia se quiere jugar, con qué jugadores, con cuántos municipios y el modo de dificultad (Easy/Normal/Hard)
