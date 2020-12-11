@@ -27,5 +27,19 @@ $ docker-compose build && docker-compose up -d
 ## Documentación API Rest - Backend
 [http://localhost:8080/swagger-ui.html#/](http://localhost:8080/swagger-ui.html#/)
 
+![](/screenshots/Swagger.PNG)
+
 ## Screenshots Wololo (Frontend + Servidor intermedio + Backend)
 
+![](/screenshots/Listado.PNG)
+
+![](/screenshots/Mendoza.PNG)
+
+![](/screenshots/Game.PNG)
+
+![](/screenshots/Game2.PNG)
+
+![](/screenshots/Game3.PNG)
+
+![](/screenshots/Game4.PNG)
+![](/screenshots/NewGame.PNG)
